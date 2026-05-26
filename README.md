@@ -1,0 +1,3 @@
+# WizAccountant
+
+Accounting application repository.
