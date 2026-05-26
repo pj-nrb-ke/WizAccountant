@@ -19,3 +19,6 @@ obj/
 *.suo
 Thumbs.db
 .DS_Store
+
+# Sage SDK documentation PDFs (large binaries; keep local in DOCS/)
+DOCS/*.pdf
