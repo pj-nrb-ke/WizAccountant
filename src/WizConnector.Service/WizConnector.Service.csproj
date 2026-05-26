@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-WizConnector.Service-7a870d9f-c3fd-49f5-82b2-c2003f67f9f2</UserSecretsId>
+    <!-- Override in Directory.Build.props or env if Evolution is installed elsewhere -->
+    <SageSdkPath Condition="'$(SageSdkPath)' == ''">C:\Program Files (x86)\Sage Evolution</SageSdkPath>
+    <EnableSageSdk Condition="'$(EnableSageSdk)' == ''">true</EnableSageSdk>
+    <PlatformTarget Condition="'$(EnableSageSdk)' == 'true'">x86</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WizAccountant.Contracts\WizAccountant.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(EnableSageSdk)' == 'true'">
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+    <Reference Include="Pastel.Evolution">
+      <HintPath>$(SageSdkPath)\Pastel.Evolution.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Pastel.Evolution.Common">
+      <HintPath>$(SageSdkPath)\Pastel.Evolution.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="RemoveCopiedSageSdkFromOutput" AfterTargets="Build" Condition="'$(EnableSageSdk)' == 'true'">
+    <ItemGroup>
+      <_SageSdkCopy Include="$(OutputPath)Pastel.Evolution.dll" />
+      <_SageSdkCopy Include="$(OutputPath)Pastel.Evolution.Common.dll" />
+      <_SageSdkCopy Include="$(OutputPath)Pastel.Evolution.tlb" />
+      <_SageSdkCopy Include="$(OutputPath)Pastel.Evolution.Common.tlb" />
+    </ItemGroup>
+    <Delete Files="@(_SageSdkCopy)" ContinueOnError="true" />
+  </Target>
+
+</Project>

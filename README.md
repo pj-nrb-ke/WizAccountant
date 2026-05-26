@@ -13,3 +13,25 @@ After clone, or if you see the GitHub account picker again:
 ```powershell
 powershell -File scripts/setup-github-ssh.ps1
 ```
+
+## Phase 1 scaffold (started)
+
+Current solution/projects:
+
+- `src/WizAccountant.Contracts` — shared DTOs (`Pairing`, `Site`, `Job`, `Heartbeat`)
+- `src/WizAccountant.Api` — pairing code API, site pairing, jobs API, SignalR connector hub, SQLite persistence
+- `src/WizConnector.Service` — on-prem worker with pairing flow, hub connection, heartbeat, job execution shell
+
+Build:
+
+```powershell
+dotnet build WizAccountant.slnx
+```
+
+### Sage SDK
+
+Installed locally at `C:\Program Files (x86)\Sage Evolution` (v11). See [lib/sage-sdk/README.md](lib/sage-sdk/README.md) and [official SDK downloads](https://developerzone.pastel.co.za/index.php?title=Downloads).
+
+Configure Sage via **`WizConnector.Setup.exe`** (saves encrypted config). See [DOCS/SAGE-Connection-Process.md](DOCS/SAGE-Connection-Process.md).
+
+**Pilot (API + connector):** see [scripts/run-pilot-e2e.ps1](scripts/run-pilot-e2e.ps1) — API on `http://localhost:5278`.

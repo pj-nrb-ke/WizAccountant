@@ -6,7 +6,45 @@ from pathlib import Path
 
 OUT = Path(__file__).resolve().parents[1] / "WizAccountant.xlsx"
 
+# Phase 1 checklist — update `done` as work completes, then run this script.
+PHASE1_CHECKLIST = [
+    # (id, component, task, done)
+    ("P1-01", "Solution", "Create WizAccountant.slnx + Contracts, Api, Connector projects", True),
+    ("P1-02", "Contracts", "Shared DTOs: pairing, site, job, heartbeat, run-job message", True),
+    ("P1-03", "API", "SQLite persistence (sites, pairing codes, jobs)", True),
+    ("P1-04", "API", "POST /api/pairing-codes — generate pairing code", True),
+    ("P1-05", "API", "POST /api/sites/pair — register connector site", True),
+    ("P1-06", "API", "GET /api/sites — list sites + online status", True),
+    ("P1-07", "API", "POST/GET /api/jobs — submit job, poll result", True),
+    ("P1-08", "API", "SignalR Connector Hub — register, heartbeat, route RunJob", True),
+    ("P1-09", "Connector", "Worker service: pair on first run, save site state", True),
+    ("P1-10", "Connector", "Connect to hub, register site, 30s heartbeat loop", True),
+    ("P1-11", "Connector", "Receive RunJob, execute handler, POST job result", True),
+    ("P1-12", "Connector", "Job shell: Site.Health (mock)", True),
+    ("P1-13", "Connector", "Job shell: Customer.List (mock)", True),
+    ("P1-14", "Build", "dotnet build WizAccountant.slnx succeeds", True),
+    ("P1-15", "Connector", "Wire Pastel.Evolution SDK — Site.Health (live DB)", True),
+    ("P1-16", "Connector", "SDK handler: GLAccount.List + GLAccount.Get", True),
+    ("P1-17", "Connector", "SDK handler: Customer.List + Customer.Get", True),
+    ("P1-18", "Connector", "SDK handler: CustomerTransaction.List (criteria)", False),
+    ("P1-19", "Connector", "SDK handler: Supplier.List + SupplierTransaction.List", False),
+    ("P1-20", "Connector", "Evolution connection profile + Agent.Authenticate (WizConnector.Setup + DPAPI)", True),
+    ("P1-21", "Connector", "WizConnector.Tray — pairing wizard, status, device ID", False),
+    ("P1-22", "API", "Auth stub — tenants + users (minimal)", False),
+    ("P1-23", "Web", "Admin UI — create pairing code, list sites, Test connection", False),
+    ("P1-24", "API", "Job wait/poll helper — sync read with timeout (30–60s)", False),
+    ("P1-25", "API", "Basic audit log table for all jobs", False),
+    ("P1-26", "Connector", "REST long-poll fallback when WebSocket down", False),
+    ("P1-27", "Docs", "Evolution version matrix + pilot install guide", False),
+    ("P1-28", "Pilot", "End-to-end test on pilot site #1 (pair → online → Customer.List)", True),
+    ("P1-29", "Pilot", "End-to-end test on pilot site #2 (second Evolution version)", False),
+    ("P1-30", "Success", "Site Online within 60s of connector start", True),
+]
+
 HEADER_FILL = PatternFill("solid", fgColor="1F4E79")
+CHECK_DONE_FILL = PatternFill("solid", fgColor="C6EFCE")
+CHECK_TODO_FILL = PatternFill("solid", fgColor="FFC7CE")
+CHECK_NEXT_FILL = PatternFill("solid", fgColor="FFEB9C")
 HEADER_FONT = Font(bold=True, color="FFFFFF", size=11)
 PHASE_FILLS = {
     1: PatternFill("solid", fgColor="D6E4F0"),
@@ -83,6 +121,53 @@ def main():
             (4, "Scale", "v1.x Scale", "Ongoing after P3", "Inventory, orders, enterprise", "Expanded", "Workflows", "Practice mode, tablet, store release"),
         ],
     )
+
+    # --- Phase 1 Checklist (early in workbook for visibility) ---
+    ws_check = wb.create_sheet("Phase 1 Checklist", 1)
+    check_headers = ["Done", "ID", "Component", "Task", "Status"]
+    for i, h in enumerate(check_headers, 1):
+        ws_check.cell(row=1, column=i, value=h)
+    style_header(ws_check)
+
+    next_id = None
+    done_count = 0
+    for row_idx, (task_id, component, task, done) in enumerate(PHASE1_CHECKLIST, 2):
+        mark = "☑" if done else "☐"
+        status = "Complete" if done else "Pending"
+        if not done and next_id is None:
+            next_id = task_id
+            status = "NEXT"
+
+        ws_check.cell(row=row_idx, column=1, value=mark)
+        ws_check.cell(row=row_idx, column=2, value=task_id)
+        ws_check.cell(row=row_idx, column=3, value=component)
+        ws_check.cell(row=row_idx, column=4, value=task)
+        ws_check.cell(row=row_idx, column=5, value=status)
+
+        row_fill = CHECK_DONE_FILL if done else (CHECK_NEXT_FILL if status == "NEXT" else CHECK_TODO_FILL)
+        for col in range(1, 6):
+            ws_check.cell(row=row_idx, column=col).fill = row_fill
+        if done:
+            done_count += 1
+
+    total = len(PHASE1_CHECKLIST)
+    ws_check.cell(row=total + 3, column=1, value="Summary")
+    ws_check.cell(row=total + 3, column=4, value=f"{done_count} / {total} complete")
+    if next_id:
+        next_task = next(t for t in PHASE1_CHECKLIST if t[0] == next_id)
+        ws_check.cell(row=total + 4, column=1, value="Next task")
+        ws_check.cell(row=total + 4, column=2, value=next_id)
+        ws_check.cell(row=total + 4, column=4, value=next_task[2])
+
+    ws_check.freeze_panes = "A2"
+    ws_check.column_dimensions["A"].width = 8
+    ws_check.column_dimensions["B"].width = 10
+    ws_check.column_dimensions["C"].width = 14
+    ws_check.column_dimensions["D"].width = 72
+    ws_check.column_dimensions["E"].width = 12
+
+    next_task_id = next_id
+    next_task_text = next(t[2] for t in PHASE1_CHECKLIST if t[0] == next_id) if next_id else ""
 
     # --- All Features (master sheet) ---
     features = []
@@ -387,6 +472,24 @@ def main():
             ("Evolution printing", "Not available in SDK"),
         ],
     )
+
+    # --- Execution Status (synced from checklist) ---
+    ws10 = wb.create_sheet("Execution Status")
+    exec_rows = []
+    for task_id, component, task, done in PHASE1_CHECKLIST:
+        exec_rows.append(
+            (
+                "Done" if done else ("Next" if task_id == next_task_id else "Pending"),
+                f"{task_id}: {task}",
+                component,
+                "2026-05-26",
+            )
+        )
+    add_rows(ws10, ["Status", "Work item", "Component", "Updated (UTC)"], exec_rows)
+    ws10.column_dimensions["A"].width = 12
+    ws10.column_dimensions["B"].width = 80
+    ws10.column_dimensions["C"].width = 14
+    ws10.column_dimensions["D"].width = 16
 
     wb.save(OUT)
     print(f"Created {OUT}")

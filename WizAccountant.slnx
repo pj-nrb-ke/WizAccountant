@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/WizAccountant.Api/WizAccountant.Api.csproj" />
+    <Project Path="src/WizAccountant.Contracts/WizAccountant.Contracts.csproj" />
+    <Project Path="src/WizConnector.Service/WizConnector.Service.csproj" />
+    <Project Path="src/WizConnector.Setup/WizConnector.Setup.csproj" />
+  </Folder>
+</Solution>

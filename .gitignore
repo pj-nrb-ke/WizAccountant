@@ -22,3 +22,17 @@ Thumbs.db
 
 # Sage SDK documentation PDFs (large binaries; keep local in DOCS/)
 DOCS/*.pdf
+
+# Copied Sage DLLs (reference install path instead)
+lib/sage-sdk/*.dll
+src/**/Pastel.Evolution*.dll
+
+# Local pilot temp files
+scripts/.pilot-pairing-code.txt
+
+# API dev SQLite (local only)
+**/wizaccountant-phase1-dev.db
+**/wizaccountant-phase1-dev.db-*
+
+# Excel lock files
+~$*.xlsx

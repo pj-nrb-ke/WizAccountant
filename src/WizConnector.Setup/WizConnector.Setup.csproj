@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon />
+    <AssemblyName>WizConnector.Setup</AssemblyName>
+    <RootNamespace>WizConnector.Setup</RootNamespace>
+    <SageSdkPath Condition="'$(SageSdkPath)' == ''">C:\Program Files (x86)\Sage Evolution</SageSdkPath>
+    <!-- Sage Evolution SDK assemblies are 32-bit (.NET Framework) -->
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <!-- Required by Pastel.Evolution at runtime (Sage SDK uses classic SQL client) -->
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+    <ProjectReference Include="..\WizAccountant.Contracts\WizAccountant.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Pastel.Evolution">
+      <HintPath>$(SageSdkPath)\Pastel.Evolution.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Pastel.Evolution.Common">
+      <HintPath>$(SageSdkPath)\Pastel.Evolution.Common.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Do not deploy copied Sage DLLs; use regasm-registered install under Program Files (x86). -->
+  <Target Name="RemoveCopiedSageSdkFromOutput" AfterTargets="Build">
+    <ItemGroup>
+      <_SageSdkCopy Include="$(OutputPath)Pastel.Evolution.dll" />
+      <_SageSdkCopy Include="$(OutputPath)Pastel.Evolution.Common.dll" />
+      <_SageSdkCopy Include="$(OutputPath)Pastel.Evolution.tlb" />
+      <_SageSdkCopy Include="$(OutputPath)Pastel.Evolution.Common.tlb" />
+    </ItemGroup>
+    <Delete Files="@(_SageSdkCopy)" ContinueOnError="true" />
+  </Target>
+
+</Project>
