@@ -1,4 +1,5 @@
 using System.Text.Json;
+using WizConnector.Service.Sage;
 
 namespace WizConnector.Service;
 
@@ -11,6 +12,9 @@ public sealed class ConnectorSettings
     /// <summary>P1-26: poll for jobs via REST when SignalR is disconnected.</summary>
     public bool RestJobPollEnabled { get; set; } = true;
     public int RestPollWaitSeconds { get; set; } = 30;
+    /// <summary>P3: allow write handlers (default false — enable only after pilot sign-off).</summary>
+    public bool WritesEnabled { get; set; }
+    public bool WriteConsentRequired { get; set; } = true;
 }
 
 public sealed class ConnectorState
@@ -116,6 +120,57 @@ public sealed class MockJobExecutor(ILogger<MockJobExecutor> logger) : IJobExecu
                 note = "Phase 1 mock output."
             });
             return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (operation == "dashboard.summary")
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                dataAsOfUtc = DateTimeOffset.UtcNow,
+                kpis = new { customerCount = 2, supplierCount = 1, openArItemCount = 3, openApItemCount = 1 },
+                note = "Phase 2 mock dashboard"
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (operation == "search.global")
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                query = "mock",
+                hits = new[] { new { type = "customer", code = "DEMO001", name = "Demo Customer" } },
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (operation is "site.diagnostics"
+            or "customer.openitems" or "supplier.openitems" or "gltransaction.list"
+            or "salesorder.list" or "purchaseorder.list" or "inventoryitem.list"
+            or "project.list" or "warehouse.list" or "taxrate.list" or "transactioncode.list")
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                items = Array.Empty<object>(),
+                total = 0,
+                note = $"Phase 2 mock for {operation}",
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (ConnectorWriteAllowlist.IsWrite(operation))
+        {
+            var payload = parameters.GetValueOrDefault("payload") ?? "{}";
+            var simulated = JsonSerializer.Serialize(new
+            {
+                simulated = true,
+                operation,
+                ok = true,
+                message = "Phase 3 mock write — enable Sage and Connector:WritesEnabled for live post.",
+                payloadLength = payload.Length
+            });
+            return Task.FromResult<(string?, string?)>((simulated, null));
         }
 
         logger.LogWarning("Unsupported operation requested: {Operation}", operation);

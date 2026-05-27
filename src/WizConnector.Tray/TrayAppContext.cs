@@ -36,6 +36,7 @@ internal sealed class TrayAppContext : ApplicationContext
         menu.Items.Add("Status…", null, (_, _) => ShowStatus());
         menu.Items.Add("Pair with code…", null, (_, _) => ShowPairing());
         menu.Items.Add("Open Sage Setup", null, (_, _) => OpenSageSetup());
+        menu.Items.Add("Allow cloud posts (1 hour)", null, (_, _) => GrantWriteConsent());
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Open config folder", null, (_, _) => OpenConfigFolder());
         menu.Items.Add("Exit", null, (_, _) => ExitThread());
@@ -107,6 +108,16 @@ internal sealed class TrayAppContext : ApplicationContext
     {
         Directory.CreateDirectory(ConnectorPaths.ConfigFolder);
         Process.Start(new ProcessStartInfo("explorer.exe", ConnectorPaths.ConfigFolder) { UseShellExecute = true });
+    }
+
+    private static void GrantWriteConsent()
+    {
+        WriteConsentHelper.Grant(TimeSpan.FromHours(1));
+        MessageBox.Show(
+            "Cloud write jobs may run for the next hour.\r\nAlso set Connector:WritesEnabled=true on the service.",
+            "WizConnector",
+            MessageBoxButtons.OK,
+            MessageBoxIcon.Information);
     }
 
     private void UpdateTrayTooltip()

@@ -41,6 +41,42 @@ PHASE1_CHECKLIST = [
     ("P1-30", "Success", "Site Online within 60s of connector start", True),
 ]
 
+# Phase 2 checklist — update `done` as work completes.
+PHASE2_CHECKLIST = [
+    ("P2-01", "Connector", "Expanded SDK reads (GL tx, orders, inventory, master data)", True),
+    ("P2-02", "Connector", "AR/AP open items handlers", True),
+    ("P2-03", "Connector", "Criteria builder (date, account, reference) + pagination", True),
+    ("P2-04", "Connector", "site.diagnostics support bundle", True),
+    ("P2-05", "Connector", "dashboard.summary + search.global", True),
+    ("P2-06", "API", "Insight dashboard + search endpoints", True),
+    ("P2-07", "API", "Read-only AI chat + conversation history", True),
+    ("P2-08", "API", "CSV export from job results", True),
+    ("P2-09", "API", "Notification email stub + log", True),
+    ("P2-10", "API", "Per-site rate limiting", True),
+    ("P2-11", "API", "API versioning /api/v1/insight/tools", True),
+    ("P2-12", "Web", "Insight UI — dashboard, AR/AP, search, chat", True),
+    ("P2-13", "Docs", "PHASE2-AI-GUARDRAILS.md", True),
+    ("P2-14", "Mobile", "Native iOS/Android app (Expo — mobile/wiz-accountant)", True),
+    ("P2-15", "Cloud", "Production JWT + Brevo email integration", False),
+    ("P2-16", "Connector", "Signed auto-update channel", False),
+]
+
+PHASE3_CHECKLIST = [
+    ("P3-01", "Connector", "Idempotency store (SQLite)", True),
+    ("P3-02", "Connector", "Write handlers GL/AR/AP + master save", True),
+    ("P3-03", "Connector", "Sage transactions BeginTran/Commit + error mapping", True),
+    ("P3-04", "Connector", "Write consent store (Tray-ready)", True),
+    ("P3-05", "API", "Approval queue propose/approve/reject", True),
+    ("P3-06", "API", "Maker-checker roles (Preparer vs Approver)", True),
+    ("P3-07", "API", "AI propose draft (structured JSON)", True),
+    ("P3-08", "API", "Write audit before/after + Evolution ref", True),
+    ("P3-09", "API", "Workflow templates + site config sync", True),
+    ("P3-10", "Web", "Act UI — inbox, propose, audit", True),
+    ("P3-11", "Docs", "PHASE3-APPROVALS.md + rollback messaging", True),
+    ("P3-12", "Mobile", "Approval inbox native app (Approvals tab)", True),
+    ("P3-13", "Connector", "Tray consent menu item", True),
+]
+
 HEADER_FILL = PatternFill("solid", fgColor="1F4E79")
 CHECK_DONE_FILL = PatternFill("solid", fgColor="C6EFCE")
 CHECK_TODO_FILL = PatternFill("solid", fgColor="FFC7CE")
@@ -168,6 +204,61 @@ def main():
 
     next_task_id = next_id
     next_task_text = next(t[2] for t in PHASE1_CHECKLIST if t[0] == next_id) if next_id else ""
+
+    # --- Phase 2 Checklist ---
+    ws_p2 = wb.create_sheet("Phase 2 Checklist", 2)
+    for i, h in enumerate(check_headers, 1):
+        ws_p2.cell(row=1, column=i, value=h)
+    style_header(ws_p2)
+
+    p2_next = None
+    p2_done = 0
+    for row_idx, (task_id, component, task, done) in enumerate(PHASE2_CHECKLIST, 2):
+        mark = "☑" if done else "☐"
+        status = "Complete" if done else "Pending"
+        if not done and p2_next is None:
+            p2_next = task_id
+            status = "NEXT"
+        ws_p2.cell(row=row_idx, column=1, value=mark)
+        ws_p2.cell(row=row_idx, column=2, value=task_id)
+        ws_p2.cell(row=row_idx, column=3, value=component)
+        ws_p2.cell(row=row_idx, column=4, value=task)
+        ws_p2.cell(row=row_idx, column=5, value=status)
+        row_fill = CHECK_DONE_FILL if done else (CHECK_NEXT_FILL if status == "NEXT" else CHECK_TODO_FILL)
+        for col in range(1, 6):
+            ws_p2.cell(row=row_idx, column=col).fill = row_fill
+        if done:
+            p2_done += 1
+
+    p2_total = len(PHASE2_CHECKLIST)
+    ws_p2.cell(row=p2_total + 3, column=1, value="Summary")
+    ws_p2.cell(row=p2_total + 3, column=4, value=f"{p2_done} / {p2_total} complete")
+    ws_p2.freeze_panes = "A2"
+    ws_p2.column_dimensions["D"].width = 72
+
+    # --- Phase 3 Checklist ---
+    ws_p3 = wb.create_sheet("Phase 3 Checklist", 3)
+    for i, h in enumerate(check_headers, 1):
+        ws_p3.cell(row=1, column=i, value=h)
+    style_header(ws_p3)
+    p3_done = 0
+    for row_idx, (task_id, component, task, done) in enumerate(PHASE3_CHECKLIST, 2):
+        mark = "☑" if done else "☐"
+        status = "Complete" if done else "Pending"
+        ws_p3.cell(row=row_idx, column=1, value=mark)
+        ws_p3.cell(row=row_idx, column=2, value=task_id)
+        ws_p3.cell(row=row_idx, column=3, value=component)
+        ws_p3.cell(row=row_idx, column=4, value=task)
+        ws_p3.cell(row=row_idx, column=5, value=status)
+        row_fill = CHECK_DONE_FILL if done else CHECK_TODO_FILL
+        for col in range(1, 6):
+            ws_p3.cell(row=row_idx, column=col).fill = row_fill
+        if done:
+            p3_done += 1
+    p3_total = len(PHASE3_CHECKLIST)
+    ws_p3.cell(row=p3_total + 3, column=4, value=f"{p3_done} / {p3_total} complete")
+    ws_p3.freeze_panes = "A2"
+    ws_p3.column_dimensions["D"].width = 72
 
     # --- All Features (master sheet) ---
     features = []

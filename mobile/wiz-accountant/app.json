@@ -1,0 +1,25 @@
+{
+  "expo": {
+    "name": "WizAccountant",
+    "slug": "wiz-accountant",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "wizaccountant",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.wizaccountant.mobile"
+    },
+    "android": {
+      "package": "com.wizaccountant.mobile",
+      "adaptiveIcon": {
+        "backgroundColor": "#1e3a5f"
+      }
+    },
+    "plugins": ["expo-router", "expo-secure-store"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

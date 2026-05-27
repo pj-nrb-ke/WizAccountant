@@ -11,6 +11,9 @@ obj/
 .env
 .env.*
 !.env.example
+config/secrets/*.credentials.txt
+config/secrets/*.txt
+!config/secrets/*.example.txt
 
 # IDE and OS
 .vs/

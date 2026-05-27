@@ -38,6 +38,20 @@ Configure Sage via **`WizConnector.Setup.exe`** (saves encrypted config). See [D
 
 **Pilot (API + connector):** see [scripts/run-pilot-e2e.ps1](scripts/run-pilot-e2e.ps1) — API on `http://localhost:5278`.
 
+## Phase 3 Act (approvals + writes)
+
+- **Act UI:** [http://localhost:5278/act/](http://localhost:5278/act/) — approval inbox, propose postings, write audit
+- **Roles:** preparer@pilot.local / approver@pilot.local / admin@pilot.local (password `pilot`)
+- **Docs:** [DOCS/PHASE3-APPROVALS.md](DOCS/PHASE3-APPROVALS.md)
+- Enable live posts: `Connector:WritesEnabled=true` + Tray → **Allow cloud posts (1 hour)**
+
+## Phase 2 Insight (web)
+
+- **Insight UI:** [http://localhost:5278/insight/](http://localhost:5278/insight/) — dashboard, AR/AP workspaces, search, read-only AI chat
+- **Admin:** [http://localhost:5278/admin/](http://localhost:5278/admin/)
+- **AI guardrails:** [DOCS/PHASE2-AI-GUARDRAILS.md](DOCS/PHASE2-AI-GUARDRAILS.md)
+- Dev login: `admin@pilot.local` / `pilot` → `POST /api/auth/login`
+
 **Admin UI:** run the API, then open [http://localhost:5278/admin/](http://localhost:5278/admin/) — pairing codes, sites, test connection.
 
 **Tray:** `src\WizConnector.Tray\bin\Release\net8.0-windows\WizConnector.Tray.exe` (pair site, view online status).

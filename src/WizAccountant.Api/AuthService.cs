@@ -19,7 +19,8 @@ public sealed class AuthService(AppDbContext db)
             Token = EncodeToken(user.TenantId, user.UserId),
             TenantId = user.TenantId,
             UserId = user.UserId,
-            DisplayName = user.DisplayName
+            DisplayName = user.DisplayName,
+            Role = user.Role
         };
     }
 
@@ -40,7 +41,8 @@ public sealed class AuthService(AppDbContext db)
                 UserId = u.UserId,
                 TenantId = u.TenantId,
                 Email = u.Email,
-                DisplayName = u.DisplayName
+                DisplayName = u.DisplayName,
+                Role = u.Role
             })
             .ToListAsync(ct);
     }

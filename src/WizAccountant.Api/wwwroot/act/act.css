@@ -1,0 +1,22 @@
+@import url("/insight/insight.css");
+
+header { background: linear-gradient(135deg, #4a1942, #7c2d12); }
+button.primary { background: #f97316; color: #1c1917; }
+.tab.active { background: #ea580c; border-color: #ea580c; }
+
+.list { margin-top: 0.75rem; }
+.proposal {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.85rem;
+  margin-bottom: 0.65rem;
+  background: #0f172a;
+}
+.proposal h3 { margin: 0 0 0.35rem; font-size: 1rem; }
+.proposal .meta { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.5rem; }
+.proposal .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+textarea { font-family: Consolas, monospace; font-size: 0.8rem; width: 100%; }
+
+.header-row { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-top: 0.75rem; }
+.link { color: #fdba74; text-decoration: none; font-size: 0.9rem; }

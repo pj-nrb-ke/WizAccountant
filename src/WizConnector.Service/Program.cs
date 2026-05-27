@@ -22,6 +22,7 @@ if (sageEnabled)
 {
     builder.Services.AddSingleton<SageSession>();
     builder.Services.AddSingleton<IJobExecutor, SageSdkJobExecutor>();
+    builder.Services.AddSingleton<WriteConsentStore>();
 }
 else
 {

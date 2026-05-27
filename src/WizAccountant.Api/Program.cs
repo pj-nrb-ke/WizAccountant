@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using WizAccountant.Api;
+using WizAccountant.Api.Act;
+using WizAccountant.Api.Insight;
+using WizAccountant.Api.Middleware;
 using WizAccountant.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,13 +15,29 @@ builder.Services.AddSignalR();
 builder.Services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
 builder.Services.AddScoped<JobService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ReadOnlyChatService>();
+builder.Services.AddScoped<NotificationStubService>();
+builder.Services.AddScoped<ApprovalService>();
+builder.Services.AddSingleton<ActDraftService>();
+builder.Services.AddScoped<SiteConfigService>();
 builder.Services.AddSingleton<LocalConnectorLauncher>();
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MobileDev", policy =>
+        policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+});
+
 var app = builder.Build();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
 using (var scope = app.Services.CreateScope())
 {
@@ -43,13 +63,17 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("MobileDev");
 }
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
+app.UseMiddleware<SiteRateLimitMiddleware>();
 
-app.MapGet("/", () => Results.Redirect("/admin/index.html"));
+app.MapGet("/", () => Results.Redirect("/insight/index.html"));
 app.MapGet("/admin", () => Results.Redirect("/admin/index.html"));
+app.MapGet("/insight", () => Results.Redirect("/insight/index.html"));
+app.MapGet("/act", () => Results.Redirect("/act/index.html"));
 
 app.MapGet("/health", () => Results.Ok(new { ok = true, service = "WizAccountant.Api" }));
 
@@ -237,6 +261,119 @@ app.MapPost("/api/admin/open-sage-setup", (LocalConnectorLauncher launcher, IHos
         return Results.Json(new { error = "Opening Sage setup from the browser is only enabled on the pilot API." }, statusCode: 403);
 
     return Results.Ok(launcher.OpenSageSetup());
+});
+
+// --- Phase 2 Insight API (v1) ---
+app.MapGet("/api/v1/insight/tools", () => Results.Ok(InsightReadOnlyTools.Allowed.OrderBy(x => x)));
+
+app.MapGet("/api/insight/dashboard/{siteId:guid}", async (Guid siteId, JobService jobs, CancellationToken ct) =>
+{
+    try
+    {
+        var job = await jobs.RunAndWaitAsync(new CreateJobRequest
+        {
+            SiteId = siteId,
+            Operation = "dashboard.summary",
+            Parameters = new Dictionary<string, string>(),
+            RequestedBy = "insight-ui"
+        }, 90, ct);
+        return Results.Ok(job);
+    }
+    catch (InvalidOperationException ex) { return Results.NotFound(ex.Message); }
+    catch (TimeoutException ex) { return Results.Json(new { error = ex.Message }, statusCode: 504); }
+});
+
+app.MapPost("/api/insight/search", async (InsightSearchRequest request, JobService jobs, CancellationToken ct) =>
+{
+    try
+    {
+        var job = await jobs.RunAndWaitAsync(new CreateJobRequest
+        {
+            SiteId = request.SiteId,
+            Operation = "search.global",
+            Parameters = new Dictionary<string, string> { ["query"] = request.Query },
+            RequestedBy = "insight-ui"
+        }, 60, ct);
+        return Results.Ok(job);
+    }
+    catch (InvalidOperationException ex) { return Results.NotFound(ex.Message); }
+    catch (TimeoutException ex) { return Results.Json(new { error = ex.Message }, statusCode: 504); }
+});
+
+app.MapPost("/api/insight/chat", async (ChatMessageRequest request, ReadOnlyChatService chat, HttpContext http, CancellationToken ct) =>
+{
+    var tenantId = http.Request.Headers.TryGetValue("X-Tenant-Id", out var t) ? t.ToString() : "pilot-tenant";
+    try
+    {
+        return Results.Ok(await chat.AskAsync(request, tenantId, ct));
+    }
+    catch (InvalidOperationException ex) { return Results.NotFound(ex.Message); }
+});
+
+app.MapGet("/api/insight/conversations", async (Guid siteId, string? tenantId, ReadOnlyChatService chat, CancellationToken ct) =>
+    Results.Ok(await chat.ListConversationsAsync(tenantId ?? "pilot-tenant", siteId, ct)));
+
+app.MapGet("/api/insight/export/{jobId:guid}", async (Guid jobId, AppDbContext db, CancellationToken ct) =>
+{
+    var job = await db.Jobs.FindAsync([jobId], ct);
+    if (job is null) return Results.NotFound();
+    var csv = ExportService.ToCsv(job.ResultJson);
+    if (csv is null) return Results.BadRequest("Job result is not a list export.");
+    return Results.File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", $"wiz-export-{jobId:N}.csv");
+});
+
+app.MapPost("/api/insight/notifications/stub", async (NotificationStubRequest request, NotificationStubService notifications, CancellationToken ct) =>
+{
+    try
+    {
+        await notifications.SendSiteEventAsync(request, ct);
+        return Results.Ok(new { ok = true, message = "Notification logged (email stub — configure Brevo in production)." });
+    }
+    catch (InvalidOperationException ex) { return Results.NotFound(ex.Message); }
+});
+
+// --- Phase 3 Act API ---
+app.MapGet("/api/act/workflows", () => Results.Ok(WorkflowTemplates.All));
+
+app.MapGet("/api/act/proposals", async (Guid? siteId, ApprovalStatus? status, ApprovalService approvals, CancellationToken ct) =>
+    Results.Ok(await approvals.ListAsync(siteId, status, ct)));
+
+app.MapPost("/api/act/proposals", async (ProposeApprovalRequest request, ApprovalService approvals, CancellationToken ct) =>
+{
+    try { return Results.Ok(await approvals.ProposeAsync(request, ct)); }
+    catch (InvalidOperationException ex) { return Results.BadRequest(ex.Message); }
+});
+
+app.MapPost("/api/act/proposals/{proposalId:guid}/approve", async (Guid proposalId, ApproveProposalRequest request, ApprovalService approvals, CancellationToken ct) =>
+{
+    try { return Results.Ok(await approvals.ApproveAsync(proposalId, request, ct)); }
+    catch (InvalidOperationException ex) { return Results.BadRequest(ex.Message); }
+    catch (TimeoutException ex) { return Results.Json(new { error = ex.Message }, statusCode: 504); }
+});
+
+app.MapPost("/api/act/proposals/{proposalId:guid}/reject", async (Guid proposalId, RejectProposalRequest request, ApprovalService approvals, CancellationToken ct) =>
+{
+    try { return Results.Ok(await approvals.RejectAsync(proposalId, request, ct)); }
+    catch (InvalidOperationException ex) { return Results.BadRequest(ex.Message); }
+});
+
+app.MapPost("/api/act/ai-draft", (AiDraftRequest request, ActDraftService drafts) =>
+    Results.Ok(drafts.CreateDraft(request)));
+
+app.MapGet("/api/act/write-audit", async (Guid? siteId, ApprovalService approvals, CancellationToken ct) =>
+    Results.Ok(await approvals.ListWriteAuditAsync(siteId, ct)));
+
+app.MapPost("/api/act/sites/{siteId:guid}/sync-config", async (Guid siteId, SiteConfigService config, CancellationToken ct) =>
+{
+    try { return Results.Ok(await config.SyncAsync(siteId, ct)); }
+    catch (InvalidOperationException ex) { return Results.NotFound(ex.Message); }
+    catch (TimeoutException ex) { return Results.Json(new { error = ex.Message }, statusCode: 504); }
+});
+
+app.MapGet("/api/act/sites/{siteId:guid}/config", async (Guid siteId, SiteConfigService config, CancellationToken ct) =>
+{
+    var row = await config.GetAsync(siteId, ct);
+    return row is null ? Results.NotFound() : Results.Ok(row);
 });
 
 app.MapHub<ConnectorHub>("/hubs/connector");

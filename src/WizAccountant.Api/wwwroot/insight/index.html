@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WizAccountant Insight</title>
+  <link rel="stylesheet" href="insight.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>WizAccountant Insight</h1>
+      <p class="tagline">Phase 2 — read-only workspaces &amp; AI assistant</p>
+    </div>
+    <div class="header-actions">
+      <label class="inline">Site
+        <select id="site-select"><option value="">Loading sites…</option></select>
+      </label>
+      <a href="/admin/index.html" class="link-btn">Admin</a>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button type="button" class="tab active" data-tab="dashboard">Dashboard</button>
+    <button type="button" class="tab" data-tab="ar">Customers (AR)</button>
+    <button type="button" class="tab" data-tab="ap">Suppliers (AP)</button>
+    <button type="button" class="tab" data-tab="search">Search</button>
+    <button type="button" class="tab" data-tab="chat">AI Assistant</button>
+  </nav>
+
+  <main>
+    <section id="panel-dashboard" class="panel active card">
+      <div class="row">
+        <h2>Dashboard</h2>
+        <button type="button" id="btn-dashboard" class="primary">Refresh KPIs</button>
+      </div>
+      <pre id="dashboard-out" class="output muted">Select an online site and refresh.</pre>
+    </section>
+
+    <section id="panel-ar" class="panel card">
+      <h2>Accounts receivable</h2>
+      <div class="button-row">
+        <button type="button" data-op="customer.list">All customers</button>
+        <button type="button" data-op="customer.openitems">Open items</button>
+        <button type="button" class="secondary" id="export-ar">Export CSV</button>
+      </div>
+      <label>Account filter <input id="ar-account" placeholder="e.g. CASH" /></label>
+      <pre id="ar-out" class="output muted"></pre>
+    </section>
+
+    <section id="panel-ap" class="panel card">
+      <h2>Accounts payable</h2>
+      <div class="button-row">
+        <button type="button" data-op="supplier.list">All suppliers</button>
+        <button type="button" data-op="supplier.openitems">Open items</button>
+        <button type="button" class="secondary" id="export-ap">Export CSV</button>
+      </div>
+      <label>Account filter <input id="ap-account" placeholder="optional" /></label>
+      <pre id="ap-out" class="output muted"></pre>
+    </section>
+
+    <section id="panel-search" class="panel card">
+      <h2>Global search</h2>
+      <form id="search-form" class="search-row">
+        <input name="q" placeholder="Customer, supplier, or GL code…" required />
+        <button type="submit" class="primary">Search</button>
+      </form>
+      <pre id="search-out" class="output muted"></pre>
+    </section>
+
+    <section id="panel-chat" class="panel card">
+      <h2>AI assistant <span class="badge">read-only</span></h2>
+      <p class="muted small">Uses allowlisted Sage read tools only. Try: “show dashboard”, “list customers”, “open items”, “search CASH”.</p>
+      <div id="chat-log" class="chat-log"></div>
+      <form id="chat-form" class="search-row">
+        <input name="message" placeholder="Ask about customers, suppliers, open items…" required autocomplete="off" />
+        <button type="submit" class="primary">Send</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="muted small">
+    Data is live from Sage via WizConnector. Writes require Phase 3 approvals.
+  </footer>
+  <script src="insight.js"></script>
+</body>
+</html>

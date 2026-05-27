@@ -1,11 +1,19 @@
 using System.Data;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 using Pastel.Evolution;
+using WizConnector.Service;
 
 namespace WizConnector.Service.Sage;
 
-public sealed class SageSdkJobExecutor(ILogger<SageSdkJobExecutor> logger, SageSession session) : IJobExecutor
+public sealed class SageSdkJobExecutor(
+    ILogger<SageSdkJobExecutor> logger,
+    SageSession session,
+    Microsoft.Extensions.Options.IOptions<ConnectorSettings> connectorOptions) : IJobExecutor
 {
+    private readonly IdempotencyStore _idempotency = new();
+    private readonly WriteConsentStore _consent = new();
+    private readonly ConnectorSettings _connector = connectorOptions.Value;
     public async Task<(string? resultJson, string? error)> ExecuteAsync(
         string operation,
         Dictionary<string, string> parameters,
@@ -23,8 +31,15 @@ public sealed class SageSdkJobExecutor(ILogger<SageSdkJobExecutor> logger, SageS
         }
     }
 
-    private static string ExecuteCore(string operation, Dictionary<string, string> parameters)
+    private string ExecuteCore(string operation, Dictionary<string, string> parameters)
     {
+        var write = SageSdkWriteHandlers.TryExecute(
+            operation, parameters, _connector.WritesEnabled, _connector.WriteConsentRequired, _consent, _idempotency);
+        if (write is not null) return write;
+
+        var phase2 = SageSdkPhase2Handlers.TryExecute(operation, parameters);
+        if (phase2 is not null) return phase2;
+
         return operation.ToLowerInvariant() switch
         {
             "site.health" => SiteHealth(),
@@ -55,15 +70,15 @@ public sealed class SageSdkJobExecutor(ILogger<SageSdkJobExecutor> logger, SageS
 
     private static string CustomerList(Dictionary<string, string> parameters)
     {
-        var criteria = GetCriteria(parameters, "DCLink > 0");
+        var criteria = SageListHelpers.BuildCriteria(parameters, "DCLink > 0");
         var table = Customer.List(criteria);
-        var items = ToRows(table, row => new
+        var items = SageListHelpers.MapRows(table, row => new
         {
-            code = Col(row, "Account"),
-            name = Col(row, "Name"),
-            dclink = Col(row, "DCLink")
+            code = SageListHelpers.Col(row, "Account"),
+            name = SageListHelpers.Col(row, "Name"),
+            dclink = SageListHelpers.Col(row, "DCLink")
         });
-        return JsonSerializer.Serialize(new { items, criteria });
+        return SageListHelpers.SerializePaged(items, criteria, parameters);
     }
 
     private static string CustomerGet(Dictionary<string, string> parameters)
@@ -83,62 +98,62 @@ public sealed class SageSdkJobExecutor(ILogger<SageSdkJobExecutor> logger, SageS
 
     private static string CustomerTransactionList(Dictionary<string, string> parameters)
     {
-        var criteria = GetCriteria(parameters, "AutoIdx > 0");
+        var criteria = SageListHelpers.BuildCriteria(parameters, "AutoIdx > 0");
         var table = CustomerTransaction.List(criteria);
-        var items = ToRows(table, row => new
+        var items = SageListHelpers.MapRows(table, row => new
         {
-            autoIdx = Col(row, "AutoIdx", "ID"),
-            account = Col(row, "Account"),
-            txDate = Col(row, "TxDate"),
-            reference = Col(row, "Reference"),
-            description = Col(row, "Description"),
-            debit = Col(row, "Debit"),
-            credit = Col(row, "Credit")
+            autoIdx = SageListHelpers.Col(row, "AutoIdx", "ID"),
+            account = SageListHelpers.Col(row, "Account"),
+            txDate = SageListHelpers.Col(row, "TxDate"),
+            reference = SageListHelpers.Col(row, "Reference"),
+            description = SageListHelpers.Col(row, "Description"),
+            debit = SageListHelpers.Col(row, "Debit"),
+            credit = SageListHelpers.Col(row, "Credit")
         });
-        return JsonSerializer.Serialize(new { items, criteria });
+        return SageListHelpers.SerializePaged(items, criteria, parameters);
     }
 
     private static string SupplierList(Dictionary<string, string> parameters)
     {
-        var criteria = GetCriteria(parameters, "DCLink > 0");
+        var criteria = SageListHelpers.BuildCriteria(parameters, "DCLink > 0");
         var table = Supplier.List(criteria);
-        var items = ToRows(table, row => new
+        var items = SageListHelpers.MapRows(table, row => new
         {
-            code = Col(row, "Account"),
-            name = Col(row, "Name"),
-            dclink = Col(row, "DCLink")
+            code = SageListHelpers.Col(row, "Account"),
+            name = SageListHelpers.Col(row, "Name"),
+            dclink = SageListHelpers.Col(row, "DCLink")
         });
-        return JsonSerializer.Serialize(new { items, criteria });
+        return SageListHelpers.SerializePaged(items, criteria, parameters);
     }
 
     private static string SupplierTransactionList(Dictionary<string, string> parameters)
     {
-        var criteria = GetCriteria(parameters, "AutoIdx > 0");
+        var criteria = SageListHelpers.BuildCriteria(parameters, "AutoIdx > 0");
         var table = SupplierTransaction.List(criteria);
-        var items = ToRows(table, row => new
+        var items = SageListHelpers.MapRows(table, row => new
         {
-            autoIdx = Col(row, "AutoIdx", "ID"),
-            account = Col(row, "Account"),
-            txDate = Col(row, "TxDate"),
-            reference = Col(row, "Reference"),
-            description = Col(row, "Description"),
-            debit = Col(row, "Debit"),
-            credit = Col(row, "Credit")
+            autoIdx = SageListHelpers.Col(row, "AutoIdx", "ID"),
+            account = SageListHelpers.Col(row, "Account"),
+            txDate = SageListHelpers.Col(row, "TxDate"),
+            reference = SageListHelpers.Col(row, "Reference"),
+            description = SageListHelpers.Col(row, "Description"),
+            debit = SageListHelpers.Col(row, "Debit"),
+            credit = SageListHelpers.Col(row, "Credit")
         });
-        return JsonSerializer.Serialize(new { items, criteria });
+        return SageListHelpers.SerializePaged(items, criteria, parameters);
     }
 
     private static string GlAccountList(Dictionary<string, string> parameters)
     {
-        var criteria = GetCriteria(parameters, "ActiveAccount = 1");
+        var criteria = SageListHelpers.BuildCriteria(parameters, "ActiveAccount = 1");
         var table = GLAccount.List(criteria);
-        var items = ToRows(table, row => new
+        var items = SageListHelpers.MapRows(table, row => new
         {
-            code = Col(row, "Account"),
-            description = Col(row, "Description"),
-            accountLink = Col(row, "AccountLink")
+            code = SageListHelpers.Col(row, "Account"),
+            description = SageListHelpers.Col(row, "Description"),
+            accountLink = SageListHelpers.Col(row, "AccountLink")
         });
-        return JsonSerializer.Serialize(new { items, criteria });
+        return SageListHelpers.SerializePaged(items, criteria, parameters);
     }
 
     private static string GlAccountGet(Dictionary<string, string> parameters)
@@ -155,25 +170,4 @@ public sealed class SageSdkJobExecutor(ILogger<SageSdkJobExecutor> logger, SageS
         });
     }
 
-    private static string GetCriteria(Dictionary<string, string> parameters, string defaultCriteria) =>
-        parameters.TryGetValue("criteria", out var c) && !string.IsNullOrWhiteSpace(c) ? c : defaultCriteria;
-
-    private static string? Col(DataRow row, params string[] names)
-    {
-        foreach (var name in names)
-        {
-            if (!row.Table.Columns.Contains(name)) continue;
-            return row[name]?.ToString();
-        }
-        return null;
-    }
-
-    private static List<T> ToRows<T>(DataTable? table, Func<DataRow, T> map)
-    {
-        var list = new List<T>();
-        if (table is null) return list;
-        foreach (DataRow row in table.Rows)
-            list.Add(map(row));
-        return list;
-    }
 }
