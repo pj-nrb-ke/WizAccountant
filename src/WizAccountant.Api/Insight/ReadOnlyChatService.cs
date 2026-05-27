@@ -110,9 +110,12 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
         };
     }
 
-    public async Task<List<ConversationDto>> ListConversationsAsync(string tenantId, Guid siteId, CancellationToken ct) =>
-        await db.ChatConversations.AsNoTracking()
+    public async Task<List<ConversationDto>> ListConversationsAsync(string tenantId, Guid siteId, CancellationToken ct)
+    {
+        var rows = await db.ChatConversations.AsNoTracking()
             .Where(c => c.TenantId == tenantId && c.SiteId == siteId)
+            .ToListAsync(ct);
+        return rows
             .OrderByDescending(c => c.UpdatedAtUtc)
             .Take(50)
             .Select(c => new ConversationDto
@@ -121,7 +124,8 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
                 Title = c.Title,
                 UpdatedAtUtc = c.UpdatedAtUtc
             })
-            .ToListAsync(ct);
+            .ToList();
+    }
 
     private static (string? operation, Dictionary<string, string> parameters, List<string> tools) PlanToolCall(string message)
     {

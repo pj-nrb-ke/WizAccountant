@@ -1,0 +1,11 @@
+{
+  "name": "wizaccountant-qa",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:003": "playwright test enterprise-cycle-003.spec.ts --trace retain-on-failure"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}

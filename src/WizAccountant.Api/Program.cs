@@ -128,7 +128,10 @@ app.MapPost("/api/sites/pair", async (PairSiteRequest request, AppDbContext db) 
 
 app.MapGet("/api/sites", async (AppDbContext db) =>
 {
-    var sites = await db.Sites.OrderByDescending(s => s.LastSeenUtc ?? DateTimeOffset.MinValue)
+    // SQLite cannot ORDER BY DateTimeOffset — sort in memory after fetch.
+    var rows = await db.Sites.AsNoTracking().ToListAsync();
+    var sites = rows
+        .OrderByDescending(s => s.LastSeenUtc ?? DateTimeOffset.MinValue)
         .Select(s => new SiteDto
         {
             SiteId = s.SiteId,
@@ -137,7 +140,8 @@ app.MapGet("/api/sites", async (AppDbContext db) =>
             DeviceId = s.DeviceId,
             IsOnline = s.IsOnline,
             LastSeenUtc = s.LastSeenUtc
-        }).ToListAsync();
+        })
+        .ToList();
     return Results.Ok(sites);
 });
 

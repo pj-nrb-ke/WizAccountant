@@ -39,3 +39,13 @@ scripts/.pilot-pairing-code.txt
 
 # Excel lock files
 ~$*.xlsx
+
+# Mobile release APKs (built locally)
+WizAccountant-production.apk
+WizAccountant-lite.apk
+
+# QA artifacts
+QA-Test-003.xlsx
+docs/QA/results/
+qa/node_modules/
+qa/e2e-report/

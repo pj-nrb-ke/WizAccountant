@@ -55,7 +55,10 @@ public sealed class ApprovalService(AppDbContext db, JobService jobs, ILogger<Ap
         var q = db.ApprovalProposals.AsNoTracking();
         if (siteId is not null) q = q.Where(p => p.SiteId == siteId);
         if (status is not null) q = q.Where(p => p.Status == status);
-        var rows = await q.OrderByDescending(p => p.CreatedAtUtc).Take(100).ToListAsync(ct);
+        var rows = (await q.ToListAsync(ct))
+            .OrderByDescending(p => p.CreatedAtUtc)
+            .Take(100)
+            .ToList();
         var result = new List<ApprovalProposalDto>();
         foreach (var row in rows)
             result.Add(await ToDtoAsync(row, ct));
@@ -154,7 +157,10 @@ public sealed class ApprovalService(AppDbContext db, JobService jobs, ILogger<Ap
     {
         var q = db.WriteAudits.AsNoTracking();
         if (siteId is not null) q = q.Where(a => a.SiteId == siteId);
-        return await q.OrderByDescending(a => a.TimestampUtc).Take(100)
+        var auditRows = (await q.ToListAsync(ct))
+            .OrderByDescending(a => a.TimestampUtc)
+            .Take(100);
+        return auditRows
             .Select(a => new WriteAuditDto
             {
                 WriteAuditId = a.WriteAuditId,
@@ -168,7 +174,8 @@ public sealed class ApprovalService(AppDbContext db, JobService jobs, ILogger<Ap
                 EvolutionRef = a.EvolutionRef,
                 Success = a.Success,
                 TimestampUtc = a.TimestampUtc
-            }).ToListAsync(ct);
+            })
+            .ToList();
     }
 
     private async Task<ApprovalProposalDto> ToDtoAsync(ApprovalProposalRecord p, CancellationToken ct)
