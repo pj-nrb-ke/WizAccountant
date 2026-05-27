@@ -89,3 +89,71 @@ public sealed class SubmitJobResultRequest
     public string? ResultJson { get; set; }
     public string? Error { get; set; }
 }
+
+/// <summary>P1-24: submit a job and wait for the connector (sync read, capped timeout).</summary>
+public sealed class RunJobWaitRequest
+{
+    public Guid SiteId { get; set; }
+    public string Operation { get; set; } = "site.health";
+    public Dictionary<string, string> Parameters { get; set; } = new();
+    public string? RequestedBy { get; set; }
+    public int TimeoutSeconds { get; set; } = 60;
+}
+
+public sealed class JobAuditDto
+{
+    public Guid AuditId { get; set; }
+    public Guid JobId { get; set; }
+    public Guid SiteId { get; set; }
+    public string SiteName { get; set; } = string.Empty;
+    public string Operation { get; set; } = string.Empty;
+    public string EventType { get; set; } = string.Empty;
+    public string? RequestedBy { get; set; }
+    public bool? Success { get; set; }
+    public string? Detail { get; set; }
+    public DateTimeOffset TimestampUtc { get; set; }
+}
+
+public sealed class StartLocalProgramsResponse
+{
+    public bool Ok { get; set; }
+    public string Message { get; set; } = string.Empty;
+    public List<string> Started { get; set; } = new();
+    public List<string> AlreadyRunning { get; set; } = new();
+    public List<string> Errors { get; set; } = new();
+}
+
+public sealed class LoginRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
+public sealed class LoginResponse
+{
+    public string Token { get; set; } = string.Empty;
+    public string TenantId { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
+    public string DisplayName { get; set; } = string.Empty;
+}
+
+public sealed class TenantDto
+{
+    public string TenantId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+}
+
+public sealed class UserDto
+{
+    public Guid UserId { get; set; }
+    public string TenantId { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
+}
+
+/// <summary>P1-26: job claimed by connector REST long-poll.</summary>
+public sealed class ConnectorJobPollResponse
+{
+    public bool HasJob { get; set; }
+    public RunJobMessage? Job { get; set; }
+}

@@ -21,6 +21,8 @@ Current solution/projects:
 - `src/WizAccountant.Contracts` — shared DTOs (`Pairing`, `Site`, `Job`, `Heartbeat`)
 - `src/WizAccountant.Api` — pairing code API, site pairing, jobs API, SignalR connector hub, SQLite persistence
 - `src/WizConnector.Service` — on-prem worker with pairing flow, hub connection, heartbeat, job execution shell
+- `src/WizConnector.Setup` — Sage connection wizard (DPAPI config)
+- `src/WizConnector.Tray` — system tray: pairing, status, open Setup
 
 Build:
 
@@ -35,3 +37,7 @@ Installed locally at `C:\Program Files (x86)\Sage Evolution` (v11). See [lib/sag
 Configure Sage via **`WizConnector.Setup.exe`** (saves encrypted config). See [DOCS/SAGE-Connection-Process.md](DOCS/SAGE-Connection-Process.md).
 
 **Pilot (API + connector):** see [scripts/run-pilot-e2e.ps1](scripts/run-pilot-e2e.ps1) — API on `http://localhost:5278`.
+
+**Admin UI:** run the API, then open [http://localhost:5278/admin/](http://localhost:5278/admin/) — pairing codes, sites, test connection.
+
+**Tray:** `src\WizConnector.Tray\bin\Release\net8.0-windows\WizConnector.Tray.exe` (pair site, view online status).

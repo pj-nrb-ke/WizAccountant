@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using WizAccountant.Api;
@@ -10,6 +9,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
+builder.Services.AddScoped<JobService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddSingleton<LocalConnectorLauncher>();
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -21,6 +23,20 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
+    await db.Database.ExecuteSqlRawAsync("""
+        CREATE TABLE IF NOT EXISTS JobAuditRecords (
+            AuditId TEXT NOT NULL PRIMARY KEY,
+            JobId TEXT NOT NULL,
+            SiteId TEXT NOT NULL,
+            Operation TEXT NOT NULL,
+            EventType TEXT NOT NULL,
+            RequestedBy TEXT NULL,
+            Success INTEGER NULL,
+            Detail TEXT NULL,
+            TimestampUtc TEXT NOT NULL
+        );
+        """);
+    await DbSeed.EnsurePhase1SeedAsync(db);
 }
 
 if (app.Environment.IsDevelopment())
@@ -29,16 +45,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+app.MapGet("/", () => Results.Redirect("/admin/index.html"));
+app.MapGet("/admin", () => Results.Redirect("/admin/index.html"));
 
 app.MapGet("/health", () => Results.Ok(new { ok = true, service = "WizAccountant.Api" }));
 
 app.MapPost("/api/pairing-codes", async (CreatePairingCodeRequest request, AppDbContext db) =>
 {
     if (string.IsNullOrWhiteSpace(request.TenantId) || string.IsNullOrWhiteSpace(request.SiteName))
-    {
         return Results.BadRequest("tenantId and siteName are required.");
-    }
 
     var code = $"WZ{Random.Shared.Next(100000, 999999)}";
     var expires = DateTimeOffset.UtcNow.AddMinutes(Math.Clamp(request.ExpiresInMinutes, 5, 60));
@@ -54,7 +72,7 @@ app.MapPost("/api/pairing-codes", async (CreatePairingCodeRequest request, AppDb
     return Results.Ok(new PairingCodeResponse { PairingCode = code, ExpiresAtUtc = expires });
 });
 
-app.MapPost("/api/sites/pair", async (PairSiteRequest request, HttpContext http, AppDbContext db) =>
+app.MapPost("/api/sites/pair", async (PairSiteRequest request, AppDbContext db) =>
 {
     var candidates = await db.PairingCodes
         .Where(p => p.Code == request.PairingCode && !p.IsUsed)
@@ -86,7 +104,7 @@ app.MapPost("/api/sites/pair", async (PairSiteRequest request, HttpContext http,
 
 app.MapGet("/api/sites", async (AppDbContext db) =>
 {
-    var sites = await db.Sites.OrderBy(x => x.SiteName)
+    var sites = await db.Sites.OrderByDescending(s => s.LastSeenUtc ?? DateTimeOffset.MinValue)
         .Select(s => new SiteDto
         {
             SiteId = s.SiteId,
@@ -99,71 +117,127 @@ app.MapGet("/api/sites", async (AppDbContext db) =>
     return Results.Ok(sites);
 });
 
-app.MapPost("/api/jobs", async (CreateJobRequest request, AppDbContext db, IConnectorRegistry registry, IHubContext<ConnectorHub> hub) =>
+app.MapPost("/api/jobs", async (CreateJobRequest request, JobService jobs, CancellationToken ct) =>
 {
-    var site = await db.Sites.FindAsync(request.SiteId);
-    if (site is null) return Results.NotFound("Site not found.");
-
-    var job = new JobRecord
+    try
     {
-        JobId = Guid.NewGuid(),
-        SiteId = request.SiteId,
-        Operation = request.Operation,
-        ParametersJson = JsonSerializer.Serialize(request.Parameters),
-        Status = JobStatus.Pending,
-        CreatedAtUtc = DateTimeOffset.UtcNow,
-        RequestedBy = request.RequestedBy,
-        IdempotencyKey = request.IdempotencyKey
-    };
-
-    db.Jobs.Add(job);
-    await db.SaveChangesAsync();
-
-    if (registry.TryGetConnectionId(request.SiteId, out var connectionId) && !string.IsNullOrWhiteSpace(connectionId))
-    {
-        await hub.Clients.Client(connectionId).SendAsync("RunJob", new RunJobMessage
-        {
-            JobId = job.JobId,
-            SiteId = job.SiteId,
-            Operation = job.Operation,
-            Parameters = request.Parameters,
-            IdempotencyKey = request.IdempotencyKey
-        });
+        var job = await jobs.CreateAndDispatchAsync(request, ct);
+        return Results.Ok(JobService.ToJobDto(job));
     }
-
-    return Results.Ok(ToJobDto(job));
+    catch (InvalidOperationException ex)
+    {
+        return Results.NotFound(ex.Message);
+    }
 });
 
-app.MapPost("/api/jobs/{jobId:guid}/result", async (Guid jobId, SubmitJobResultRequest result, AppDbContext db) =>
+/// <summary>P1-24: one call to submit and wait for job completion.</summary>
+app.MapPost("/api/jobs/run-wait", async (RunJobWaitRequest request, JobService jobs, CancellationToken ct) =>
 {
-    var job = await db.Jobs.FindAsync(jobId);
-    if (job is null) return Results.NotFound();
-
-    job.Status = string.IsNullOrWhiteSpace(result.Error) ? JobStatus.Completed : JobStatus.Failed;
-    job.ResultJson = result.ResultJson;
-    job.Error = result.Error;
-    job.UpdatedAtUtc = DateTimeOffset.UtcNow;
-    await db.SaveChangesAsync();
-    return Results.Ok(ToJobDto(job));
+    try
+    {
+        var result = await jobs.RunAndWaitAsync(new CreateJobRequest
+        {
+            SiteId = request.SiteId,
+            Operation = request.Operation,
+            Parameters = request.Parameters,
+            RequestedBy = request.RequestedBy ?? "api"
+        }, request.TimeoutSeconds, ct);
+        return Results.Ok(result);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.NotFound(ex.Message);
+    }
+    catch (TimeoutException ex)
+    {
+        return Results.Json(new { error = ex.Message }, statusCode: StatusCodes.Status504GatewayTimeout);
+    }
 });
 
-app.MapGet("/api/jobs/{jobId:guid}", async (Guid jobId, AppDbContext db) =>
+app.MapPost("/api/sites/{siteId:guid}/test-connection", async (Guid siteId, JobService jobs, CancellationToken ct) =>
 {
-    var job = await db.Jobs.FindAsync(jobId);
-    return job is null ? Results.NotFound() : Results.Ok(ToJobDto(job));
+    try
+    {
+        var result = await jobs.RunAndWaitAsync(new CreateJobRequest
+        {
+            SiteId = siteId,
+            Operation = "site.health",
+            Parameters = new Dictionary<string, string>(),
+            RequestedBy = "admin-ui"
+        }, 60, ct);
+        return Results.Ok(result);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.NotFound(ex.Message);
+    }
+    catch (TimeoutException ex)
+    {
+        return Results.Json(new { error = ex.Message }, statusCode: StatusCodes.Status504GatewayTimeout);
+    }
+});
+
+app.MapPost("/api/jobs/{jobId:guid}/result", async (Guid jobId, SubmitJobResultRequest result, JobService jobs, AppDbContext db, CancellationToken ct) =>
+{
+    await jobs.RecordResultAsync(jobId, result, ct);
+    var job = await db.Jobs.FindAsync([jobId], ct);
+    return job is null ? Results.NotFound() : Results.Ok(JobService.ToJobDto(job));
+});
+
+app.MapGet("/api/jobs/{jobId:guid}", async (Guid jobId, AppDbContext db, CancellationToken ct) =>
+{
+    var job = await db.Jobs.FindAsync([jobId], ct);
+    return job is null ? Results.NotFound() : Results.Ok(JobService.ToJobDto(job));
+});
+
+/// <summary>P1-25: recent job activity for admin review.</summary>
+app.MapGet("/api/audit/jobs", async (int? take, JobService jobs, CancellationToken ct) =>
+    Results.Ok(await jobs.ListAuditAsync(take ?? 50, ct)));
+
+/// <summary>P1-22: minimal auth stub for Phase 1.</summary>
+app.MapPost("/api/auth/login", async (LoginRequest request, AuthService auth, CancellationToken ct) =>
+{
+    var result = await auth.LoginAsync(request, ct);
+    return result is null ? Results.Unauthorized() : Results.Ok(result);
+});
+
+app.MapGet("/api/auth/tenants", async (AuthService auth, CancellationToken ct) =>
+    Results.Ok(await auth.ListTenantsAsync(ct)));
+
+app.MapGet("/api/auth/users", async (string? tenantId, AuthService auth, CancellationToken ct) =>
+    Results.Ok(await auth.ListUsersAsync(tenantId, ct)));
+
+/// <summary>P1-26: connector REST long-poll when SignalR is down.</summary>
+app.MapGet("/api/connector/jobs/next", async (
+    Guid siteId,
+    string deviceId,
+    int? waitSeconds,
+    JobService jobs,
+    CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(deviceId))
+        return Results.BadRequest("deviceId is required.");
+
+    var result = await jobs.PollNextJobAsync(siteId, deviceId, waitSeconds ?? 30, ct);
+    return result is null ? Results.NotFound("Site not found or device mismatch.") : Results.Ok(result);
+});
+
+/// <summary>Manager action: start connector service + tray on the same PC as this API (dev/pilot).</summary>
+app.MapPost("/api/admin/start-local-programs", (LocalConnectorLauncher launcher, IHostEnvironment env, IConfiguration config) =>
+{
+    if (!env.IsDevelopment() && !config.GetValue("Admin:AllowLocalStart", false))
+        return Results.Json(new { error = "Starting programs from the browser is only enabled on the pilot API." }, statusCode: 403);
+
+    return Results.Ok(launcher.Start());
+});
+
+app.MapPost("/api/admin/open-sage-setup", (LocalConnectorLauncher launcher, IHostEnvironment env, IConfiguration config) =>
+{
+    if (!env.IsDevelopment() && !config.GetValue("Admin:AllowLocalStart", false))
+        return Results.Json(new { error = "Opening Sage setup from the browser is only enabled on the pilot API." }, statusCode: 403);
+
+    return Results.Ok(launcher.OpenSageSetup());
 });
 
 app.MapHub<ConnectorHub>("/hubs/connector");
 app.Run();
-
-static JobDto ToJobDto(JobRecord x) => new()
-{
-    JobId = x.JobId,
-    SiteId = x.SiteId,
-    Operation = x.Operation,
-    Status = x.Status,
-    ResultJson = x.ResultJson,
-    Error = x.Error,
-    CreatedAtUtc = x.CreatedAtUtc,
-    UpdatedAtUtc = x.UpdatedAtUtc
-};

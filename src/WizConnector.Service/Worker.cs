@@ -32,28 +32,114 @@ public class Worker(
             .WithAutomaticReconnect()
             .Build();
 
-        _hub.On<RunJobMessage>("RunJob", async job =>
+        _hub.On<RunJobMessage>("RunJob", job => HandleJobAsync(job, stoppingToken));
+
+        _hub.Reconnecting += _ =>
         {
-            var (result, error) = await jobExecutor.ExecuteAsync(job.Operation, job.Parameters, stoppingToken);
-            await SubmitResultAsync(job.JobId, result, error, stoppingToken);
-        });
+            logger.LogWarning("SignalR reconnecting; REST job poll will be used if enabled.");
+            return Task.CompletedTask;
+        };
 
-        await _hub.StartAsync(stoppingToken);
-        await _hub.InvokeAsync("RegisterSite", _state.SiteId, cancellationToken: stoppingToken);
-        logger.LogInformation("Connected to hub for SiteId={SiteId}", _state.SiteId);
+        _hub.Reconnected += async _ =>
+        {
+            if (_state is not null)
+                await _hub.InvokeAsync("RegisterSite", _state.SiteId, cancellationToken: stoppingToken);
+            logger.LogInformation("SignalR reconnected.");
+        };
 
+        try
+        {
+            await _hub.StartAsync(stoppingToken);
+            await _hub.InvokeAsync("RegisterSite", _state.SiteId, cancellationToken: stoppingToken);
+            logger.LogInformation("Connected to hub for SiteId={SiteId}", _state.SiteId);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Initial SignalR connection failed; using REST poll fallback.");
+        }
+
+        var heartbeatDue = DateTimeOffset.UtcNow;
         while (!stoppingToken.IsCancellationRequested)
         {
-            await _hub.InvokeAsync("Heartbeat", new ConnectorHeartbeat
+            if (_hub.State == HubConnectionState.Connected)
             {
-                SiteId = _state.SiteId,
-                ConnectorVersion = _settings.ConnectorVersion,
-                EvolutionVersion = "NotConnectedYet",
-                CompanyName = _state.SiteName
-            }, stoppingToken);
+                if (DateTimeOffset.UtcNow >= heartbeatDue)
+                {
+                    try
+                    {
+                        await _hub.InvokeAsync("Heartbeat", new ConnectorHeartbeat
+                        {
+                            SiteId = _state.SiteId,
+                            ConnectorVersion = _settings.ConnectorVersion,
+                            EvolutionVersion = "Pastel.Evolution",
+                            CompanyName = _state.SiteName
+                        }, stoppingToken);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Heartbeat failed.");
+                    }
+                    heartbeatDue = DateTimeOffset.UtcNow.AddSeconds(30);
+                }
 
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+                await Task.Delay(1000, stoppingToken);
+            }
+            else if (_settings.RestJobPollEnabled)
+            {
+                await PollAndRunJobsAsync(stoppingToken);
+            }
+            else
+            {
+                try
+                {
+                    if (_hub.State == HubConnectionState.Disconnected)
+                        await _hub.StartAsync(stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogWarning(ex, "SignalR reconnect attempt failed.");
+                }
+                await Task.Delay(5000, stoppingToken);
+            }
         }
+    }
+
+    private async Task PollAndRunJobsAsync(CancellationToken ct)
+    {
+        if (_state is null) return;
+
+        var client = httpClientFactory.CreateClient();
+        client.Timeout = TimeSpan.FromSeconds(_settings.RestPollWaitSeconds + 15);
+
+        try
+        {
+            var url =
+                $"api/connector/jobs/next?siteId={_state.SiteId}&deviceId={Uri.EscapeDataString(_settings.DeviceId)}&waitSeconds={_settings.RestPollWaitSeconds}";
+            var response = await client.GetAsync(
+                new Uri(new Uri(_settings.ApiBaseUrl.TrimEnd('/') + "/"), url), ct);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                logger.LogWarning("REST job poll failed: {Status}", response.StatusCode);
+                await Task.Delay(5000, ct);
+                return;
+            }
+
+            var poll = await response.Content.ReadFromJsonAsync<ConnectorJobPollResponse>(cancellationToken: ct);
+            if (poll?.HasJob == true && poll.Job is not null)
+                await HandleJobAsync(poll.Job, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "REST job poll error.");
+            await Task.Delay(5000, ct);
+        }
+    }
+
+    private async Task HandleJobAsync(RunJobMessage job, CancellationToken ct)
+    {
+        var (result, error) = await jobExecutor.ExecuteAsync(job.Operation, job.Parameters, ct);
+        await SubmitResultAsync(job.JobId, result, error, ct);
     }
 
     private async Task<ConnectorState?> EnsurePairedAsync(CancellationToken ct)
@@ -103,8 +189,6 @@ public class Worker(
         }, ct);
 
         if (!response.IsSuccessStatusCode)
-        {
             logger.LogWarning("Result submit failed for JobId={JobId} status={Status}", jobId, response.StatusCode);
-        }
     }
 }

@@ -4,5 +4,6 @@
     <Project Path="src/WizAccountant.Contracts/WizAccountant.Contracts.csproj" />
     <Project Path="src/WizConnector.Service/WizConnector.Service.csproj" />
     <Project Path="src/WizConnector.Setup/WizConnector.Setup.csproj" />
+    <Project Path="src/WizConnector.Tray/WizConnector.Tray.csproj" />
   </Folder>
 </Solution>

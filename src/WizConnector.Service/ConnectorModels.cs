@@ -8,6 +8,9 @@ public sealed class ConnectorSettings
     public string PairingCode { get; set; } = string.Empty;
     public string DeviceId { get; set; } = Environment.MachineName;
     public string ConnectorVersion { get; set; } = "0.1.0";
+    /// <summary>P1-26: poll for jobs via REST when SignalR is disconnected.</summary>
+    public bool RestJobPollEnabled { get; set; } = true;
+    public int RestPollWaitSeconds { get; set; } = 30;
 }
 
 public sealed class ConnectorState
@@ -25,10 +28,7 @@ public interface IStateStore
 
 public sealed class FileStateStore : IStateStore
 {
-    private static readonly string Folder = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-        "WizConnector");
-    private static readonly string FilePath = Path.Combine(Folder, "connector-state.json");
+    private static readonly string FilePath = WizAccountant.Contracts.ConnectorPaths.StateFilePath;
 
     public async Task<ConnectorState?> ReadAsync(CancellationToken ct)
     {
@@ -42,7 +42,7 @@ public sealed class FileStateStore : IStateStore
 
     public async Task WriteAsync(ConnectorState state, CancellationToken ct)
     {
-        Directory.CreateDirectory(Folder);
+        Directory.CreateDirectory(WizAccountant.Contracts.ConnectorPaths.ConfigFolder);
         var json = JsonSerializer.Serialize(state, new JsonSerializerOptions
         {
             WriteIndented = true,
@@ -82,7 +82,38 @@ public sealed class MockJobExecutor(ILogger<MockJobExecutor> logger) : IJobExecu
                     new { code = "DEMO001", name = "Demo Customer 1" },
                     new { code = "DEMO002", name = "Demo Customer 2" }
                 },
-                note = "Phase 1 mock output. Replace with Sage SDK query next."
+                note = "Phase 1 mock output."
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (operation.Equals("customertransaction.list", StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                items = new[] { new { autoIdx = "1", account = "DEMO001", reference = "INV-001", debit = "100.00" } },
+                criteria = parameters.GetValueOrDefault("criteria") ?? "mock",
+                note = "Phase 1 mock output."
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (operation.Equals("supplier.list", StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                items = new[] { new { code = "SUPP001", name = "Demo Supplier" } },
+                note = "Phase 1 mock output."
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (operation.Equals("suppliertransaction.list", StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                items = new[] { new { autoIdx = "1", account = "SUPP001", reference = "PO-001", credit = "50.00" } },
+                note = "Phase 1 mock output."
             });
             return Task.FromResult<(string?, string?)>((payload, null));
         }

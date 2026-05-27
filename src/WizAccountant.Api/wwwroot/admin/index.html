@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WizAccountant Admin</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <header>
+    <h1>WizAccountant Admin</h1>
+    <p class="subtitle">Pair sites, test Sage connections, and review activity</p>
+  </header>
+
+  <main>
+    <section class="card actions">
+      <h2>Quick actions (this PC)</h2>
+      <p class="muted">Use these buttons on the pilot machine where Sage is installed. No command line needed.</p>
+      <div class="button-row">
+        <button type="button" id="start-local" class="primary">Start connector on this PC</button>
+        <button type="button" id="open-sage-setup" class="secondary">Open Sage setup</button>
+        <button type="button" id="refresh-sites-top" class="secondary">Refresh sites</button>
+      </div>
+      <div id="action-status" class="action-status muted" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2>Create pairing code</h2>
+      <form id="pairing-form">
+        <label>Tenant ID <input name="tenantId" value="pilot-tenant" required /></label>
+        <label>Site name <input name="siteName" placeholder="Customer site name" required /></label>
+        <label>Expires (minutes) <input name="expiresInMinutes" type="number" min="5" max="60" value="30" /></label>
+        <button type="submit">Generate code</button>
+      </form>
+      <div id="pairing-result" class="result hidden"></div>
+    </section>
+
+    <section class="card">
+      <div class="row">
+        <h2>Sites</h2>
+        <button type="button" id="refresh-sites" class="secondary">Refresh</button>
+      </div>
+      <table id="sites-table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Site</th>
+            <th>Device</th>
+            <th>Last seen (UTC)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="sites-body">
+          <tr><td colspan="5" class="muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Test job result</h2>
+      <pre id="test-output" class="output muted">Click “Test connection” on an online site (up to 60 seconds).</pre>
+    </section>
+
+    <section class="card">
+      <div class="row">
+        <h2>Activity log</h2>
+        <button type="button" id="refresh-audit" class="secondary">Refresh</button>
+      </div>
+      <p class="muted">Recent Sage jobs and connection tests (P1-25 audit).</p>
+      <table id="audit-table">
+        <thead>
+          <tr>
+            <th>When (UTC)</th>
+            <th>Site</th>
+            <th>Operation</th>
+            <th>Event</th>
+            <th>Result</th>
+          </tr>
+        </thead>
+        <tbody id="audit-body">
+          <tr><td colspan="5" class="muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>
