@@ -20,18 +20,25 @@ Only **WizAccountant.Api** runs in the cloud (Docker). The **WizConnector** stay
 
 4. On the server, allow GitHub deploy (SSH key in `/root/.ssh` or use HTTPS clone in bootstrap).
 
-## Publish (from your PC)
+## Publish (GitHub only — no SCP / local upload)
+
+Code on the server always comes from **GitHub** (`git fetch` + `git reset --hard origin/main`).  
+Do not copy project folders from your PC.
 
 ```powershell
 cd C:\Users\pj\WizAccountant
-# Commit changes first, then:
+git add -A && git commit -m "your message"   # if needed
+git push origin main
 .\scripts\deploy-ascendbooks.ps1
 ```
 
-Or manually after `git push`:
+SSH uses `~/.ssh/contabo_wizerp` (see `config/secrets/website-hosting-notes.md`).
+
+Server one-liner (after push):
 
 ```bash
-ssh root@167.86.125.230 "cd /opt/wizaccountant && git pull origin main && bash scripts/deploy-vps-wizaccountant.sh"
+ssh -i ~/.ssh/contabo_wizerp root@167.86.125.230 \
+  "cd /opt/wizaccountant && git fetch origin && git reset --hard origin/main && bash scripts/deploy-vps-wizaccountant.sh"
 ```
 
 ## Verify

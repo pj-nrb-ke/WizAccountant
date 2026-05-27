@@ -40,6 +40,7 @@ echo "==> Smoke"
 sleep 3
 curl -sf "http://127.0.0.1:8088/health" | head -c 200
 echo ""
-curl -sfI "$APP_URL/health" | head -1 || true
+curl -sf "$APP_URL/health" | head -c 120 || true
+echo ""
 
 echo "Done. App: $APP_URL"

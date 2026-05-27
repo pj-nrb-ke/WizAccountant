@@ -1,9 +1,11 @@
-# Deploy WizAccountant to app.ascendbooks.biz (git push + SSH deploy).
-# Requires: config/secrets/ascendbooks-server.credentials.txt (see .example file)
+# Deploy WizAccountant to app.ascendbooks.biz — GitHub only (no local file upload).
+# 1) git push origin main from this PC
+# 2) SSH to VPS: git fetch + reset --hard origin/main + docker build on server
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 $credFile = Join-Path $root "config\secrets\ascendbooks-server.credentials.txt"
+$defaultKey = Join-Path $env:USERPROFILE ".ssh\contabo_wizerp"
 
 function Read-Credentials([string]$path) {
     $cfg = @{}
@@ -43,37 +45,42 @@ function Invoke-RemoteCommand([string]$hostName, [string]$user, [string]$command
     throw "Set PASSWORD or SSH_PRIVATE_KEY in $credFile"
 }
 
-if (-not (Test-Path $credFile)) {
-    Write-Host "Missing credentials file."
-    Write-Host "Copy config\secrets\ascendbooks-server.credentials.example.txt"
-    Write-Host "  to config\secrets\ascendbooks-server.credentials.txt"
-    Write-Host "Add root password or SSH key, then run this script again."
+if (Test-Path $credFile) {
+    $cfg = Read-Credentials $credFile
+} else {
+    $cfg = @{}
+}
+if (-not $cfg["SSH_PRIVATE_KEY"] -and (Test-Path $defaultKey)) {
+    $cfg["SSH_PRIVATE_KEY"] = $defaultKey
+}
+if (-not $cfg["SSH_PRIVATE_KEY"] -and -not $cfg["PASSWORD"]) {
+    Write-Host "No SSH access. Use $defaultKey (see config/secrets/website-hosting-notes.md)"
+    Write-Host "  or create config\secrets\ascendbooks-server.credentials.txt"
     exit 1
 }
 
-$cfg = Read-Credentials $credFile
 $hostName = if ($cfg["HOST"]) { $cfg["HOST"] } else { "167.86.125.230" }
 $user = if ($cfg["USER"]) { $cfg["USER"] } else { "root" }
-$repo = if ($cfg["GITHUB_REPO"]) { $cfg["GITHUB_REPO"] } else { "git@github.com:pj-nrb-ke/pj-nrb-ke/WizAccountant.git" }
 
 Write-Host "==> Git push (local)"
 Push-Location $root
 git push origin main
 if ($LASTEXITCODE -ne 0) { throw "git push failed" }
 
-Write-Host "==> Bootstrap /opt/wizaccountant on server (if needed)"
-$bootstrap = @"
+Write-Host "==> Deploy on server (git pull from GitHub only)"
+$remoteDeploy = @'
 set -eu
-if [ ! -d /opt/wizaccountant/.git ]; then
-  apt-get update -qq
-  apt-get install -y -qq git docker.io docker-compose-plugin 2>/dev/null || apt-get install -y -qq git docker.io
-  systemctl enable --now docker 2>/dev/null || true
-  git clone '$repo' /opt/wizaccountant || git clone 'https://github.com/pj-nrb-ke/WizAccountant.git' /opt/wizaccountant
+APP=/opt/wizaccountant
+if [ ! -d "$APP/.git" ]; then
+  echo "First-time: clone on server: git clone git@github.com:pj-nrb-ke/WizAccountant.git $APP"
+  exit 1
 fi
-"@
-Invoke-RemoteCommand $hostName $user $bootstrap $cfg
-
-Write-Host "==> Deploy on server"
-Invoke-RemoteCommand $hostName $user "cd /opt/wizaccountant && git fetch origin && git reset --hard origin/main && bash scripts/deploy-vps-wizaccountant.sh" $cfg
+cd "$APP"
+git fetch origin
+git checkout main
+git reset --hard origin/main
+bash scripts/deploy-vps-wizaccountant.sh
+'@
+Invoke-RemoteCommand $hostName $user $remoteDeploy $cfg
 
 Write-Host "==> Done. Open https://app.ascendbooks.biz/health"
