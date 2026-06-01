@@ -98,15 +98,34 @@ existing.summary = {
   totalNavActions: existing.longDuration.length * 50,
 };
 
-existing.criticalIssues = all
-  .filter((r) => r.status === 'FAIL')
-  .map((r, i) => ({
-    id: `CI-${String(i + 1).padStart(3, '0')}`,
-    severity: r.id?.startsWith('DP') ? 'Critical' : 'High',
-    test: r.test,
-    notes: r.notes,
-    evidence: r.evidence || 'see qa-cycle-003.json',
-  }));
+existing.criticalIssues = [
+  {
+    id: 'CI-000',
+    severity: 'Critical',
+    test: 'GET /api/sites returned 500 on production (SQLite DateTimeOffset ORDER BY)',
+    notes: 'Fixed in commit 97ac780 — in-memory sort. Deployed before Playwright run.',
+    evidence: 'docker logs wizaccountant-api; Program.cs line 131',
+  },
+  ...all
+    .filter((r) => r.status === 'FAIL')
+    .map((r, i) => ({
+      id: `CI-${String(i + 1).padStart(3, '0')}`,
+      severity: r.id?.startsWith('DP') ? 'Critical' : 'High',
+      test: r.test,
+      notes: r.notes,
+      evidence: r.evidence || 'see qa-cycle-003.json',
+    })),
+];
+
+if (existing.summary.blocked > 0) {
+  existing.criticalIssues.push({
+    id: 'CI-ENV',
+    severity: 'Medium',
+    test: `${existing.summary.blocked} tests BLOCKED — no paired Sage site online on production`,
+    notes: 'Pair WizConnector to app.ascendbooks.biz and re-run DP-04+ and RC-04+.',
+    evidence: 'GET /api/sites returns empty or all offline',
+  });
+}
 
 existing.recommendedFixes = existing.criticalIssues.map((c, i) => ({
   id: `RF-${String(i + 1).padStart(3, '0')}`,
@@ -117,9 +136,14 @@ existing.recommendedFixes = existing.criticalIssues.map((c, i) => ({
 
 existing.uxFindings = [
   {
+    id: 'UX-000',
+    severity: 'Critical',
+    finding: 'Production /api/sites failed until SQLite DateTimeOffset sort fix (deployed).',
+  },
+  {
     id: 'UX-001',
     severity: 'High',
-    finding: 'P1-22 auth stub: API does not validate Bearer token on most routes (SR-005 documents).',
+    finding: 'P1-22 auth stub: API does not validate Bearer token on most routes (SR-005 PASS with finding).',
   },
   {
     id: 'UX-002',

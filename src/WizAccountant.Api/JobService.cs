@@ -135,10 +135,8 @@ public sealed class JobService(
     public async Task<List<JobAuditDto>> ListAuditAsync(int take, CancellationToken ct)
     {
         take = Math.Clamp(take, 1, 500);
-        var rows = await db.JobAudits
-            .OrderByDescending(a => a.TimestampUtc)
-            .Take(take)
-            .ToListAsync(ct);
+        var rows = await db.JobAudits.ToListAsync(ct);
+        rows = rows.OrderByDescending(a => a.TimestampUtc).Take(take).ToList();
 
         var siteNames = await db.Sites.AsNoTracking().ToDictionaryAsync(s => s.SiteId, s => s.SiteName, ct);
 

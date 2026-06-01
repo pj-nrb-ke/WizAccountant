@@ -187,14 +187,26 @@ public sealed class ChatMessageRequest
     public string Message { get; set; } = string.Empty;
 }
 
+public sealed class ChatGridDto
+{
+    public List<string> Columns { get; set; } = new();
+    public List<Dictionary<string, string?>> Rows { get; set; } = new();
+}
+
 public sealed class ChatMessageResponse
 {
     public Guid ConversationId { get; set; }
     public string Reply { get; set; } = string.Empty;
+    /// <summary>Narrative explanation for the right-hand panel.</summary>
+    public string Explanation { get; set; } = string.Empty;
+    /// <summary>Tabular results for the grid (when available).</summary>
+    public ChatGridDto? Grid { get; set; }
     public List<string> ToolsUsed { get; set; } = new();
     public List<string> Citations { get; set; } = new();
     public DateTimeOffset DataAsOfUtc { get; set; }
     public string GuardrailNotice { get; set; } = "Read-only assistant. No posting to Sage.";
+    /// <summary>Changes when chat routing is updated — compare with /health insightChatVersion.</summary>
+    public string InsightChatVersion { get; set; } = string.Empty;
 }
 
 public sealed class ConversationDto

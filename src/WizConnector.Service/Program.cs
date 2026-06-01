@@ -13,6 +13,11 @@ if (sageFromDisk is not null)
         builder.Configuration[key] = value;
 }
 builder.Services.Configure<ConnectorSettings>(builder.Configuration.GetSection("Connector"));
+builder.Services.PostConfigure<ConnectorSettings>(s =>
+{
+    if (string.IsNullOrWhiteSpace(s.DeviceId))
+        s.DeviceId = Environment.MachineName;
+});
 builder.Services.Configure<SageSettings>(builder.Configuration.GetSection("Sage"));
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IStateStore, FileStateStore>();

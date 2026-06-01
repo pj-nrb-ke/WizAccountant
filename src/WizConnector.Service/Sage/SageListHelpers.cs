@@ -27,7 +27,7 @@ internal static class SageListHelpers
         return string.Join(" AND ", parts.Distinct());
     }
 
-    public static string SerializePaged<T>(List<T> allItems, string criteria, Dictionary<string, string> parameters)
+    public static string SerializePaged<T>(List<T> allItems, string criteria, Dictionary<string, string> parameters, string? note = null, decimal? minBalance = null, decimal? minValuation = null)
     {
         var skip = ParseInt(parameters, "skip", 0);
         var top = Math.Clamp(ParseInt(parameters, "top", 100), 1, 500);
@@ -37,11 +37,46 @@ internal static class SageListHelpers
         {
             items = page,
             criteria,
+            minBalance,
+            minValuation,
             total = allItems.Count,
             skip,
             top,
+            note,
             dataAsOfUtc = DateTimeOffset.UtcNow
         });
+    }
+
+    public static decimal? ParseParameterDecimal(Dictionary<string, string> parameters, string key) =>
+        parameters.TryGetValue(key, out var raw) &&
+        decimal.TryParse(raw, System.Globalization.NumberStyles.Any,
+            System.Globalization.CultureInfo.InvariantCulture, out var value)
+            ? value
+            : null;
+
+    public static decimal? ParseRowAmount(DataRow row, params string[] columnNames)
+    {
+        var raw = Col(row, columnNames);
+        if (string.IsNullOrWhiteSpace(raw)) return null;
+        if (decimal.TryParse(raw, System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture, out var v))
+            return v;
+        return decimal.TryParse(raw, System.Globalization.NumberStyles.Any,
+            System.Globalization.CultureInfo.CurrentCulture, out v) ? v : null;
+    }
+
+    public static decimal? TryGetSdkPropertyDecimal(object instance, params string[] propertyNames)
+    {
+        var type = instance.GetType();
+        foreach (var propName in propertyNames)
+        {
+            var prop = type.GetProperty(propName);
+            if (prop?.GetValue(instance) is decimal d) return d;
+            if (prop?.GetValue(instance) is double dbl) return (decimal)dbl;
+            if (prop?.GetValue(instance) is float f) return (decimal)f;
+        }
+
+        return null;
     }
 
     public static List<T> MapRows<T>(DataTable? table, Func<DataRow, T> map)
@@ -71,6 +106,9 @@ internal static class SageListHelpers
 
     private static int ParseInt(Dictionary<string, string> parameters, string key, int defaultValue) =>
         parameters.TryGetValue(key, out var raw) && int.TryParse(raw, out var value) ? Math.Max(0, value) : defaultValue;
+
+    public static int ParseIntParam(Dictionary<string, string> parameters, string key, int defaultValue) =>
+        ParseInt(parameters, key, defaultValue);
 
     private static string EscapeLiteral(string value) => value.Replace("'", "''");
 }

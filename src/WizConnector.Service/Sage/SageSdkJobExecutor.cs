@@ -9,11 +9,14 @@ namespace WizConnector.Service.Sage;
 public sealed class SageSdkJobExecutor(
     ILogger<SageSdkJobExecutor> logger,
     SageSession session,
-    Microsoft.Extensions.Options.IOptions<ConnectorSettings> connectorOptions) : IJobExecutor
+    IOptions<SageSettings> sageSettings,
+    IOptions<ConnectorSettings> connectorOptions) : IJobExecutor
 {
     private readonly IdempotencyStore _idempotency = new();
     private readonly WriteConsentStore _consent = new();
     private readonly ConnectorSettings _connector = connectorOptions.Value;
+    private readonly SageSettings _sage = sageSettings.Value;
+
     public async Task<(string? resultJson, string? error)> ExecuteAsync(
         string operation,
         Dictionary<string, string> parameters,
@@ -33,6 +36,8 @@ public sealed class SageSdkJobExecutor(
 
     private string ExecuteCore(string operation, Dictionary<string, string> parameters)
     {
+        SageSdkPhase2Handlers.Configure(_sage);
+
         var write = SageSdkWriteHandlers.TryExecute(
             operation, parameters, _connector.WritesEnabled, _connector.WriteConsentRequired, _consent, _idempotency);
         if (write is not null) return write;
@@ -72,14 +77,132 @@ public sealed class SageSdkJobExecutor(
     {
         var criteria = SageListHelpers.BuildCriteria(parameters, "DCLink > 0");
         var table = Customer.List(criteria);
-        var items = SageListHelpers.MapRows(table, row => new
+        var minBalance = SageListHelpers.ParseParameterDecimal(parameters, "minBalance");
+        var items = new List<CustomerListItem>();
+
+        if (table is not null)
         {
-            code = SageListHelpers.Col(row, "Account"),
-            name = SageListHelpers.Col(row, "Name"),
-            dclink = SageListHelpers.Col(row, "DCLink")
-        });
-        return SageListHelpers.SerializePaged(items, criteria, parameters);
+            foreach (DataRow row in table.Rows)
+            {
+                var code = SageListHelpers.Col(row, "Account") ?? "";
+                var balance = ParseRowBalance(row);
+                if (!balance.HasValue && !string.IsNullOrWhiteSpace(code))
+                    balance = TryGetCustomerBalance(code);
+
+                items.Add(new CustomerListItem(
+                    code,
+                    SageListHelpers.Col(row, "Name") ?? "",
+                    SageListHelpers.Col(row, "DCLink") ?? "",
+                    balance));
+            }
+        }
+
+        string? note = null;
+        if (minBalance.HasValue)
+        {
+            var withBalance = items.Count(i => i.Balance.HasValue);
+            items = items.Where(i => i.Balance is not null && i.Balance >= minBalance.Value).ToList();
+            note = withBalance == 0
+                ? $"Balance filter >= {minBalance.Value} requested, but Sage did not return balances for customers. Try Customers (AR) → Open items, or check Sage setup."
+                : $"Filtered to {items.Count} customer(s) with balance >= {minBalance.Value} (read {withBalance} balance(s) from Sage).";
+        }
+
+        var dtoItems = items.Select(i => new
+        {
+            code = i.Code,
+            name = i.Name,
+            dclink = i.Dclink,
+            balance = i.Balance
+        }).ToList();
+
+        return SageListHelpers.SerializePaged(dtoItems, criteria, parameters, note, minBalance);
     }
+
+    private static decimal? TryGetCustomerBalance(string code)
+    {
+        try
+        {
+            var customer = new Customer(code);
+            foreach (var propName in new[] { "Balance", "DCBalance", "AccountBalance", "Outstanding", "CreditLimit" })
+            {
+                var prop = typeof(Customer).GetProperty(propName);
+                if (prop?.GetValue(customer) is decimal d) return d;
+                if (prop?.GetValue(customer) is double dbl) return (decimal)dbl;
+                if (prop?.GetValue(customer) is float f) return (decimal)f;
+            }
+        }
+        catch
+        {
+            // Customer code invalid or SDK error — leave balance null.
+        }
+
+        return null;
+    }
+
+    private static decimal? ParseRowBalance(DataRow row) =>
+        SageListHelpers.ParseRowAmount(row, "DCBalance", "Balance", "fAccBal", "AccountBalance", "Outstanding");
+
+    private static string SupplierList(Dictionary<string, string> parameters)
+    {
+        var criteria = SageListHelpers.BuildCriteria(parameters, "DCLink > 0");
+        var table = Supplier.List(criteria);
+        var minBalance = SageListHelpers.ParseParameterDecimal(parameters, "minBalance");
+        var items = new List<SupplierListItem>();
+
+        if (table is not null)
+        {
+            foreach (DataRow row in table.Rows)
+            {
+                var code = SageListHelpers.Col(row, "Account") ?? "";
+                var balance = SageListHelpers.ParseRowAmount(row, "DCBalance", "Balance", "fAccBal", "AccountBalance", "Outstanding");
+                if (!balance.HasValue && !string.IsNullOrWhiteSpace(code))
+                    balance = TryGetSupplierBalance(code);
+
+                items.Add(new SupplierListItem(
+                    code,
+                    SageListHelpers.Col(row, "Name") ?? "",
+                    SageListHelpers.Col(row, "DCLink") ?? "",
+                    balance));
+            }
+        }
+
+        string? note = null;
+        if (minBalance.HasValue)
+        {
+            var withBalance = items.Count(i => i.Balance.HasValue);
+            items = items.Where(i => i.Balance is not null && i.Balance >= minBalance.Value).ToList();
+            note = withBalance == 0
+                ? $"Balance filter >= {minBalance.Value} requested, but Sage did not return supplier balances."
+                : $"Filtered to {items.Count} supplier(s) with balance >= {minBalance.Value} (read {withBalance} balance(s) from Sage).";
+        }
+
+        var dtoItems = items.Select(i => new
+        {
+            code = i.Code,
+            name = i.Name,
+            dclink = i.Dclink,
+            balance = i.Balance
+        }).ToList();
+
+        return SageListHelpers.SerializePaged(dtoItems, criteria, parameters, note, minBalance);
+    }
+
+    private static decimal? TryGetSupplierBalance(string code)
+    {
+        try
+        {
+            var supplier = new Supplier(code);
+            return SageListHelpers.TryGetSdkPropertyDecimal(supplier,
+                "Balance", "DCBalance", "AccountBalance", "Outstanding", "CreditLimit");
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private readonly record struct CustomerListItem(string Code, string Name, string Dclink, decimal? Balance);
+    private readonly record struct SupplierListItem(string Code, string Name, string Dclink, decimal? Balance);
 
     private static string CustomerGet(Dictionary<string, string> parameters)
     {
@@ -109,19 +232,6 @@ public sealed class SageSdkJobExecutor(
             description = SageListHelpers.Col(row, "Description"),
             debit = SageListHelpers.Col(row, "Debit"),
             credit = SageListHelpers.Col(row, "Credit")
-        });
-        return SageListHelpers.SerializePaged(items, criteria, parameters);
-    }
-
-    private static string SupplierList(Dictionary<string, string> parameters)
-    {
-        var criteria = SageListHelpers.BuildCriteria(parameters, "DCLink > 0");
-        var table = Supplier.List(criteria);
-        var items = SageListHelpers.MapRows(table, row => new
-        {
-            code = SageListHelpers.Col(row, "Account"),
-            name = SageListHelpers.Col(row, "Name"),
-            dclink = SageListHelpers.Col(row, "DCLink")
         });
         return SageListHelpers.SerializePaged(items, criteria, parameters);
     }

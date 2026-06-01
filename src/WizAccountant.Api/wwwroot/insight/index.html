@@ -16,6 +16,7 @@
       <label class="inline">Site
         <select id="site-select"><option value="">Loading sites…</option></select>
       </label>
+      <span id="api-version" class="api-version muted">API …</span>
       <a href="/admin/index.html" class="link-btn">Admin</a>
     </div>
   </header>
@@ -24,6 +25,7 @@
     <button type="button" class="tab active" data-tab="dashboard">Dashboard</button>
     <button type="button" class="tab" data-tab="ar">Customers (AR)</button>
     <button type="button" class="tab" data-tab="ap">Suppliers (AP)</button>
+    <button type="button" class="tab" data-tab="inventory">Inventory</button>
     <button type="button" class="tab" data-tab="search">Search</button>
     <button type="button" class="tab" data-tab="chat">AI Assistant</button>
   </nav>
@@ -56,7 +58,18 @@
         <button type="button" class="secondary" id="export-ap">Export CSV</button>
       </div>
       <label>Account filter <input id="ap-account" placeholder="optional" /></label>
+      <label>Min balance filter <input id="ap-min-balance" placeholder="e.g. 100000 (leave empty for all)" /></label>
       <pre id="ap-out" class="output muted"></pre>
+    </section>
+
+    <section id="panel-inventory" class="panel card">
+      <h2>Inventory</h2>
+      <div class="button-row">
+        <button type="button" data-op="inventoryitem.list">All items</button>
+        <button type="button" class="secondary" id="export-inventory">Export CSV</button>
+      </div>
+      <label>Min valuation filter <input id="inv-min-valuation" placeholder="e.g. 50000 (leave empty for all)" /></label>
+      <pre id="inventory-out" class="output muted"></pre>
     </section>
 
     <section id="panel-search" class="panel card">
@@ -68,14 +81,37 @@
       <pre id="search-out" class="output muted"></pre>
     </section>
 
-    <section id="panel-chat" class="panel card">
+    <section id="panel-chat" class="panel card assistant-panel">
       <h2>AI assistant <span class="badge">read-only</span></h2>
-      <p class="muted small">Uses allowlisted Sage read tools only. Try: “show dashboard”, “list customers”, “open items”, “search CASH”.</p>
-      <div id="chat-log" class="chat-log"></div>
-      <form id="chat-form" class="search-row">
-        <input name="message" placeholder="Ask about customers, suppliers, open items…" required autocomplete="off" />
-        <button type="submit" class="primary">Send</button>
+      <p class="muted small">Type or use the microphone, then <strong>Run query</strong>. Results appear in the grid; the explanation panel summarizes what Sage returned.</p>
+
+      <form id="chat-form" class="assistant-query-form">
+        <label class="sr-only" for="chat-query">Your question</label>
+        <textarea id="chat-query" name="message" rows="3" placeholder="e.g. which customer has highest unpaid invoices, or is inventory valuation matching balance sheet stock value" required autocomplete="off"></textarea>
+        <div class="assistant-query-actions">
+          <button type="button" id="chat-mic" class="secondary" title="Speak your question (Chrome / Edge)">🎤 Mic</button>
+          <button type="submit" id="chat-run" class="primary">Run query</button>
+        </div>
+        <p id="chat-mic-status" class="muted small" aria-live="polite"></p>
       </form>
+
+      <div class="assistant-workspace">
+        <div class="assistant-grid-pane">
+          <h3 class="assistant-pane-title">Query results</h3>
+          <div class="assistant-grid-wrap">
+            <table id="chat-grid" class="assistant-grid hidden">
+              <thead id="chat-grid-head"></thead>
+              <tbody id="chat-grid-body"></tbody>
+            </table>
+          </div>
+          <p id="chat-grid-meta" class="muted small"></p>
+          <p id="chat-grid-empty" class="muted small">No results yet — enter a question above.</p>
+        </div>
+        <div class="assistant-explain-pane">
+          <h3 class="assistant-pane-title">Explanation</h3>
+          <textarea id="chat-explanation" class="assistant-explanation" readonly placeholder="Explanation of the query and Sage read will appear here after you run a query."></textarea>
+        </div>
+      </div>
     </section>
   </main>
 

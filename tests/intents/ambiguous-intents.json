@@ -1,0 +1,46 @@
+[
+  { "id": "amb-most-customers-unpaid", "query": "Which customers have the most unpaid invoices?", "expectedIntent": "Ranking", "expectedDomain": "AccountsReceivable", "minConfidence": 0.65, "preferredOperation": "customer.unpaid.summary" },
+  { "id": "amb-most-suppliers-owed", "query": "Suppliers we owe the most money to", "expectedIntent": "Ranking", "expectedDomain": "AccountsPayable", "minConfidence": 0.6 },
+  { "id": "amb-most-discounts", "query": "Most discounted sales invoices in 2025", "expectedIntent": "Ranking", "expectedDomain": "AccountsReceivable", "minConfidence": 0.55 },
+  { "id": "amb-most-stock-value", "query": "Items with the most stock value", "expectedIntent": "Ranking", "expectedDomain": "Inventory", "minConfidence": 0.65 },
+  { "id": "amb-most-not-count", "query": "How many customers have the most open items", "expectedIntent": "Aggregation", "expectedDomain": "AccountsReceivable", "minConfidence": 0.5 },
+
+  { "id": "amb-howmuch-outstanding", "query": "How much outstanding do customers owe in total?", "expectedIntent": "Aggregation", "expectedDomain": "AccountsReceivable", "minConfidence": 0.7 },
+  { "id": "amb-howmuch-sales", "query": "How much sales revenue in March 2026?", "expectedIntent": "Aggregation", "minConfidence": 0.7 },
+  { "id": "amb-howmuch-supplier", "query": "How much do we owe suppliers overall?", "expectedIntent": "Aggregation", "expectedDomain": "AccountsPayable", "minConfidence": 0.7 },
+  { "id": "amb-howmuch-valuation", "query": "How much is our inventory valuation?", "expectedIntent": "Aggregation", "expectedDomain": "Inventory", "minConfidence": 0.7 },
+
+  { "id": "amb-which-highest-customer", "query": "Which customer has the highest balance?", "expectedIntent": "Ranking", "expectedDomain": "AccountsReceivable", "minConfidence": 0.65, "preferredOperation": "customer.unpaid.summary" },
+  { "id": "amb-which-oldest-supplier", "query": "Which supplier has the oldest unpaid bill?", "expectedIntent": "Ranking", "expectedDomain": "AccountsPayable", "minConfidence": 0.65 },
+  { "id": "amb-which-list-invoices", "query": "Which invoices are still open — show me the list", "expectedIntent": "Listing", "expectedDomain": "AccountsReceivable", "minConfidence": 0.6 },
+  { "id": "amb-which-display-gl", "query": "Which GL accounts — display them", "expectedIntent": "Listing", "expectedDomain": "GeneralLedger", "minConfidence": 0.6 },
+
+  { "id": "amb-oldest-credit-ar", "query": "Customers with oldest credit balance on AR", "expectedIntent": "Ranking", "expectedDomain": "AccountsReceivable", "minConfidence": 0.75, "preferredOperation": "customer.credit.balances" },
+  { "id": "amb-oldest-credit-ap", "query": "Oldest credit balance by supplier", "expectedIntent": "Ranking", "expectedDomain": "AccountsPayable", "minConfidence": 0.75 },
+  { "id": "amb-oldest-debit-aged", "query": "Oldest aged debit balances for debtors", "expectedIntent": "Ranking", "expectedDomain": "AccountsReceivable", "minConfidence": 0.75, "preferredOperation": "customer.aged.top" },
+
+  { "id": "amb-inv-neg-bs-1", "query": "Negative stock values on the balance sheet", "expectedIntent": "Listing", "expectedDomain": "Inventory", "minConfidence": 0.75, "preferredOperation": "inventory.bs.negative_ledgers" },
+  { "id": "amb-inv-neg-bs-2", "query": "Why is inventory negative on the balance sheet?", "expectedIntent": "Listing", "expectedDomain": "Inventory", "minConfidence": 0.7, "preferredOperation": "inventory.bs.negative_ledgers" },
+  { "id": "amb-inv-neg-bs-3", "query": "Stock accounts with credit balance on balance sheet", "expectedIntent": "Listing", "expectedDomain": "Inventory", "minConfidence": 0.7, "preferredOperation": "inventory.bs.negative_ledgers" },
+
+  { "id": "amb-ar-credit-limit", "query": "Customers over credit limit with aged balance", "expectedIntent": "Ranking", "expectedDomain": "AccountsReceivable", "minConfidence": 0.5 },
+  { "id": "amb-ar-debtors-overdue", "query": "Debtors with invoices overdue 90 days", "expectedIntent": "Ranking", "expectedDomain": "AccountsReceivable", "minConfidence": 0.5 },
+  { "id": "amb-ap-creditor-payments", "query": "Creditors awaiting payment this week", "expectedIntent": "Listing", "expectedDomain": "AccountsPayable", "minConfidence": 0.5 },
+
+  { "id": "amb-inv-warehouse", "query": "Warehouse stock valuation by item", "expectedIntent": "Listing", "expectedDomain": "Inventory", "minConfidence": 0.5 },
+  { "id": "amb-inv-recon", "query": "Does stock valuation match the balance sheet?", "expectedIntent": "Reconciliation", "expectedDomain": "Inventory", "minConfidence": 0.7, "preferredOperation": "inventory.gl.reconcile" },
+
+  { "id": "amb-gl-tb", "query": "Trial balance for period 3", "expectedIntent": "Listing", "expectedDomain": "GeneralLedger", "minConfidence": 0.5 },
+  { "id": "amb-gl-journal", "query": "List journal entries for April", "expectedIntent": "Listing", "expectedDomain": "GeneralLedger", "minConfidence": 0.65 },
+
+  { "id": "amb-audit-dup", "query": "Suspicious duplicate journal entries", "expectedIntent": "Audit", "minConfidence": 0.7, "preferredOperation": "gl.journal.duplicate" },
+  { "id": "amb-audit-reversed", "query": "Reversed manual postings last month", "expectedIntent": "Audit", "minConfidence": 0.7, "routeKind": "MegaDigestFallback" },
+  { "id": "amb-audit-backdated", "query": "Backdated GL journals in 2026", "expectedIntent": "Audit", "minConfidence": 0.7, "preferredOperation": "gl.transaction.backdated" },
+  { "id": "amb-audit-manual", "query": "Manual post transactions that look fraudulent", "expectedIntent": "Audit", "minConfidence": 0.65, "preferredOperation": "gl.journal.manual" },
+
+  { "id": "amb-rank-top10-items", "query": "Top 10 stock items by valuation", "expectedIntent": "Ranking", "expectedDomain": "Inventory", "minConfidence": 0.75, "maxRows": 10 },
+  { "id": "amb-rank-lowest-customer", "query": "Lowest owing customer balances", "expectedIntent": "Ranking", "expectedDomain": "AccountsReceivable", "minConfidence": 0.7 },
+  { "id": "amb-agg-count-invoices", "query": "Count of open sales invoices", "expectedIntent": "Aggregation", "expectedDomain": "AccountsReceivable", "minConfidence": 0.75 },
+  { "id": "amb-list-unpaid-2", "query": "List all unpaid customer invoices", "expectedIntent": "Listing", "expectedDomain": "AccountsReceivable", "minConfidence": 0.65, "preferredOperation": "customer.openitems" },
+  { "id": "amb-fix-inv", "query": "Please fix inventory vs GL mismatch", "expectedIntent": "Datafix", "expectedDomain": "Inventory", "minConfidence": 0.7 }
+]

@@ -34,7 +34,7 @@ def auto_width(ws):
 
 
 def sheet_data(wb, name, rows, headers):
-    ws = wb.create_worksheet(name[:31])
+    ws = wb.create_sheet(name[:31])
     ws.append(headers)
     style_header(ws[1])
     for r in rows:

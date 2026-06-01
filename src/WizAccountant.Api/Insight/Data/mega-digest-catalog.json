@@ -1,0 +1,2507 @@
+﻿{
+    "entries":  [
+                    {
+                        "id":  1,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Top 10 customers with oldest aged debit balances"
+                    },
+                    {
+                        "id":  2,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers have credit balances?"
+                    },
+                    {
+                        "id":  3,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customer has the highest outstanding balance?"
+                    },
+                    {
+                        "id":  4,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Show overdue invoices above 180 days"
+                    },
+                    {
+                        "id":  5,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which invoices are partially paid?"
+                    },
+                    {
+                        "id":  6,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers stopped buying in last 6 months?"
+                    },
+                    {
+                        "id":  7,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers exceeded credit limits?"
+                    },
+                    {
+                        "id":  8,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which invoices are disputed?"
+                    },
+                    {
+                        "id":  9,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers pay late consistently?"
+                    },
+                    {
+                        "id":  10,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which invoices are unallocated?"
+                    },
+                    {
+                        "id":  11,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers have bounced cheques?"
+                    },
+                    {
+                        "id":  12,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Show customers by payment behavior"
+                    },
+                    {
+                        "id":  13,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers have highest sales returns?"
+                    },
+                    {
+                        "id":  14,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers generate highest GP?"
+                    },
+                    {
+                        "id":  15,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers buy only once?"
+                    },
+                    {
+                        "id":  16,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers are inactive?"
+                    },
+                    {
+                        "id":  17,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers have duplicate invoices?"
+                    },
+                    {
+                        "id":  18,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Show average collection days per customer"
+                    },
+                    {
+                        "id":  19,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers pay cash only?"
+                    },
+                    {
+                        "id":  20,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers have abnormal discounts?"
+                    },
+                    {
+                        "id":  21,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers contribute 80% of revenue?"
+                    },
+                    {
+                        "id":  22,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Show customer aging summary by branch"
+                    },
+                    {
+                        "id":  23,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which customers exceeded payment terms?"
+                    },
+                    {
+                        "id":  24,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Which invoices are nearing due date?"
+                    },
+                    {
+                        "id":  25,
+                        "domain":  "Accounts Receivable (AR)",
+                        "title":  "Show customers with no contact activity"
+                    },
+                    {
+                        "id":  26,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers have oldest unpaid balances?"
+                    },
+                    {
+                        "id":  27,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which supplier has highest balance outstanding?"
+                    },
+                    {
+                        "id":  28,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers have credit balances?"
+                    },
+                    {
+                        "id":  29,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which supplier invoices are overdue?"
+                    },
+                    {
+                        "id":  30,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers were paid twice?"
+                    },
+                    {
+                        "id":  31,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which supplier invoices are duplicated?"
+                    },
+                    {
+                        "id":  32,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers have not been paid in 90 days?"
+                    },
+                    {
+                        "id":  33,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which supplier transactions were manually journaled?"
+                    },
+                    {
+                        "id":  34,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers have abnormal purchases?"
+                    },
+                    {
+                        "id":  35,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers offer best payment terms?"
+                    },
+                    {
+                        "id":  36,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers have pending GRNs?"
+                    },
+                    {
+                        "id":  37,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers have disputes?"
+                    },
+                    {
+                        "id":  38,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers received highest payments this month?"
+                    },
+                    {
+                        "id":  39,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Show suppliers by average payment delay"
+                    },
+                    {
+                        "id":  40,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers are inactive?"
+                    },
+                    {
+                        "id":  41,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers were created recently?"
+                    },
+                    {
+                        "id":  42,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers have tax discrepancies?"
+                    },
+                    {
+                        "id":  43,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers have highest discounts?"
+                    },
+                    {
+                        "id":  44,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which supplier accounts changed unexpectedly?"
+                    },
+                    {
+                        "id":  45,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which supplier balances disagree with AP aging?"
+                    },
+                    {
+                        "id":  46,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers are overpaid?"
+                    },
+                    {
+                        "id":  47,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers have unallocated credits?"
+                    },
+                    {
+                        "id":  48,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers are frequently adjusted?"
+                    },
+                    {
+                        "id":  49,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which suppliers were paid after due date?"
+                    },
+                    {
+                        "id":  50,
+                        "domain":  "Accounts Payable (AP)",
+                        "title":  "Which supplier invoices were backdated?"
+                    },
+                    {
+                        "id":  51,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Is inventory valuation matching balance sheet stock value?"
+                    },
+                    {
+                        "id":  52,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which inventory GL accounts have negative balances?"
+                    },
+                    {
+                        "id":  53,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Top 20 slow moving items"
+                    },
+                    {
+                        "id":  54,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have not moved in 12 months?"
+                    },
+                    {
+                        "id":  55,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have negative stock quantities?"
+                    },
+                    {
+                        "id":  56,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have negative stock valuation?"
+                    },
+                    {
+                        "id":  57,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which warehouse holds highest stock value?"
+                    },
+                    {
+                        "id":  58,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which stock items generate highest sales?"
+                    },
+                    {
+                        "id":  59,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items were sold below cost?"
+                    },
+                    {
+                        "id":  60,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have abnormal GP margins?"
+                    },
+                    {
+                        "id":  61,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items are overstocked?"
+                    },
+                    {
+                        "id":  62,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items require replenishment?"
+                    },
+                    {
+                        "id":  63,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items are nearing expiry?"
+                    },
+                    {
+                        "id":  64,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which warehouses have stock discrepancies?"
+                    },
+                    {
+                        "id":  65,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have zero cost?"
+                    },
+                    {
+                        "id":  66,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have duplicate barcodes?"
+                    },
+                    {
+                        "id":  67,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items are inactive?"
+                    },
+                    {
+                        "id":  68,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items were transferred most frequently?"
+                    },
+                    {
+                        "id":  69,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have abnormal valuation changes?"
+                    },
+                    {
+                        "id":  70,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items were adjusted manually?"
+                    },
+                    {
+                        "id":  71,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have serial number conflicts?"
+                    },
+                    {
+                        "id":  72,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items are fast moving?"
+                    },
+                    {
+                        "id":  73,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have highest returns?"
+                    },
+                    {
+                        "id":  74,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have no sales history?"
+                    },
+                    {
+                        "id":  75,
+                        "domain":  "Inventory / Stock",
+                        "title":  "Which items have highest shrinkage?"
+                    },
+                    {
+                        "id":  76,
+                        "domain":  "Sales",
+                        "title":  "Which invoices have highest discounts?"
+                    },
+                    {
+                        "id":  77,
+                        "domain":  "Sales",
+                        "title":  "Which sales rep generated highest sales this month?"
+                    },
+                    {
+                        "id":  78,
+                        "domain":  "Sales",
+                        "title":  "Which customers contributed highest revenue?"
+                    },
+                    {
+                        "id":  79,
+                        "domain":  "Sales",
+                        "title":  "Which invoices were reversed?"
+                    },
+                    {
+                        "id":  80,
+                        "domain":  "Sales",
+                        "title":  "Which sales transactions were backdated?"
+                    },
+                    {
+                        "id":  81,
+                        "domain":  "Sales",
+                        "title":  "Which branches generated highest sales?"
+                    },
+                    {
+                        "id":  82,
+                        "domain":  "Sales",
+                        "title":  "Which products have highest GP?"
+                    },
+                    {
+                        "id":  83,
+                        "domain":  "Sales",
+                        "title":  "Which sales reps underperformed?"
+                    },
+                    {
+                        "id":  84,
+                        "domain":  "Sales",
+                        "title":  "Which invoices exceed approval threshold?"
+                    },
+                    {
+                        "id":  85,
+                        "domain":  "Sales",
+                        "title":  "Which invoices were manually edited?"
+                    },
+                    {
+                        "id":  86,
+                        "domain":  "Sales",
+                        "title":  "Which invoices have freight charges?"
+                    },
+                    {
+                        "id":  87,
+                        "domain":  "Sales",
+                        "title":  "Which quotations were never converted?"
+                    },
+                    {
+                        "id":  88,
+                        "domain":  "Sales",
+                        "title":  "Which customers buy seasonally?"
+                    },
+                    {
+                        "id":  89,
+                        "domain":  "Sales",
+                        "title":  "Which sales days are busiest?"
+                    },
+                    {
+                        "id":  90,
+                        "domain":  "Sales",
+                        "title":  "Which sales transactions were voided?"
+                    },
+                    {
+                        "id":  91,
+                        "domain":  "Sales",
+                        "title":  "Which invoices have pricing anomalies?"
+                    },
+                    {
+                        "id":  92,
+                        "domain":  "Sales",
+                        "title":  "Which invoices were posted after midnight?"
+                    },
+                    {
+                        "id":  93,
+                        "domain":  "Sales",
+                        "title":  "Which sales orders remain open?"
+                    },
+                    {
+                        "id":  94,
+                        "domain":  "Sales",
+                        "title":  "Which customers buy most frequently?"
+                    },
+                    {
+                        "id":  95,
+                        "domain":  "Sales",
+                        "title":  "Which reps gave highest discounts?"
+                    },
+                    {
+                        "id":  96,
+                        "domain":  "Sales",
+                        "title":  "Which invoices contain free items?"
+                    },
+                    {
+                        "id":  97,
+                        "domain":  "Sales",
+                        "title":  "Which invoices were changed after posting?"
+                    },
+                    {
+                        "id":  98,
+                        "domain":  "Sales",
+                        "title":  "Which customers shifted buying trends?"
+                    },
+                    {
+                        "id":  99,
+                        "domain":  "Sales",
+                        "title":  "Which invoices have unusual tax values?"
+                    },
+                    {
+                        "id":  100,
+                        "domain":  "Sales",
+                        "title":  "Which items dominate sales volume?"
+                    },
+                    {
+                        "id":  101,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which BOM components drive production cost increases?"
+                    },
+                    {
+                        "id":  102,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which manufacturing batches have abnormal variances?"
+                    },
+                    {
+                        "id":  103,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which WIP accounts have high balances?"
+                    },
+                    {
+                        "id":  104,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which BOM items use DSTK?"
+                    },
+                    {
+                        "id":  105,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which manufactured items have highest production cost?"
+                    },
+                    {
+                        "id":  106,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which BOMs have inactive components?"
+                    },
+                    {
+                        "id":  107,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which BOMs use obsolete items?"
+                    },
+                    {
+                        "id":  108,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which production runs exceeded expected cost?"
+                    },
+                    {
+                        "id":  109,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which manufactured items were produced below standard yield?"
+                    },
+                    {
+                        "id":  110,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which BOMs changed recently?"
+                    },
+                    {
+                        "id":  111,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which WIP balances are stagnant?"
+                    },
+                    {
+                        "id":  112,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which production users posted highest adjustments?"
+                    },
+                    {
+                        "id":  113,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which production jobs are incomplete?"
+                    },
+                    {
+                        "id":  114,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which BOM items have missing mappings?"
+                    },
+                    {
+                        "id":  115,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which BOMs use non-stock items?"
+                    },
+                    {
+                        "id":  116,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which manufacturing batches failed QC?"
+                    },
+                    {
+                        "id":  117,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which production runs generated scrap?"
+                    },
+                    {
+                        "id":  118,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which BOMs have duplicate components?"
+                    },
+                    {
+                        "id":  119,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which items consume most raw materials?"
+                    },
+                    {
+                        "id":  120,
+                        "domain":  "Manufacturing / BOM",
+                        "title":  "Which production lines are least efficient?"
+                    },
+                    {
+                        "id":  121,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which GL accounts have unusual balances?"
+                    },
+                    {
+                        "id":  122,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which journals were posted manually?"
+                    },
+                    {
+                        "id":  123,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which GL transactions were posted after period close?"
+                    },
+                    {
+                        "id":  124,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which users posted highest transaction values?"
+                    },
+                    {
+                        "id":  125,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which GL accounts changed significantly month-over-month?"
+                    },
+                    {
+                        "id":  126,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which accounts have no activity?"
+                    },
+                    {
+                        "id":  127,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which accounts have suspicious round values?"
+                    },
+                    {
+                        "id":  128,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which journals were reversed?"
+                    },
+                    {
+                        "id":  129,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which accounts exceed budget?"
+                    },
+                    {
+                        "id":  130,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which GL postings are duplicated?"
+                    },
+                    {
+                        "id":  131,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which accounts have negative balances unexpectedly?"
+                    },
+                    {
+                        "id":  132,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which users post most journals?"
+                    },
+                    {
+                        "id":  133,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which accounts changed after audit?"
+                    },
+                    {
+                        "id":  134,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which journals were backdated?"
+                    },
+                    {
+                        "id":  135,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which accounts are inactive?"
+                    },
+                    {
+                        "id":  136,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which GL balances mismatch subledgers?"
+                    },
+                    {
+                        "id":  137,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which periods contain unusual postings?"
+                    },
+                    {
+                        "id":  138,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which accounts had largest adjustments?"
+                    },
+                    {
+                        "id":  139,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which journals were posted outside working hours?"
+                    },
+                    {
+                        "id":  140,
+                        "domain":  "General Ledger (GL)",
+                        "title":  "Which projects generated highest expenses?"
+                    },
+                    {
+                        "id":  141,
+                        "domain":  "Fixed Assets",
+                        "title":  "Is depreciation matching fixed asset batch values?"
+                    },
+                    {
+                        "id":  142,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets are fully depreciated but still active?"
+                    },
+                    {
+                        "id":  143,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets were added this year?"
+                    },
+                    {
+                        "id":  144,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets were disposed recently?"
+                    },
+                    {
+                        "id":  145,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets have no depreciation?"
+                    },
+                    {
+                        "id":  146,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets changed category?"
+                    },
+                    {
+                        "id":  147,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets have abnormal NBV?"
+                    },
+                    {
+                        "id":  148,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets are idle?"
+                    },
+                    {
+                        "id":  149,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets have duplicate serial numbers?"
+                    },
+                    {
+                        "id":  150,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets were transferred between departments?"
+                    },
+                    {
+                        "id":  151,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets exceed useful life?"
+                    },
+                    {
+                        "id":  152,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which asset classes generate highest depreciation?"
+                    },
+                    {
+                        "id":  153,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets were manually adjusted?"
+                    },
+                    {
+                        "id":  154,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets have insurance expiring?"
+                    },
+                    {
+                        "id":  155,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets are not tagged?"
+                    },
+                    {
+                        "id":  156,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets have maintenance overdue?"
+                    },
+                    {
+                        "id":  157,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets were impaired?"
+                    },
+                    {
+                        "id":  158,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets have location mismatches?"
+                    },
+                    {
+                        "id":  159,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which assets were revalued?"
+                    },
+                    {
+                        "id":  160,
+                        "domain":  "Fixed Assets",
+                        "title":  "Which users changed asset values?"
+                    },
+                    {
+                        "id":  161,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which users are posting suspiciously high adjustments?"
+                    },
+                    {
+                        "id":  162,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which transactions were deleted unusually?"
+                    },
+                    {
+                        "id":  163,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which users frequently reverse journals?"
+                    },
+                    {
+                        "id":  164,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which invoices were changed after approval?"
+                    },
+                    {
+                        "id":  165,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which users login outside office hours?"
+                    },
+                    {
+                        "id":  166,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which transactions bypassed approval workflow?"
+                    },
+                    {
+                        "id":  167,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which users created suppliers and paid them same day?"
+                    },
+                    {
+                        "id":  168,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which journals contain round suspicious values?"
+                    },
+                    {
+                        "id":  169,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which customers received abnormal discounts?"
+                    },
+                    {
+                        "id":  170,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which users posted after midnight?"
+                    },
+                    {
+                        "id":  171,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which transactions were modified multiple times?"
+                    },
+                    {
+                        "id":  172,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which branches show unusual stock losses?"
+                    },
+                    {
+                        "id":  173,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which items were frequently adjusted manually?"
+                    },
+                    {
+                        "id":  174,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which users have highest void rates?"
+                    },
+                    {
+                        "id":  175,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which invoices were cancelled repeatedly?"
+                    },
+                    {
+                        "id":  176,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which payments were split unusually?"
+                    },
+                    {
+                        "id":  177,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which transactions have missing references?"
+                    },
+                    {
+                        "id":  178,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which users posted transactions from multiple locations?"
+                    },
+                    {
+                        "id":  179,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which journals lack supporting documents?"
+                    },
+                    {
+                        "id":  180,
+                        "domain":  "Audit / Fraud / Control",
+                        "title":  "Which stock adjustments exceed tolerance?"
+                    },
+                    {
+                        "id":  181,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 customers by value"
+                    },
+                    {
+                        "id":  182,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 suppliers by value"
+                    },
+                    {
+                        "id":  183,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 stock items by value"
+                    },
+                    {
+                        "id":  184,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 GL accounts by value"
+                    },
+                    {
+                        "id":  185,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 warehouses by value"
+                    },
+                    {
+                        "id":  186,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 sales reps by value"
+                    },
+                    {
+                        "id":  187,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 invoices by value"
+                    },
+                    {
+                        "id":  188,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 payments by value"
+                    },
+                    {
+                        "id":  189,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 journals by value"
+                    },
+                    {
+                        "id":  190,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 BOMs by value"
+                    },
+                    {
+                        "id":  191,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 production batches by value"
+                    },
+                    {
+                        "id":  192,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 fixed assets by value"
+                    },
+                    {
+                        "id":  193,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 projects by value"
+                    },
+                    {
+                        "id":  194,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 branches by value"
+                    },
+                    {
+                        "id":  195,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 inventory valuations by value"
+                    },
+                    {
+                        "id":  196,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 cost centers by value"
+                    },
+                    {
+                        "id":  197,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 discounts by value"
+                    },
+                    {
+                        "id":  198,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 tax postings by value"
+                    },
+                    {
+                        "id":  199,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 adjustments by value"
+                    },
+                    {
+                        "id":  200,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 transactions by value"
+                    },
+                    {
+                        "id":  201,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers increased significantly this month?"
+                    },
+                    {
+                        "id":  202,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers increased significantly this month?"
+                    },
+                    {
+                        "id":  203,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items increased significantly this month?"
+                    },
+                    {
+                        "id":  204,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts increased significantly this month?"
+                    },
+                    {
+                        "id":  205,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses increased significantly this month?"
+                    },
+                    {
+                        "id":  206,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps increased significantly this month?"
+                    },
+                    {
+                        "id":  207,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices increased significantly this month?"
+                    },
+                    {
+                        "id":  208,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments increased significantly this month?"
+                    },
+                    {
+                        "id":  209,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals increased significantly this month?"
+                    },
+                    {
+                        "id":  210,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs increased significantly this month?"
+                    },
+                    {
+                        "id":  211,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches increased significantly this month?"
+                    },
+                    {
+                        "id":  212,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets increased significantly this month?"
+                    },
+                    {
+                        "id":  213,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects increased significantly this month?"
+                    },
+                    {
+                        "id":  214,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches increased significantly this month?"
+                    },
+                    {
+                        "id":  215,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations increased significantly this month?"
+                    },
+                    {
+                        "id":  216,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers increased significantly this month?"
+                    },
+                    {
+                        "id":  217,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts increased significantly this month?"
+                    },
+                    {
+                        "id":  218,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings increased significantly this month?"
+                    },
+                    {
+                        "id":  219,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments increased significantly this month?"
+                    },
+                    {
+                        "id":  220,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions increased significantly this month?"
+                    },
+                    {
+                        "id":  221,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers decreased significantly this month?"
+                    },
+                    {
+                        "id":  222,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers decreased significantly this month?"
+                    },
+                    {
+                        "id":  223,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items decreased significantly this month?"
+                    },
+                    {
+                        "id":  224,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts decreased significantly this month?"
+                    },
+                    {
+                        "id":  225,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses decreased significantly this month?"
+                    },
+                    {
+                        "id":  226,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps decreased significantly this month?"
+                    },
+                    {
+                        "id":  227,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices decreased significantly this month?"
+                    },
+                    {
+                        "id":  228,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments decreased significantly this month?"
+                    },
+                    {
+                        "id":  229,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals decreased significantly this month?"
+                    },
+                    {
+                        "id":  230,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs decreased significantly this month?"
+                    },
+                    {
+                        "id":  231,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches decreased significantly this month?"
+                    },
+                    {
+                        "id":  232,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets decreased significantly this month?"
+                    },
+                    {
+                        "id":  233,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects decreased significantly this month?"
+                    },
+                    {
+                        "id":  234,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches decreased significantly this month?"
+                    },
+                    {
+                        "id":  235,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations decreased significantly this month?"
+                    },
+                    {
+                        "id":  236,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers decreased significantly this month?"
+                    },
+                    {
+                        "id":  237,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts decreased significantly this month?"
+                    },
+                    {
+                        "id":  238,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings decreased significantly this month?"
+                    },
+                    {
+                        "id":  239,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments decreased significantly this month?"
+                    },
+                    {
+                        "id":  240,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions decreased significantly this month?"
+                    },
+                    {
+                        "id":  241,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers have abnormal trends?"
+                    },
+                    {
+                        "id":  242,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers have abnormal trends?"
+                    },
+                    {
+                        "id":  243,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items have abnormal trends?"
+                    },
+                    {
+                        "id":  244,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts have abnormal trends?"
+                    },
+                    {
+                        "id":  245,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses have abnormal trends?"
+                    },
+                    {
+                        "id":  246,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps have abnormal trends?"
+                    },
+                    {
+                        "id":  247,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices have abnormal trends?"
+                    },
+                    {
+                        "id":  248,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments have abnormal trends?"
+                    },
+                    {
+                        "id":  249,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals have abnormal trends?"
+                    },
+                    {
+                        "id":  250,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs have abnormal trends?"
+                    },
+                    {
+                        "id":  251,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches have abnormal trends?"
+                    },
+                    {
+                        "id":  252,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets have abnormal trends?"
+                    },
+                    {
+                        "id":  253,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects have abnormal trends?"
+                    },
+                    {
+                        "id":  254,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches have abnormal trends?"
+                    },
+                    {
+                        "id":  255,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations have abnormal trends?"
+                    },
+                    {
+                        "id":  256,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers have abnormal trends?"
+                    },
+                    {
+                        "id":  257,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts have abnormal trends?"
+                    },
+                    {
+                        "id":  258,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings have abnormal trends?"
+                    },
+                    {
+                        "id":  259,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments have abnormal trends?"
+                    },
+                    {
+                        "id":  260,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions have abnormal trends?"
+                    },
+                    {
+                        "id":  261,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers were modified manually?"
+                    },
+                    {
+                        "id":  262,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers were modified manually?"
+                    },
+                    {
+                        "id":  263,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items were modified manually?"
+                    },
+                    {
+                        "id":  264,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts were modified manually?"
+                    },
+                    {
+                        "id":  265,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses were modified manually?"
+                    },
+                    {
+                        "id":  266,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps were modified manually?"
+                    },
+                    {
+                        "id":  267,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices were modified manually?"
+                    },
+                    {
+                        "id":  268,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments were modified manually?"
+                    },
+                    {
+                        "id":  269,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals were modified manually?"
+                    },
+                    {
+                        "id":  270,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs were modified manually?"
+                    },
+                    {
+                        "id":  271,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches were modified manually?"
+                    },
+                    {
+                        "id":  272,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets were modified manually?"
+                    },
+                    {
+                        "id":  273,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects were modified manually?"
+                    },
+                    {
+                        "id":  274,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches were modified manually?"
+                    },
+                    {
+                        "id":  275,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations were modified manually?"
+                    },
+                    {
+                        "id":  276,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers were modified manually?"
+                    },
+                    {
+                        "id":  277,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts were modified manually?"
+                    },
+                    {
+                        "id":  278,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings were modified manually?"
+                    },
+                    {
+                        "id":  279,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments were modified manually?"
+                    },
+                    {
+                        "id":  280,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions were modified manually?"
+                    },
+                    {
+                        "id":  281,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers were created recently?"
+                    },
+                    {
+                        "id":  282,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers were created recently?"
+                    },
+                    {
+                        "id":  283,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items were created recently?"
+                    },
+                    {
+                        "id":  284,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts were created recently?"
+                    },
+                    {
+                        "id":  285,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses were created recently?"
+                    },
+                    {
+                        "id":  286,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps were created recently?"
+                    },
+                    {
+                        "id":  287,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices were created recently?"
+                    },
+                    {
+                        "id":  288,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments were created recently?"
+                    },
+                    {
+                        "id":  289,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals were created recently?"
+                    },
+                    {
+                        "id":  290,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs were created recently?"
+                    },
+                    {
+                        "id":  291,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches were created recently?"
+                    },
+                    {
+                        "id":  292,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets were created recently?"
+                    },
+                    {
+                        "id":  293,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects were created recently?"
+                    },
+                    {
+                        "id":  294,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches were created recently?"
+                    },
+                    {
+                        "id":  295,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations were created recently?"
+                    },
+                    {
+                        "id":  296,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers were created recently?"
+                    },
+                    {
+                        "id":  297,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts were created recently?"
+                    },
+                    {
+                        "id":  298,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings were created recently?"
+                    },
+                    {
+                        "id":  299,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments were created recently?"
+                    },
+                    {
+                        "id":  300,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions were created recently?"
+                    },
+                    {
+                        "id":  301,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers have no activity?"
+                    },
+                    {
+                        "id":  302,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers have no activity?"
+                    },
+                    {
+                        "id":  303,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items have no activity?"
+                    },
+                    {
+                        "id":  304,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts have no activity?"
+                    },
+                    {
+                        "id":  305,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses have no activity?"
+                    },
+                    {
+                        "id":  306,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps have no activity?"
+                    },
+                    {
+                        "id":  307,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices have no activity?"
+                    },
+                    {
+                        "id":  308,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments have no activity?"
+                    },
+                    {
+                        "id":  309,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals have no activity?"
+                    },
+                    {
+                        "id":  310,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs have no activity?"
+                    },
+                    {
+                        "id":  311,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches have no activity?"
+                    },
+                    {
+                        "id":  312,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets have no activity?"
+                    },
+                    {
+                        "id":  313,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects have no activity?"
+                    },
+                    {
+                        "id":  314,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches have no activity?"
+                    },
+                    {
+                        "id":  315,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations have no activity?"
+                    },
+                    {
+                        "id":  316,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers have no activity?"
+                    },
+                    {
+                        "id":  317,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts have no activity?"
+                    },
+                    {
+                        "id":  318,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings have no activity?"
+                    },
+                    {
+                        "id":  319,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments have no activity?"
+                    },
+                    {
+                        "id":  320,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions have no activity?"
+                    },
+                    {
+                        "id":  321,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers require investigation?"
+                    },
+                    {
+                        "id":  322,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers require investigation?"
+                    },
+                    {
+                        "id":  323,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items require investigation?"
+                    },
+                    {
+                        "id":  324,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts require investigation?"
+                    },
+                    {
+                        "id":  325,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses require investigation?"
+                    },
+                    {
+                        "id":  326,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps require investigation?"
+                    },
+                    {
+                        "id":  327,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices require investigation?"
+                    },
+                    {
+                        "id":  328,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments require investigation?"
+                    },
+                    {
+                        "id":  329,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals require investigation?"
+                    },
+                    {
+                        "id":  330,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs require investigation?"
+                    },
+                    {
+                        "id":  331,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches require investigation?"
+                    },
+                    {
+                        "id":  332,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets require investigation?"
+                    },
+                    {
+                        "id":  333,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects require investigation?"
+                    },
+                    {
+                        "id":  334,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches require investigation?"
+                    },
+                    {
+                        "id":  335,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations require investigation?"
+                    },
+                    {
+                        "id":  336,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers require investigation?"
+                    },
+                    {
+                        "id":  337,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts require investigation?"
+                    },
+                    {
+                        "id":  338,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings require investigation?"
+                    },
+                    {
+                        "id":  339,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments require investigation?"
+                    },
+                    {
+                        "id":  340,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions require investigation?"
+                    },
+                    {
+                        "id":  341,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers are mismatching related reports?"
+                    },
+                    {
+                        "id":  342,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers are mismatching related reports?"
+                    },
+                    {
+                        "id":  343,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items are mismatching related reports?"
+                    },
+                    {
+                        "id":  344,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts are mismatching related reports?"
+                    },
+                    {
+                        "id":  345,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses are mismatching related reports?"
+                    },
+                    {
+                        "id":  346,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps are mismatching related reports?"
+                    },
+                    {
+                        "id":  347,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices are mismatching related reports?"
+                    },
+                    {
+                        "id":  348,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments are mismatching related reports?"
+                    },
+                    {
+                        "id":  349,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals are mismatching related reports?"
+                    },
+                    {
+                        "id":  350,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs are mismatching related reports?"
+                    },
+                    {
+                        "id":  351,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches are mismatching related reports?"
+                    },
+                    {
+                        "id":  352,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets are mismatching related reports?"
+                    },
+                    {
+                        "id":  353,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects are mismatching related reports?"
+                    },
+                    {
+                        "id":  354,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches are mismatching related reports?"
+                    },
+                    {
+                        "id":  355,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations are mismatching related reports?"
+                    },
+                    {
+                        "id":  356,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers are mismatching related reports?"
+                    },
+                    {
+                        "id":  357,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts are mismatching related reports?"
+                    },
+                    {
+                        "id":  358,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings are mismatching related reports?"
+                    },
+                    {
+                        "id":  359,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments are mismatching related reports?"
+                    },
+                    {
+                        "id":  360,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions are mismatching related reports?"
+                    },
+                    {
+                        "id":  361,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers contain suspicious values?"
+                    },
+                    {
+                        "id":  362,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers contain suspicious values?"
+                    },
+                    {
+                        "id":  363,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items contain suspicious values?"
+                    },
+                    {
+                        "id":  364,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts contain suspicious values?"
+                    },
+                    {
+                        "id":  365,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses contain suspicious values?"
+                    },
+                    {
+                        "id":  366,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps contain suspicious values?"
+                    },
+                    {
+                        "id":  367,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices contain suspicious values?"
+                    },
+                    {
+                        "id":  368,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments contain suspicious values?"
+                    },
+                    {
+                        "id":  369,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals contain suspicious values?"
+                    },
+                    {
+                        "id":  370,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs contain suspicious values?"
+                    },
+                    {
+                        "id":  371,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches contain suspicious values?"
+                    },
+                    {
+                        "id":  372,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets contain suspicious values?"
+                    },
+                    {
+                        "id":  373,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects contain suspicious values?"
+                    },
+                    {
+                        "id":  374,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches contain suspicious values?"
+                    },
+                    {
+                        "id":  375,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations contain suspicious values?"
+                    },
+                    {
+                        "id":  376,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers contain suspicious values?"
+                    },
+                    {
+                        "id":  377,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts contain suspicious values?"
+                    },
+                    {
+                        "id":  378,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings contain suspicious values?"
+                    },
+                    {
+                        "id":  379,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments contain suspicious values?"
+                    },
+                    {
+                        "id":  380,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions contain suspicious values?"
+                    },
+                    {
+                        "id":  381,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 customers by value"
+                    },
+                    {
+                        "id":  382,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 suppliers by value"
+                    },
+                    {
+                        "id":  383,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 stock items by value"
+                    },
+                    {
+                        "id":  384,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 GL accounts by value"
+                    },
+                    {
+                        "id":  385,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 warehouses by value"
+                    },
+                    {
+                        "id":  386,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 sales reps by value"
+                    },
+                    {
+                        "id":  387,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 invoices by value"
+                    },
+                    {
+                        "id":  388,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 payments by value"
+                    },
+                    {
+                        "id":  389,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 journals by value"
+                    },
+                    {
+                        "id":  390,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 BOMs by value"
+                    },
+                    {
+                        "id":  391,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 production batches by value"
+                    },
+                    {
+                        "id":  392,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 fixed assets by value"
+                    },
+                    {
+                        "id":  393,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 projects by value"
+                    },
+                    {
+                        "id":  394,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 branches by value"
+                    },
+                    {
+                        "id":  395,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 inventory valuations by value"
+                    },
+                    {
+                        "id":  396,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 cost centers by value"
+                    },
+                    {
+                        "id":  397,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 discounts by value"
+                    },
+                    {
+                        "id":  398,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 tax postings by value"
+                    },
+                    {
+                        "id":  399,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 adjustments by value"
+                    },
+                    {
+                        "id":  400,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Show top 10 transactions by value"
+                    },
+                    {
+                        "id":  401,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers increased significantly this month?"
+                    },
+                    {
+                        "id":  402,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers increased significantly this month?"
+                    },
+                    {
+                        "id":  403,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items increased significantly this month?"
+                    },
+                    {
+                        "id":  404,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts increased significantly this month?"
+                    },
+                    {
+                        "id":  405,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses increased significantly this month?"
+                    },
+                    {
+                        "id":  406,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps increased significantly this month?"
+                    },
+                    {
+                        "id":  407,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices increased significantly this month?"
+                    },
+                    {
+                        "id":  408,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments increased significantly this month?"
+                    },
+                    {
+                        "id":  409,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals increased significantly this month?"
+                    },
+                    {
+                        "id":  410,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs increased significantly this month?"
+                    },
+                    {
+                        "id":  411,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches increased significantly this month?"
+                    },
+                    {
+                        "id":  412,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets increased significantly this month?"
+                    },
+                    {
+                        "id":  413,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects increased significantly this month?"
+                    },
+                    {
+                        "id":  414,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches increased significantly this month?"
+                    },
+                    {
+                        "id":  415,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations increased significantly this month?"
+                    },
+                    {
+                        "id":  416,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers increased significantly this month?"
+                    },
+                    {
+                        "id":  417,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts increased significantly this month?"
+                    },
+                    {
+                        "id":  418,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings increased significantly this month?"
+                    },
+                    {
+                        "id":  419,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments increased significantly this month?"
+                    },
+                    {
+                        "id":  420,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions increased significantly this month?"
+                    },
+                    {
+                        "id":  421,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers decreased significantly this month?"
+                    },
+                    {
+                        "id":  422,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers decreased significantly this month?"
+                    },
+                    {
+                        "id":  423,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items decreased significantly this month?"
+                    },
+                    {
+                        "id":  424,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts decreased significantly this month?"
+                    },
+                    {
+                        "id":  425,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses decreased significantly this month?"
+                    },
+                    {
+                        "id":  426,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps decreased significantly this month?"
+                    },
+                    {
+                        "id":  427,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices decreased significantly this month?"
+                    },
+                    {
+                        "id":  428,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments decreased significantly this month?"
+                    },
+                    {
+                        "id":  429,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals decreased significantly this month?"
+                    },
+                    {
+                        "id":  430,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs decreased significantly this month?"
+                    },
+                    {
+                        "id":  431,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches decreased significantly this month?"
+                    },
+                    {
+                        "id":  432,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets decreased significantly this month?"
+                    },
+                    {
+                        "id":  433,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects decreased significantly this month?"
+                    },
+                    {
+                        "id":  434,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches decreased significantly this month?"
+                    },
+                    {
+                        "id":  435,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations decreased significantly this month?"
+                    },
+                    {
+                        "id":  436,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers decreased significantly this month?"
+                    },
+                    {
+                        "id":  437,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts decreased significantly this month?"
+                    },
+                    {
+                        "id":  438,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings decreased significantly this month?"
+                    },
+                    {
+                        "id":  439,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments decreased significantly this month?"
+                    },
+                    {
+                        "id":  440,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions decreased significantly this month?"
+                    },
+                    {
+                        "id":  441,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers have abnormal trends?"
+                    },
+                    {
+                        "id":  442,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers have abnormal trends?"
+                    },
+                    {
+                        "id":  443,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items have abnormal trends?"
+                    },
+                    {
+                        "id":  444,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts have abnormal trends?"
+                    },
+                    {
+                        "id":  445,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses have abnormal trends?"
+                    },
+                    {
+                        "id":  446,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps have abnormal trends?"
+                    },
+                    {
+                        "id":  447,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices have abnormal trends?"
+                    },
+                    {
+                        "id":  448,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments have abnormal trends?"
+                    },
+                    {
+                        "id":  449,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals have abnormal trends?"
+                    },
+                    {
+                        "id":  450,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs have abnormal trends?"
+                    },
+                    {
+                        "id":  451,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches have abnormal trends?"
+                    },
+                    {
+                        "id":  452,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets have abnormal trends?"
+                    },
+                    {
+                        "id":  453,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects have abnormal trends?"
+                    },
+                    {
+                        "id":  454,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches have abnormal trends?"
+                    },
+                    {
+                        "id":  455,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations have abnormal trends?"
+                    },
+                    {
+                        "id":  456,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers have abnormal trends?"
+                    },
+                    {
+                        "id":  457,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts have abnormal trends?"
+                    },
+                    {
+                        "id":  458,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings have abnormal trends?"
+                    },
+                    {
+                        "id":  459,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments have abnormal trends?"
+                    },
+                    {
+                        "id":  460,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions have abnormal trends?"
+                    },
+                    {
+                        "id":  461,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers were modified manually?"
+                    },
+                    {
+                        "id":  462,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers were modified manually?"
+                    },
+                    {
+                        "id":  463,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items were modified manually?"
+                    },
+                    {
+                        "id":  464,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts were modified manually?"
+                    },
+                    {
+                        "id":  465,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses were modified manually?"
+                    },
+                    {
+                        "id":  466,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps were modified manually?"
+                    },
+                    {
+                        "id":  467,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices were modified manually?"
+                    },
+                    {
+                        "id":  468,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments were modified manually?"
+                    },
+                    {
+                        "id":  469,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals were modified manually?"
+                    },
+                    {
+                        "id":  470,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs were modified manually?"
+                    },
+                    {
+                        "id":  471,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches were modified manually?"
+                    },
+                    {
+                        "id":  472,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets were modified manually?"
+                    },
+                    {
+                        "id":  473,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects were modified manually?"
+                    },
+                    {
+                        "id":  474,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches were modified manually?"
+                    },
+                    {
+                        "id":  475,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations were modified manually?"
+                    },
+                    {
+                        "id":  476,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers were modified manually?"
+                    },
+                    {
+                        "id":  477,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts were modified manually?"
+                    },
+                    {
+                        "id":  478,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings were modified manually?"
+                    },
+                    {
+                        "id":  479,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments were modified manually?"
+                    },
+                    {
+                        "id":  480,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions were modified manually?"
+                    },
+                    {
+                        "id":  481,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which customers were created recently?"
+                    },
+                    {
+                        "id":  482,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which suppliers were created recently?"
+                    },
+                    {
+                        "id":  483,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which stock items were created recently?"
+                    },
+                    {
+                        "id":  484,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which GL accounts were created recently?"
+                    },
+                    {
+                        "id":  485,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which warehouses were created recently?"
+                    },
+                    {
+                        "id":  486,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which sales reps were created recently?"
+                    },
+                    {
+                        "id":  487,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which invoices were created recently?"
+                    },
+                    {
+                        "id":  488,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which payments were created recently?"
+                    },
+                    {
+                        "id":  489,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which journals were created recently?"
+                    },
+                    {
+                        "id":  490,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which BOMs were created recently?"
+                    },
+                    {
+                        "id":  491,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which production batches were created recently?"
+                    },
+                    {
+                        "id":  492,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which fixed assets were created recently?"
+                    },
+                    {
+                        "id":  493,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which projects were created recently?"
+                    },
+                    {
+                        "id":  494,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which branches were created recently?"
+                    },
+                    {
+                        "id":  495,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which inventory valuations were created recently?"
+                    },
+                    {
+                        "id":  496,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which cost centers were created recently?"
+                    },
+                    {
+                        "id":  497,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which discounts were created recently?"
+                    },
+                    {
+                        "id":  498,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which tax postings were created recently?"
+                    },
+                    {
+                        "id":  499,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which adjustments were created recently?"
+                    },
+                    {
+                        "id":  500,
+                        "domain":  "Advanced Analytical Queries",
+                        "title":  "Which transactions were created recently?"
+                    }
+                ],
+    "source":  "Sage_AI_Agent_500_Common_Business_Queries_Mega_Digest.md",
+    "entryCount":  500,
+    "version":  1
+}

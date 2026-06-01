@@ -1,0 +1,773 @@
+{
+  "version": "2026-06-08-payment-behavior",
+  "handlers": [
+    {
+      "id": "AR-COUNT-DISCOUNTED-INVOICES",
+      "domain": "AR",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "salesinvoice.discount.count",
+      "keywords": ["how many", "count", "discount", "sales invoice", "invoice"]
+    },
+    {
+      "id": "AR-TOP-DISCOUNT-INVOICES",
+      "domain": "AR",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "salesinvoice.discount.top",
+      "keywords": ["top", "highest", "discount", "invoice", "sales"]
+    },
+    {
+      "id": "AR-TOP-AGED-DEBIT",
+      "domain": "AR",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "customer.aged.top",
+      "keywords": ["top", "oldest", "aged", "customer", "debit", "balance"]
+    },
+    {
+      "id": "AR-TOP-AGED-CREDIT",
+      "domain": "AR",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "customer.aged.credit.top",
+      "keywords": ["oldest", "aged", "credit", "customer"]
+    },
+    {
+      "id": "AR-COUNT-OVERDUE-BUCKETS",
+      "domain": "AR",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "ar.invoice.overdue.buckets",
+      "keywords": ["count", "overdue", "aging", "bucket"]
+    },
+    {
+      "id": "AR-LIST-CREDIT-LIMIT",
+      "domain": "AR",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "customer.over.creditlimit",
+      "keywords": ["credit limit", "exceeded", "customer"]
+    },
+    {
+      "id": "AR-LIST-PARTIAL-PAID",
+      "domain": "AR",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "salesinvoice.partially.paid",
+      "keywords": ["partially paid", "partial", "invoice"]
+    },
+    {
+      "id": "AR-LIST-UNPAID-OLDER",
+      "domain": "AR",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "customer.invoice.unpaid.olderthan",
+      "keywords": ["unpaid", "older", "days", "invoice"]
+    },
+    {
+      "id": "AR-TOP-OUTSTANDING-DEBIT",
+      "domain": "AR",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "customer.outstanding.debit.top",
+      "keywords": ["top", "outstanding", "debit", "customer", "balance"]
+    },
+    {
+      "id": "AR-TOP-SALES-VALUE",
+      "domain": "AR",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "customer.sales.top",
+      "keywords": ["top", "sales", "customer", "revenue", "period"]
+    },
+    {
+      "id": "AR-RANK-UNPAID-SUMMARY",
+      "domain": "AR",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "customer.unpaid.summary",
+      "keywords": ["highest", "most", "unpaid", "customer", "outstanding", "invoice"]
+    },
+    {
+      "id": "AR-PAYMENT-PROMPT-TOP",
+      "domain": "AR",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "customer.payment.prompt.top",
+      "keywords": ["paying promptly", "prompt payer", "within terms", "payment discipline"]
+    },
+    {
+      "id": "AR-PAYMENT-LATE-TOP",
+      "domain": "AR",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "customer.payment.late.top",
+      "keywords": ["late payer", "slow payer", "pay late"]
+    },
+    {
+      "id": "AR-PAYMENT-SUMMARY",
+      "domain": "AR",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "customer.payment.behavior.summary",
+      "keywords": ["payment behaviour", "payment behavior", "summary"]
+    },
+    {
+      "id": "AR-PAYMENT-DETAIL",
+      "domain": "AR",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "customer.payment.detail",
+      "keywords": ["payment behaviour for", "customer payment detail"]
+    },
+    {
+      "id": "AR-LIST-CREDIT-BALANCES",
+      "domain": "AR",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "customer.credit.balances",
+      "keywords": ["credit balance", "customer"]
+    },
+    {
+      "id": "AR-LIST-OPEN-ITEMS",
+      "domain": "AR",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "customer.openitems",
+      "keywords": ["unpaid", "open", "invoice", "outstanding", "ar"]
+    },
+    {
+      "id": "AP-TOP-AGED-SUPPLIER",
+      "domain": "AP",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "supplier.aged.top",
+      "keywords": ["top", "oldest", "supplier", "aged", "unpaid"]
+    },
+    {
+      "id": "AP-CREDIT-BALANCES",
+      "domain": "AP",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "supplier.credit.balances",
+      "keywords": ["supplier", "credit", "overpaid"]
+    },
+    {
+      "id": "AP-COUNT-OVERDUE",
+      "domain": "AP",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "ap.invoice.overdue.count",
+      "keywords": ["count", "overdue", "supplier", "purchase"]
+    },
+    {
+      "id": "AP-UNPAID-OLDER",
+      "domain": "AP",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "supplier.invoice.unpaid.olderthan",
+      "keywords": ["supplier", "unpaid", "older", "days"]
+    },
+    {
+      "id": "AP-OUTSTANDING-TOP",
+      "domain": "AP",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "supplier.outstanding.top",
+      "keywords": ["top", "supplier", "outstanding", "owe"]
+    },
+    {
+      "id": "AP-PARTIAL-PAID",
+      "domain": "AP",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "purchaseinvoice.partially.paid",
+      "keywords": ["partially paid", "supplier", "purchase"]
+    },
+    {
+      "id": "AP-DUPLICATE-INV",
+      "domain": "AP",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "purchaseinvoice.duplicate",
+      "keywords": ["duplicate supplier", "duplicate purchase", "same invoice number"]
+    },
+    {
+      "id": "AP-PAYMENTS-TOP",
+      "domain": "AP",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "supplier.payments.top",
+      "keywords": ["supplier", "payment", "top", "month"]
+    },
+    {
+      "id": "PUR-COUNT-INV",
+      "domain": "Purchase",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "purchaseinvoice.count",
+      "keywords": ["count", "purchase", "invoice"]
+    },
+    {
+      "id": "PUR-TOP-INV",
+      "domain": "Purchase",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "purchaseinvoice.top",
+      "keywords": ["top", "purchase", "invoice", "highest"]
+    },
+    {
+      "id": "PUR-COUNT-DISC",
+      "domain": "Purchase",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "purchaseinvoice.discount.count",
+      "keywords": ["count", "discount", "purchase"]
+    },
+    {
+      "id": "PUR-TOP-DISC",
+      "domain": "Purchase",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "purchaseinvoice.discount.top",
+      "keywords": ["top", "discount", "purchase"]
+    },
+    {
+      "id": "PUR-SUPPLIER-TOP",
+      "domain": "Purchase",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "supplier.purchases.top",
+      "keywords": ["top", "supplier", "purchases", "year"]
+    },
+    {
+      "id": "INV-SLOW-MOVE",
+      "domain": "Inventory",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "inventory.slow.moving.top",
+      "keywords": ["slow moving", "stock", "item"]
+    },
+    {
+      "id": "INV-NON-MOVE",
+      "domain": "Inventory",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "inventory.nonmoving",
+      "keywords": ["non moving", "no movement", "stock"]
+    },
+    {
+      "id": "INV-NEG-QTY",
+      "domain": "Inventory",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "inventory.negative.qty",
+      "keywords": ["negative", "quantity", "on hand", "stock"]
+    },
+    {
+      "id": "INV-NEG-VAL",
+      "domain": "Inventory",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "inventory.negative.valuation",
+      "keywords": ["negative", "valuation", "stock value"]
+    },
+    {
+      "id": "INV-REORDER",
+      "domain": "Inventory",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "inventory.below.reorder",
+      "keywords": ["reorder", "replenish", "below"]
+    },
+    {
+      "id": "INV-OVERSTOCK",
+      "domain": "Inventory",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "inventory.overstocked",
+      "keywords": ["overstock", "excess", "stock"]
+    },
+    {
+      "id": "INV-VALUE-TOP",
+      "domain": "Inventory",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "inventory.value.top",
+      "keywords": ["top", "stock value", "inventory value"]
+    },
+    {
+      "id": "INV-MOVE-TOP",
+      "domain": "Inventory",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "inventory.movement.top",
+      "keywords": ["top selling", "movement", "stock"]
+    },
+    {
+      "id": "WH-VALUE",
+      "domain": "Warehouse",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "warehouse.value.summary",
+      "keywords": ["warehouse", "stock value"]
+    },
+    {
+      "id": "WH-NEG-QTY",
+      "domain": "Warehouse",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "warehouse.negative.qty",
+      "keywords": ["warehouse", "negative", "stock"]
+    },
+    {
+      "id": "WH-NONMOVE",
+      "domain": "Warehouse",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "warehouse.nonmoving",
+      "keywords": ["warehouse", "non moving"]
+    },
+    {
+      "id": "WH-TRANSFER",
+      "domain": "Warehouse",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "warehouse.transfer.summary",
+      "keywords": ["warehouse", "transfer"]
+    },
+    {
+      "id": "WH-DISCREPANCY",
+      "domain": "Warehouse",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "warehouse.discrepancy",
+      "keywords": ["warehouse", "discrepancy", "adjustment"]
+    },
+    {
+      "id": "INV-RECON-GL",
+      "domain": "Inventory",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "inventory.gl.reconcile",
+      "keywords": ["inventory", "valuation", "balance sheet", "reconcile", "match"]
+    },
+    {
+      "id": "INV-BS-NEGATIVE-GL",
+      "domain": "Inventory",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "inventory.bs.negative_ledgers",
+      "keywords": ["negative", "stock", "balance sheet", "inventory", "gl"]
+    },
+    {
+      "id": "INV-LIST-ITEMS",
+      "domain": "Inventory",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "inventoryitem.list",
+      "keywords": ["inventory", "stock", "valuation", "item"]
+    },
+    {
+      "id": "GL-EXP-TOP",
+      "domain": "GL",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "gl.expense.top",
+      "keywords": ["top", "expense", "account", "gl"]
+    },
+    {
+      "id": "GL-EXP-TREND",
+      "domain": "GL",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "gl.expense.trend",
+      "keywords": ["expense", "trend", "monthly"]
+    },
+    {
+      "id": "GL-EXP-VAR",
+      "domain": "GL",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "gl.expense.variance",
+      "keywords": ["expense", "variance", "abnormal"]
+    },
+    {
+      "id": "GL-JRNL-MANUAL",
+      "domain": "GL",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "gl.journal.manual",
+      "keywords": ["manual", "journal", "gl"]
+    },
+    {
+      "id": "GL-JRNL-USERS",
+      "domain": "GL",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "gl.journal.users.top",
+      "keywords": ["users", "journal", "posted"]
+    },
+    {
+      "id": "GL-BACKDATE",
+      "domain": "GL",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "gl.transaction.backdated",
+      "keywords": ["backdated", "journal", "late"]
+    },
+    {
+      "id": "GL-ROUND",
+      "domain": "GL",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "gl.journal.round",
+      "keywords": ["round", "journal", "suspicious"]
+    },
+    {
+      "id": "GL-BAL-UNUSUAL",
+      "domain": "GL",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "gl.balance.unusual",
+      "keywords": ["unusual", "gl", "balance"]
+    },
+    {
+      "id": "GL-JRNL-PERIODEND",
+      "domain": "GL",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "gl.journal.periodend",
+      "keywords": ["month-end", "period end", "adjustment journal"]
+    },
+    {
+      "id": "GL-JRNL-DUP",
+      "domain": "GL",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "gl.journal.duplicate",
+      "keywords": ["duplicate journal", "duplicate gl journal"]
+    },
+    {
+      "id": "GL-TB-ANOMALY",
+      "domain": "GL",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "gl.trialbalance.anomaly",
+      "keywords": ["trial balance", "suspicious movement"]
+    },
+    {
+      "id": "INV-ADJ-TOP",
+      "domain": "Inventory",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "inventory.adjustment.top",
+      "keywords": ["stock adjustment", "top adjustment"]
+    },
+    {
+      "id": "GL-RATIOS",
+      "domain": "GL",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "gl.ratios",
+      "keywords": ["current ratio", "quick ratio"]
+    },
+    {
+      "id": "VAT-SUMMARY",
+      "domain": "VAT",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "vat.summary",
+      "keywords": ["vat", "summary", "period"]
+    },
+    {
+      "id": "VAT-OUTPUT",
+      "domain": "VAT",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "vat.output",
+      "keywords": ["output vat", "vat collected"]
+    },
+    {
+      "id": "VAT-INPUT",
+      "domain": "VAT",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "vat.input",
+      "keywords": ["input vat", "vat paid"]
+    },
+    {
+      "id": "VAT-PAYABLE",
+      "domain": "VAT",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "vat.payable.estimate",
+      "keywords": ["vat payable", "estimate vat"]
+    },
+    {
+      "id": "VAT-RECON",
+      "domain": "VAT",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "vat.reconcile",
+      "keywords": ["vat reconcile", "vat control", "match vat"]
+    },
+    {
+      "id": "VAT-TREND",
+      "domain": "VAT",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "vat.trend",
+      "keywords": ["vat trend", "vat by month"]
+    },
+    {
+      "id": "VAT-ANOMALY",
+      "domain": "VAT",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "vat.anomalies",
+      "keywords": ["suspicious vat", "unusual vat"]
+    },
+    {
+      "id": "VAT-ZERO",
+      "domain": "VAT",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "vat.zero.rated",
+      "keywords": ["zero-rated", "vat exempt"]
+    },
+    {
+      "id": "VAT-ACCT-TOP",
+      "domain": "VAT",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "vat.by.account.top",
+      "keywords": ["highest vat", "customer vat"]
+    },
+    {
+      "id": "VAT-MISSING",
+      "domain": "VAT",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "vat.missing",
+      "keywords": ["no vat", "missing vat"]
+    },
+    {
+      "id": "TREASURY-DASH",
+      "domain": "Treasury",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "treasury.dashboard",
+      "keywords": ["treasury", "summary", "cash position"]
+    },
+    {
+      "id": "TREASURY-FORECAST",
+      "domain": "Treasury",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "treasury.cash.forecast",
+      "keywords": ["forecast cash", "cash position", "30 days"]
+    },
+    {
+      "id": "TREASURY-COLLECT",
+      "domain": "Treasury",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "treasury.collections.forecast",
+      "keywords": ["expected collections", "customer collections"]
+    },
+    {
+      "id": "TREASURY-PAY",
+      "domain": "Treasury",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "treasury.payments.forecast",
+      "keywords": ["expected supplier payments", "payments forecast"]
+    },
+    {
+      "id": "TREASURY-NET",
+      "domain": "Treasury",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "treasury.netcashflow.forecast",
+      "keywords": ["net cashflow", "forecast net cash"]
+    },
+    {
+      "id": "BANK-DAILY",
+      "domain": "Bank",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "bank.daily.cash",
+      "keywords": ["daily cash", "inflow outflow"]
+    },
+    {
+      "id": "BANK-UNUSUAL",
+      "domain": "Bank",
+      "intent": "audit",
+      "implemented": true,
+      "operation": "bank.unusual",
+      "keywords": ["unusual bank", "suspicious cashbook"]
+    },
+    {
+      "id": "BANK-CASHBOOK",
+      "domain": "Bank",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "bank.cashbook",
+      "keywords": ["cashbook", "bank", "transactions"]
+    },
+    {
+      "id": "GL-SAMPLE-TX",
+      "domain": "GL",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "gltransaction.list",
+      "keywords": ["gl transaction list", "sample postgl rows"]
+    },
+    {
+      "id": "DASH-SUMMARY",
+      "domain": "Dashboard",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "dashboard.summary",
+      "keywords": ["dashboard", "kpi", "summary"]
+    },
+    {
+      "id": "INV-WH-RECON",
+      "domain": "Inventory",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "inventory.warehouse.reconcile",
+      "keywords": ["warehouse", "inventory", "mismatch", "reconcile"]
+    },
+    {
+      "id": "INV-SG-RECON",
+      "domain": "Inventory",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "inventory.stockgroup.reconcile",
+      "keywords": ["stock group", "inventory", "variance"]
+    },
+    {
+      "id": "INV-GL-EXPLAIN",
+      "domain": "Inventory",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "inventory.gl.explain",
+      "keywords": ["why", "inventory", "not matching", "mismatch"]
+    },
+    {
+      "id": "INV-ITEM-DRILL",
+      "domain": "Inventory",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "inventory.item.drilldown",
+      "keywords": ["details for", "drilldown", "stock item"]
+    },
+    {
+      "id": "AR-GL-RECON",
+      "domain": "AR",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "ar.gl.reconcile",
+      "keywords": ["ar aging", "debtors control", "reconcile", "match"]
+    },
+    {
+      "id": "AR-VAR-CONT",
+      "domain": "AR",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "ar.variance.contributors",
+      "keywords": ["customer", "ar variance", "mismatch"]
+    },
+    {
+      "id": "AR-UNALLOC",
+      "domain": "AR",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "ar.unallocated",
+      "keywords": ["unallocated", "ar", "receivable"]
+    },
+    {
+      "id": "AP-GL-RECON",
+      "domain": "AP",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "ap.gl.reconcile",
+      "keywords": ["ap aging", "creditors control", "reconcile"]
+    },
+    {
+      "id": "AP-VAR-CONT",
+      "domain": "AP",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "ap.variance.contributors",
+      "keywords": ["supplier", "ap mismatch", "variance"]
+    },
+    {
+      "id": "AP-UNALLOC",
+      "domain": "AP",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "ap.unallocated",
+      "keywords": ["unallocated", "supplier", "ap"]
+    },
+    {
+      "id": "VAT-VAR-CONT",
+      "domain": "VAT",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "vat.variance.contributors",
+      "keywords": ["vat mismatch", "invoice", "causing"]
+    },
+    {
+      "id": "BANK-RECON-VAR",
+      "domain": "Bank",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "bank.reconcile.variance",
+      "keywords": ["bank reconciliation", "not balancing", "cashbook"]
+    },
+    {
+      "id": "BANK-DEP",
+      "domain": "Bank",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "bank.deposits.outstanding",
+      "keywords": ["outstanding deposits", "bank"]
+    },
+    {
+      "id": "BANK-CHQ",
+      "domain": "Bank",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "bank.cheques.unpresented",
+      "keywords": ["unpresented", "cheque", "bank"]
+    },
+    {
+      "id": "BANK-UNMATCH",
+      "domain": "Bank",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "bank.unmatched",
+      "keywords": ["unmatched", "bank entries"]
+    },
+    {
+      "id": "FA-DEP-RECON",
+      "domain": "FA",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "fa.depreciation.reconcile",
+      "keywords": ["depreciation", "fixed asset", "match"]
+    },
+    {
+      "id": "FA-VAR-CONT",
+      "domain": "FA",
+      "intent": "reconciliation",
+      "implemented": true,
+      "operation": "fa.variance.contributors",
+      "keywords": ["asset", "fa variance"]
+    }
+  ]
+}

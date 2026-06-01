@@ -43,19 +43,9 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.EnsureCreated();
-    await db.Database.ExecuteSqlRawAsync("""
-        CREATE TABLE IF NOT EXISTS JobAuditRecords (
-            AuditId TEXT NOT NULL PRIMARY KEY,
-            JobId TEXT NOT NULL,
-            SiteId TEXT NOT NULL,
-            Operation TEXT NOT NULL,
-            EventType TEXT NOT NULL,
-            RequestedBy TEXT NULL,
-            Success INTEGER NULL,
-            Detail TEXT NULL,
-            TimestampUtc TEXT NOT NULL
-        );
-        """);
+    foreach (var site in db.Sites.Where(s => s.IsOnline))
+        site.IsOnline = false;
+    await db.SaveChangesAsync();
     await DbSeed.EnsurePhase1SeedAsync(db);
 }
 
@@ -75,7 +65,12 @@ app.MapGet("/admin", () => Results.Redirect("/admin/index.html"));
 app.MapGet("/insight", () => Results.Redirect("/insight/index.html"));
 app.MapGet("/act", () => Results.Redirect("/act/index.html"));
 
-app.MapGet("/health", () => Results.Ok(new { ok = true, service = "WizAccountant.Api" }));
+app.MapGet("/health", () => Results.Ok(new
+{
+    ok = true,
+    service = "WizAccountant.Api",
+    insightChatVersion = InsightChatInfo.Version
+}));
 
 app.MapPost("/api/pairing-codes", async (CreatePairingCodeRequest request, AppDbContext db) =>
 {
@@ -128,6 +123,7 @@ app.MapPost("/api/sites/pair", async (PairSiteRequest request, AppDbContext db) 
 
 app.MapGet("/api/sites", async (AppDbContext db) =>
 {
+    var staleBefore = DateTimeOffset.UtcNow.AddSeconds(-90);
     // SQLite cannot ORDER BY DateTimeOffset — sort in memory after fetch.
     var rows = await db.Sites.AsNoTracking().ToListAsync();
     var sites = rows
@@ -138,7 +134,7 @@ app.MapGet("/api/sites", async (AppDbContext db) =>
             TenantId = s.TenantId,
             SiteName = s.SiteName,
             DeviceId = s.DeviceId,
-            IsOnline = s.IsOnline,
+            IsOnline = s.IsOnline && s.LastSeenUtc.HasValue && s.LastSeenUtc.Value >= staleBefore,
             LastSeenUtc = s.LastSeenUtc
         })
         .ToList();

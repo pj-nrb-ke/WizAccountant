@@ -16,4 +16,13 @@
     <ProjectReference Include="..\WizAccountant.Contracts\WizAccountant.Contracts.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Insight\Data\mega-digest-catalog.json" />
+    <EmbeddedResource Include="Insight\Data\handler_registry.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="WizAccountant.Insight.Intents.Tests" />
+  </ItemGroup>
+
 </Project>

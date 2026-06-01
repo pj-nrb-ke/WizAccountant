@@ -55,3 +55,11 @@ Configure Sage via **`WizConnector.Setup.exe`** (saves encrypted config). See [D
 **Admin UI:** run the API, then open [http://localhost:5278/admin/](http://localhost:5278/admin/) — pairing codes, sites, test connection.
 
 **Tray:** `src\WizConnector.Tray\bin\Release\net8.0-windows\WizConnector.Tray.exe` (pair site, view online status).
+
+## Pilot launcher (buttons — no command line)
+
+Double-click **WizPilot.exe** to start the connector, tray, open Admin/Insight, and run scripts:
+
+`src\WizAccountant.Manager\bin\Release\net8.0-windows\WizPilot.exe`
+
+Rebuild after code changes: `.\scripts\build-wiz-pilot.ps1`

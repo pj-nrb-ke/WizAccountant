@@ -86,17 +86,27 @@ public sealed class LocalConnectorLauncher(IConfiguration config, IHostEnvironme
             ProcessStartInfo psi;
             if (File.Exists(exePath))
             {
+                if (name == "WizConnector.Service")
+                {
+                    var apiBase = config["Connector:ApiBaseUrl"] ?? "http://localhost:5278";
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "powershell.exe",
+                        Arguments = $"-NoExit -Command \"$env:Connector__ApiBaseUrl='{apiBase}'; & '{exePath}'\"",
+                        WorkingDirectory = Path.GetDirectoryName(exePath)!,
+                        UseShellExecute = true,
+                        WindowStyle = ProcessWindowStyle.Normal
+                    });
+                    response.Started.Add(name);
+                    return;
+                }
+
                 psi = new ProcessStartInfo
                 {
                     FileName = exePath,
                     WorkingDirectory = Path.GetDirectoryName(exePath)!,
-                    UseShellExecute = name != "WizConnector.Service"
+                    UseShellExecute = true
                 };
-                if (name == "WizConnector.Service")
-                {
-                    psi.UseShellExecute = false;
-                    psi.Environment["Connector__ApiBaseUrl"] = config["Connector:ApiBaseUrl"] ?? "http://localhost:5278";
-                }
             }
             else
             {

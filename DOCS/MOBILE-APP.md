@@ -56,12 +56,43 @@ Password: `pilot`
 4. **Approve** — pending proposals (status `Pending`); confirm to post to Sage.
 5. **AI** — read-only assistant (same guardrails as Insight web).
 
+## Standalone APK (physical phone, no Expo Go)
+
+**Prerequisites (one-time on your PC):**
+
+- Node.js + `npm install` in `mobile/wiz-accountant`
+- [Android Studio](https://developer.android.com/studio) (SDK + platform tools)
+- JDK 17: `winget install Microsoft.OpenJDK.17`
+
+**Build from repo root (PowerShell):**
+
+```powershell
+# Production — talks to live cloud (Wi‑Fi or mobile data)
+.\scripts\build-apk.ps1 -Production
+
+# LAN pilot — API on your PC (port 5278)
+.\scripts\build-apk.ps1 -PcIp 192.168.1.10
+# or auto-detect Wi‑Fi IP:
+.\scripts\build-apk.ps1
+```
+
+Output:
+
+| Switch | APK file |
+|--------|----------|
+| `-Production` | `WizAccountant-production.apk` → `https://app.ascendbooks.biz` |
+| (default LAN) | `WizAccountant-lite.apk` → `http://YOUR_PC_IP:5278` |
+
+Copy the APK to the phone and install (enable “unknown apps” if prompted). You can still change the API URL in the app **Settings** after install.
+
+**Dev without APK:** `cd mobile\wiz-accountant` → `npx expo start` → scan QR with **Expo Go**.
+
 ## Out of scope (later phases)
 
 - Push notifications (FCM/APNs)
 - Offline mode
 - Production JWT / refresh tokens
-- App Store / Play Store builds (use EAS Build when ready)
+- Play Store signing (current APK uses debug signing for local install)
 
 ## Troubleshooting
 

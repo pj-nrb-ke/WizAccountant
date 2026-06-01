@@ -7,7 +7,7 @@ public interface IConnectorRegistry
 {
     Task RegisterAsync(Guid siteId, string connectionId);
     Task MarkHeartbeatAsync(Guid siteId);
-    Task UnregisterConnectionAsync(string connectionId);
+    Task<Guid?> UnregisterConnectionAsync(string connectionId);
     bool TryGetConnectionId(Guid siteId, out string? connectionId);
 }
 
@@ -33,7 +33,7 @@ public sealed class ConnectorRegistry : IConnectorRegistry
         return Task.CompletedTask;
     }
 
-    public Task UnregisterConnectionAsync(string connectionId)
+    public Task<Guid?> UnregisterConnectionAsync(string connectionId)
     {
         lock (_lock)
         {
@@ -41,9 +41,10 @@ public sealed class ConnectorRegistry : IConnectorRegistry
             {
                 _connectionSites.Remove(connectionId);
                 _siteConnections.Remove(siteId);
+                return Task.FromResult<Guid?>(siteId);
             }
         }
-        return Task.CompletedTask;
+        return Task.FromResult<Guid?>(null);
     }
 
     public bool TryGetConnectionId(Guid siteId, out string? connectionId)
@@ -83,7 +84,16 @@ public sealed class ConnectorHub(AppDbContext db, IConnectorRegistry registry) :
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        await registry.UnregisterConnectionAsync(Context.ConnectionId);
+        var siteId = await registry.UnregisterConnectionAsync(Context.ConnectionId);
+        if (siteId is Guid disconnectedSiteId)
+        {
+            var site = await db.Sites.FindAsync(disconnectedSiteId);
+            if (site is not null)
+            {
+                site.IsOnline = false;
+                await db.SaveChangesAsync();
+            }
+        }
         await base.OnDisconnectedAsync(exception);
     }
 }

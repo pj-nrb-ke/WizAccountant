@@ -1,5 +1,8 @@
 node_modules/
 .expo/
+.env.production.local
+android/
+.android-apk-stash/
 dist/
 npm-debug.*
 *.jks

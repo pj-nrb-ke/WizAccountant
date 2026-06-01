@@ -144,8 +144,110 @@ public sealed class MockJobExecutor(ILogger<MockJobExecutor> logger) : IJobExecu
             return Task.FromResult<(string?, string?)>((payload, null));
         }
 
+        if (string.Equals(operation, "salesinvoice.discount.count", StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = "SAGE-SALES-INV-DISC-COUNT-001",
+                year = 2026,
+                invoiceCount = 12,
+                countOnly = true,
+                finding = "Mock: 12 sales invoices in 2026 with discounts.",
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (string.Equals(operation, "customer.credit.balances", StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = "SAGE-AR-CREDIT-BAL-001",
+                hasCreditBalances = true,
+                customers = new[] { new { rank = 1, code = "C001", name = "Credit Customer", balance = -5000m } },
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (string.Equals(operation, "supplier.aged.top", StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = "SAGE-AP-AGED-TOP-001",
+                requestedTop = 5,
+                topSuppliers = new[] { new { rank = 1, code = "S001", name = "Demo Supplier", totalOutstanding = 10000m, daysOutstanding = 120, oldestInvoiceDate = "2025-01-01" } },
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (string.Equals(operation, "customer.aged.top", StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = "SAGE-AR-AGED-TOP-001",
+                requestedTop = 5,
+                topCustomers = new[]
+                {
+                    new { rank = 1, code = "DEMO01", name = "Demo Debtor Ltd", totalOutstanding = 1_245_000m, oldestInvoiceDate = "2024-04-15", daysOutstanding = 412, openLineCount = 3 }
+                },
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (string.Equals(operation, "inventory.bs.negative_ledgers", StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = "SAGE-BS-STOCK-NEGATIVE-001",
+                asOfDate = DateTime.Today.ToString("yyyy-MM-dd"),
+                hasNegativeLedgers = true,
+                totalNegativeStockValue = -15_000m,
+                ledgerCount = 1,
+                ledgers = new[]
+                {
+                    new { glAccount = "050", glAccountName = "Inventory - WIP (credit)", netBalance = -15_000m }
+                },
+                largestNegative = new { glAccount = "050", glAccountName = "Inventory - WIP (credit)", netBalance = -15_000m },
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (string.Equals(operation, "inventory.gl.reconcile", StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = "SAGE-INVVAL-RECON-CANONICAL-001",
+                asOfDate = DateTime.Today.ToString("yyyy-MM-dd"),
+                balanceSheetStockValue = 41_700_394.03m,
+                inventoryValuation = 42_083_171.63m,
+                difference = 382_777.60m,
+                matches = false,
+                reliableResult = true,
+                sanityCheckPassed = true,
+                executedSqlValuation = true,
+                usedSdkFallback = false,
+                valuationLineCount = 120,
+                valuationAccountCount = 4,
+                glAccountCount = 4,
+                detailTotalsMatchGrandTotal = true,
+                finding = "Mock: Inventory valuation is not matching Balance Sheet stock value.",
+                accounts = new[]
+                {
+                    new { rowType = "DETAIL", glAccount = "1225", glAccountName = "Inventory - Packaging", balanceSheet = 11_737_848.06m, inventoryValuation = 12_000_000m, difference = 262_151.94m, match = "No" }
+                },
+                note = "Rebuild connector for live Sage SQL reconciliation.",
+                dataAsOfUtc = DateTimeOffset.UtcNow,
+                executedAtUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
         if (operation is "site.diagnostics"
-            or "customer.openitems" or "supplier.openitems" or "gltransaction.list"
+            or "customer.openitems" or "customer.unpaid.summary" or "supplier.openitems" or "gltransaction.list"
             or "salesorder.list" or "purchaseorder.list" or "inventoryitem.list"
             or "project.list" or "warehouse.list" or "taxrate.list" or "transactioncode.list")
         {

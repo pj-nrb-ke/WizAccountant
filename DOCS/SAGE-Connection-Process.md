@@ -205,6 +205,8 @@ Data Source={Server};Initial Catalog={Database};Integrated Security=True;TrustSe
 - **Common** string → `CreateCommonDBConnection`
 - **Company** string → `CreateConnection`
 
+For **multi-table / complex reads**, Sage stores join metadata in the common database table `_btblRBJoin` (e.g. in `SageCommon11`). See **`DOCS/SAGE-COMMON-RBJOIN.md`** — use when designing new allowlisted connector operations, not for raw SQL from the UI.
+
 ---
 
 ## 8. Troubleshooting guide (errors we hit)
@@ -249,6 +251,7 @@ Use this order on a **new machine**:
 | Register script | `scripts/register-sage-sdk.ps1` |
 | Config model + DPAPI storage | `src/WizAccountant.Contracts/SageConnectorConfig.cs` |
 | Connector runtime session | `src/WizConnector.Service/Sage/SageSession.cs` |
+| Common DB join metadata (`_btblRBJoin`) | `DOCS/SAGE-COMMON-RBJOIN.md` |
 | Service startup (load encrypted config) | `src/WizConnector.Service/Program.cs` |
 | Short SDK pointer | `lib/sage-sdk/README.md` |
 

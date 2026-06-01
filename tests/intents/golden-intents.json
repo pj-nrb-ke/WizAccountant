@@ -1,0 +1,65 @@
+[
+  {
+    "id": "agg-discount-2026",
+    "query": "How many sales invoices in 2026 have discounts?",
+    "expectedIntent": "Aggregation",
+    "minConfidence": 0.7,
+    "expectedResponseShape": "SingleNumber",
+    "suppressGrid": true,
+    "forbiddenOperations": ["customer.openitems", "customer.list"]
+  },
+  {
+    "id": "rank-top5-aged",
+    "query": "Top 5 customers with oldest aged debit balances",
+    "expectedIntent": "Ranking",
+    "minConfidence": 0.7,
+    "expectedResponseShape": "TopRows",
+    "maxRows": 5,
+    "forbiddenOperations": ["customer.list"]
+  },
+  {
+    "id": "recon-inv-gl",
+    "query": "Is inventory valuation matching balance sheet stock value?",
+    "expectedIntent": "Reconciliation",
+    "minConfidence": 0.7,
+    "expectedResponseShape": "ReconciliationReport",
+    "preferredOperation": "inventory.gl.reconcile"
+  },
+  {
+    "id": "datafix-inv",
+    "query": "Can you fix the inventory mismatch?",
+    "expectedIntent": "Datafix",
+    "minConfidence": 0.7,
+    "expectedResponseShape": "DiagnosticPreview"
+  },
+  {
+    "id": "list-unpaid",
+    "query": "Show me unpaid sales invoices",
+    "expectedIntent": "Listing",
+    "minConfidence": 0.65,
+    "expectedResponseShape": "RowList"
+  },
+  {
+    "id": "audit-duplicate-journal",
+    "query": "Find duplicate manual journal postings",
+    "expectedIntent": "Audit",
+    "minConfidence": 0.6,
+    "useMegaDigestFallback": true
+  },
+  {
+    "id": "rank-highest-unpaid",
+    "query": "Which customer has the highest unpaid invoices?",
+    "expectedIntent": "Ranking",
+    "minConfidence": 0.5,
+    "preferredOperation": "customer.unpaid.summary",
+    "maxRows": 15
+  },
+  {
+    "id": "inv-negative-bs",
+    "query": "Negative stock values on the balance sheet",
+    "expectedIntent": "Listing",
+    "minConfidence": 0.75,
+    "expectedDomain": "Inventory",
+    "preferredOperation": "inventory.bs.negative_ledgers"
+  }
+]

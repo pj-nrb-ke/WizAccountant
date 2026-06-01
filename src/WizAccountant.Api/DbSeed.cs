@@ -4,8 +4,39 @@ namespace WizAccountant.Api;
 
 public static class DbSeed
 {
+    public static async Task EnsureUsersRoleColumnAsync(AppDbContext db)
+    {
+        try
+        {
+            await db.Database.ExecuteSqlRawAsync("ALTER TABLE Users ADD COLUMN Role TEXT NOT NULL DEFAULT 'Preparer';");
+        }
+        catch
+        {
+            // Column already exists.
+        }
+    }
+
+    public static async Task EnsureJobAuditsTableAsync(AppDbContext db)
+    {
+        await db.Database.ExecuteSqlRawAsync("""
+            CREATE TABLE IF NOT EXISTS JobAudits (
+                AuditId TEXT NOT NULL PRIMARY KEY,
+                JobId TEXT NOT NULL,
+                SiteId TEXT NOT NULL,
+                Operation TEXT NOT NULL,
+                EventType TEXT NOT NULL,
+                RequestedBy TEXT NULL,
+                Success INTEGER NULL,
+                Detail TEXT NULL,
+                TimestampUtc TEXT NOT NULL
+            );
+            """);
+    }
+
     public static async Task EnsurePhase1SeedAsync(AppDbContext db)
     {
+        await EnsureJobAuditsTableAsync(db);
+
         await db.Database.ExecuteSqlRawAsync("""
             CREATE TABLE IF NOT EXISTS Tenants (
                 TenantId TEXT NOT NULL PRIMARY KEY,
@@ -16,9 +47,12 @@ public static class DbSeed
                 TenantId TEXT NOT NULL,
                 Email TEXT NOT NULL,
                 Password TEXT NOT NULL,
-                DisplayName TEXT NOT NULL
+                DisplayName TEXT NOT NULL,
+                Role TEXT NOT NULL DEFAULT 'Preparer'
             );
             """);
+
+        await EnsureUsersRoleColumnAsync(db);
 
         if (!await db.Tenants.AnyAsync())
         {
@@ -77,14 +111,7 @@ public static class DbSeed
 
     public static async Task EnsurePhase3UsersAsync(AppDbContext db)
     {
-        try
-        {
-            await db.Database.ExecuteSqlRawAsync("ALTER TABLE Users ADD COLUMN Role TEXT NOT NULL DEFAULT 'Preparer';");
-        }
-        catch
-        {
-            // Column already exists.
-        }
+        await EnsureUsersRoleColumnAsync(db);
 
         var admin = await db.Users.FindAsync(Guid.Parse("11111111-1111-1111-1111-111111111111"));
         if (admin is not null)
