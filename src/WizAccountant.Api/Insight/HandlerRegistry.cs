@@ -71,6 +71,10 @@ internal sealed class HandlerRegistry
         Handlers.FirstOrDefault(h =>
             string.Equals(h.Operation, operation, StringComparison.OrdinalIgnoreCase));
 
+    public HandlerEntry? GetCanonical(string operation) =>
+        Handlers.FirstOrDefault(h =>
+            h.IsCanonical && string.Equals(h.Operation, operation, StringComparison.OrdinalIgnoreCase));
+
     public IReadOnlyList<HandlerEntry> GetByIntent(SageIntentEngine.IntentType intent)
     {
         var name = IntentToRegistryName(intent);
@@ -142,6 +146,12 @@ internal sealed class HandlerRegistry
                 var intent = h.TryGetProperty("intent", out var i) ? i.GetString() ?? "" : "";
                 var operation = h.TryGetProperty("operation", out var o) ? o.GetString() ?? "" : "";
                 var implemented = h.TryGetProperty("implemented", out var impl) && impl.GetBoolean();
+                var businessProcess = h.TryGetProperty("business_process", out var bp) ? bp.GetString() : null;
+                var canonicalMeaning = h.TryGetProperty("canonical_meaning", out var cm) ? cm.GetString() : null;
+                var isCanonical = h.TryGetProperty("is_canonical", out var ic) && ic.GetBoolean();
+                var explainability = h.TryGetProperty("explainability", out var ex) && ex.GetBoolean();
+                var reconciliation = h.TryGetProperty("reconciliation", out var rc) && rc.GetBoolean();
+                var drilldown = h.TryGetProperty("drilldown", out var dd) && dd.GetBoolean();
                 var keywords = new List<string>();
                 if (h.TryGetProperty("keywords", out var kw) && kw.ValueKind == JsonValueKind.Array)
                 {
@@ -154,7 +164,11 @@ internal sealed class HandlerRegistry
                 }
 
                 if (!string.IsNullOrEmpty(id))
-                    list.Add(new HandlerEntry(id, domain, intent, operation, implemented, keywords));
+                {
+                    list.Add(new HandlerEntry(
+                        id, domain, intent, operation, implemented, keywords,
+                        businessProcess, canonicalMeaning, isCanonical, explainability, reconciliation, drilldown));
+                }
             }
         }
 
@@ -168,4 +182,10 @@ internal sealed record HandlerEntry(
     string Intent,
     string Operation,
     bool Implemented,
-    IReadOnlyList<string> Keywords);
+    IReadOnlyList<string> Keywords,
+    string? BusinessProcess = null,
+    string? CanonicalMeaning = null,
+    bool IsCanonical = false,
+    bool Explainability = false,
+    bool Reconciliation = false,
+    bool Drilldown = false);

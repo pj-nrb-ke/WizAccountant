@@ -1,0 +1,34 @@
+[
+  {
+    "id": "pmo-01-user",
+    "query": "which product get ordered most. Give me analysis per product per month by Quantity and Value starting from Jan 2026",
+    "operation": "product.monthly.orders.analysis",
+    "mustNotRoute": ["customer.unpaid.summary", "customer.sales.top", "inventory.movement.top", "inventoryitem.list"]
+  },
+  {
+    "id": "pmo-02",
+    "query": "which product gets ordered most by month",
+    "operation": "product.monthly.orders.analysis"
+  },
+  {
+    "id": "pmo-03",
+    "query": "product-wise monthly sales from Jan 2026 quantity and value",
+    "operation": "product.monthly.orders.analysis"
+  },
+  {
+    "id": "pmo-04",
+    "query": "top ordered products by quantity from Jan 2026",
+    "operation": "product.monthly.orders.analysis"
+  },
+  {
+    "id": "pmo-05",
+    "query": "which item sells most each month",
+    "operation": "product.monthly.orders.analysis",
+    "mustNotRoute": ["inventory.movement.top"]
+  },
+  {
+    "id": "pmo-06",
+    "query": "show monthly quantity and value by product from January 2026",
+    "operation": "product.monthly.orders.analysis"
+  }
+]

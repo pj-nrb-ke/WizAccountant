@@ -1,0 +1,20 @@
+[
+  { "id": "con-pay-01", "query": "which customers pay promptly", "operation": "customer.payment.prompt.top", "mustNotRoute": ["customer.unpaid.summary", "customer.outstanding.debit.top", "customer.list"] },
+  { "id": "con-pay-02", "query": "who pays us fastest", "operation": "customer.payment.prompt.top", "mustNotRoute": ["customer.outstanding.debit.top"] },
+  { "id": "con-pay-03", "query": "which customers are slow payers", "operation": "customer.payment.late.top", "mustNotRoute": ["customer.aged.top"] },
+  { "id": "con-vat-01", "query": "estimate VAT payable this month", "operation": "vat.payable.estimate", "mustNotRoute": ["customer.sales.top"] },
+  { "id": "con-vat-02", "query": "why did VAT increase", "operation": "vat.anomalies", "mustNotRoute": ["vat.summary"] },
+  { "id": "con-inv-01", "query": "which items are dead stock", "operation": "inventory.nonmoving", "mustNotRoute": ["inventoryitem.list"] },
+  { "id": "con-inv-02", "query": "which items are slow moving", "operation": "inventory.slow.moving.top", "mustNotRoute": ["inventoryitem.list"] },
+  { "id": "con-inv-03", "query": "show negative stock on balance sheet", "operation": "inventory.bs.negative_ledgers", "mustNotRoute": ["inventory.negative.qty"] },
+  { "id": "con-cash-01", "query": "why is cash low", "operation": "treasury.dashboard", "mustNotRoute": ["bank.cashbook"] },
+  { "id": "con-bank-01", "query": "why is bank reconciliation not balancing", "operation": "bank.reconcile.variance", "mustNotRoute": ["bank.cashbook"] },
+  { "id": "con-recon-01", "query": "does AR match GL", "operation": "ar.gl.reconcile" },
+  { "id": "con-recon-02", "query": "inventory valuation vs GL", "preferredOperation": "inventory.gl.reconcile" },
+  { "id": "con-disc-01", "query": "why is GP declining", "preferredOperation": "salesinvoice.discount.top", "mustNotRoute": ["customer.sales.top"] },
+  { "id": "con-close-01", "query": "is month-end ready to close", "preferredOperation": "gl.journal.periodend", "mustNotRoute": ["gltransaction.list"] },
+  { "id": "con-bp-01", "query": "which customers pay promptly despite outstanding balances", "operation": "customer.payment.prompt.top", "mustNotRoute": ["customer.unpaid.summary"] },
+  { "id": "con-guard-01", "query": "top customers by outstanding balance", "operation": "customer.outstanding.debit.top", "mustNotRoute": ["customer.payment.prompt.top"] },
+  { "id": "con-inv-expl-01", "query": "why is inventory not matching GL", "operation": "inventory.gl.explain" },
+  { "id": "con-vat-rec-01", "query": "does VAT control match transactions", "operation": "vat.reconcile" }
+]

@@ -22,7 +22,9 @@ The Insight **AI Assistant** tab does **not** use a custom-trained language mode
 |--------|------|------|
 | UI | `wwwroot/insight/insight.js` | Sends your message + selected site to the API |
 | Router | `Insight/ChatIntentMatcher.cs` | Decides if the question matches a known pattern |
-| Planner | `Insight/ReadOnlyChatService.cs` | Picks one **allowlisted** Sage operation |
+| Business process | `Insight/BusinessProcessClassifier.cs` | Semantic process before SQL routing |
+| Planner | `Insight/ChatRoutePlanner.cs` | Picks one **allowlisted** Sage operation (confusion guards) |
+| Chat service | `Insight/ReadOnlyChatService.cs` | Runs job, formats reply, investigation context |
 | Sage | `WizConnector.Service` | Runs `CustomerTransaction.List`, etc. |
 
 If nothing matches, you see the generic help line (*“I can help with customers, suppliers…”*) — that means **add or extend an intent**, not “train” a model.
@@ -82,7 +84,7 @@ route to **`customer.openitems`** with criteria **`Outstanding <> 0`** (open AR 
 
 1. **Confirm** the data already exists as an allowlisted operation in `InsightReadOnlyTools.cs` and the connector (`SageSdkJobExecutor` / `SageSdkPhase2Handlers`).
 2. **Add a matcher** in `ChatIntentMatcher.cs` (or a new `Try…` method) with clear `Contains` / regex rules and tests for false positives (e.g. supplier vs customer).
-3. **Call it early** in `PlanToolCall` in `ReadOnlyChatService.cs` — **before** broad rules like `m.Contains("customer")` → `customer.list`.
+3. **Call it early** in `ChatRoutePlanner.cs` (matcher order) — **before** broad rules like `m.Contains("customer")` → `customer.list`. Add confusion guards in `BusinessProcessConfusionGuards.cs` when a generic route competes.
 4. **Tune the answer** in `FormatQueryDescription` and `FormatJobResult` so users see *Query run:* plus counts or a short row preview.
 5. **Restart** the local API (WizPilot → Start local API) and **Ctrl+F5** Insight so `insight.js` and the DLL reload.
 

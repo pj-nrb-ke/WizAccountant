@@ -20,6 +20,7 @@ public static class InsightReadOnlyTools
         "customer.outstanding.debit.top",
         "customer.aged.credit.top",
         "customer.sales.top",
+        "product.monthly.orders.analysis",
         "customer.payment.prompt.top",
         "customer.payment.late.top",
         "customer.payment.behavior.summary",

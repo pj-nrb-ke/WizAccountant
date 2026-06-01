@@ -17,7 +17,10 @@ async function json(url, options) {
   return body;
 }
 
-const EXPECTED_INSIGHT_CHAT = "2026-06-08-payment-behavior";
+const EXPECTED_INSIGHT_CHAT = "2026-06-12-feedback-validation";
+
+let lastQueryLogId = null;
+let feedbackLocked = false;
 
 async function loadApiVersion() {
   const el = document.getElementById("api-version");
@@ -287,6 +290,7 @@ document.getElementById("chat-form").addEventListener("submit", async (e) => {
 
   const runBtn = document.getElementById("chat-run");
   runBtn.disabled = true;
+  resetFeedbackBar();
   setChatExplanation("Running query against Sage…");
   renderChatGrid(null);
   document.getElementById("chat-grid-empty").classList.remove("hidden");
@@ -309,8 +313,12 @@ document.getElementById("chat-form").addEventListener("submit", async (e) => {
 
     setChatExplanation(explanation);
     renderChatGrid(res.grid);
+    if (res.queryLogId) showFeedbackBar(res.queryLogId);
   } catch (err) {
-    setChatExplanation(err.message);
+    const msg = SafeExecutionBoundaryLooksLikeStack(err.message)
+      ? "The request could not be completed. Check that the API is running and try again."
+      : err.message;
+    setChatExplanation(msg);
     renderChatGrid(null);
     document.getElementById("chat-grid-empty").textContent = "Query failed.";
   } finally {
@@ -318,7 +326,86 @@ document.getElementById("chat-form").addEventListener("submit", async (e) => {
   }
 });
 
+function resetFeedbackBar() {
+  feedbackLocked = false;
+  lastQueryLogId = null;
+  const bar = document.getElementById("chat-feedback");
+  const wrongPanel = document.getElementById("chat-feedback-wrong-panel");
+  const status = document.getElementById("chat-feedback-status");
+  bar?.classList.add("hidden");
+  wrongPanel?.classList.add("hidden");
+  if (status) status.textContent = "";
+  document.querySelectorAll(".feedback-btn").forEach((b) => {
+    b.disabled = false;
+    b.classList.remove("submitted");
+  });
+  const note = document.getElementById("chat-feedback-note");
+  const reason = document.getElementById("chat-feedback-reason");
+  if (note) note.value = "";
+  if (reason) reason.value = "";
+}
+
+function showFeedbackBar(queryLogId) {
+  if (!queryLogId) return;
+  lastQueryLogId = queryLogId;
+  const bar = document.getElementById("chat-feedback");
+  bar?.classList.remove("hidden");
+}
+
+async function submitFeedback(rating, reason, note) {
+  if (!lastQueryLogId || feedbackLocked) return;
+  const status = document.getElementById("chat-feedback-status");
+  try {
+    const body = await json(`${api}/api/insight/feedback`, {
+      method: "POST",
+      body: JSON.stringify({
+        queryLogId: lastQueryLogId,
+        rating,
+        reason: reason || null,
+        note: note || null,
+      }),
+    });
+    feedbackLocked = true;
+    document.querySelectorAll(".feedback-btn").forEach((b) => {
+      b.disabled = true;
+      if (b.dataset.rating === rating) b.classList.add("submitted");
+    });
+    document.getElementById("chat-feedback-wrong-panel")?.classList.add("hidden");
+    if (status) {
+      status.textContent = body.duplicate
+        ? "Feedback already recorded — thank you."
+        : "Thank you — feedback saved.";
+    }
+  } catch (e) {
+    if (status) status.textContent = `Could not save feedback: ${e.message}`;
+  }
+}
+
+function setupFeedbackUi() {
+  document.querySelectorAll(".feedback-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (feedbackLocked || !lastQueryLogId) return;
+      const rating = btn.dataset.rating;
+      if (rating === "wrong") {
+        document.getElementById("chat-feedback-wrong-panel")?.classList.remove("hidden");
+        return;
+      }
+      submitFeedback(rating === "helpful" ? "helpful" : "needs_improvement", null, null);
+    });
+  });
+  document.getElementById("chat-feedback-submit-wrong")?.addEventListener("click", () => {
+    const reason = document.getElementById("chat-feedback-reason")?.value || "";
+    const note = document.getElementById("chat-feedback-note")?.value?.trim() || "";
+    submitFeedback("wrong", reason || null, note || null);
+  });
+}
+
 setupSpeechInput();
+setupFeedbackUi();
+
+function SafeExecutionBoundaryLooksLikeStack(msg) {
+  return /Exception:|StackTrace|HEADERS|at Microsoft\.|at System\./i.test(msg || "");
+}
 
 function escapeHtml(s) {
   return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

@@ -46,6 +46,53 @@ internal static class InvNumSqlHelper
         return (new DateTime(year, 1, 1), new DateTime(year, 12, 31));
     }
 
+    /// <summary>From a start month/year onward through today (e.g. "starting from Jan 2026").</summary>
+    public static (DateTime From, DateTime To) ParseDateFromOnward(Dictionary<string, string> parameters, string? message = null)
+    {
+        if (parameters.TryGetValue("dateFrom", out var df) && DateTime.TryParse(df, out var from))
+        {
+            var to = parameters.TryGetValue("dateTo", out var dt) && DateTime.TryParse(dt, out var toParsed)
+                ? toParsed.Date
+                : DateTime.Today;
+            return (from.Date, to);
+        }
+
+        var text = (message ?? parameters.GetValueOrDefault("message") ?? "").ToLowerInvariant();
+        var year = ParseYear(parameters, message);
+        var month = ParseStartMonthFromText(text) ?? 1;
+        if (text.Contains("from jan") || text.Contains("starting from jan") || text.Contains("january 20"))
+            month = 1;
+
+        var start = new DateTime(year, month, 1);
+        return (start, DateTime.Today);
+    }
+
+    private static int? ParseStartMonthFromText(string text)
+    {
+        var months = new (string key, int num)[]
+        {
+            ("january", 1), ("jan ", 1), ("jan.", 1),
+            ("february", 2), ("feb ", 2),
+            ("march", 3), ("mar ", 3),
+            ("april", 4), ("apr ", 4),
+            ("may", 5),
+            ("june", 6), ("jun ", 6),
+            ("july", 7), ("jul ", 7),
+            ("august", 8), ("aug ", 8),
+            ("september", 9), ("sep ", 9),
+            ("october", 10), ("oct ", 10),
+            ("november", 11), ("nov ", 11),
+            ("december", 12), ("dec ", 12)
+        };
+        foreach (var (key, num) in months)
+        {
+            if (text.Contains(key, StringComparison.Ordinal))
+                return num;
+        }
+
+        return null;
+    }
+
     public static int ParseYear(Dictionary<string, string> parameters, string? message = null)
     {
         if (parameters.TryGetValue("year", out var y) && int.TryParse(y, out var year) && year is >= 1990 and <= 2100)

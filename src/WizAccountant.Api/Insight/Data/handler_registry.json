@@ -1,5 +1,5 @@
 {
-  "version": "2026-06-08-payment-behavior",
+  "version": "2026-06-10-product-monthly-orders",
   "handlers": [
     {
       "id": "AR-COUNT-DISCOUNTED-INVOICES",
@@ -92,7 +92,13 @@
     {
       "id": "AR-PAYMENT-PROMPT-TOP",
       "domain": "AR",
-      "intent": "ranking",
+      "intent": "payment_behavior",
+      "business_process": "customer_payment_discipline",
+      "canonical_meaning": "prompt payer",
+      "is_canonical": true,
+      "explainability": false,
+      "reconciliation": false,
+      "drilldown": true,
       "implemented": true,
       "operation": "customer.payment.prompt.top",
       "keywords": ["paying promptly", "prompt payer", "within terms", "payment discipline"]
@@ -100,7 +106,13 @@
     {
       "id": "AR-PAYMENT-LATE-TOP",
       "domain": "AR",
-      "intent": "ranking",
+      "intent": "payment_behavior",
+      "business_process": "customer_payment_discipline",
+      "canonical_meaning": "slow payer",
+      "is_canonical": true,
+      "explainability": false,
+      "reconciliation": false,
+      "drilldown": true,
       "implemented": true,
       "operation": "customer.payment.late.top",
       "keywords": ["late payer", "slow payer", "pay late"]

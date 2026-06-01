@@ -16,6 +16,8 @@ builder.Services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
 builder.Services.AddScoped<JobService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ReadOnlyChatService>();
+builder.Services.AddScoped<InsightQueryLogService>();
+builder.Services.AddScoped<InsightTriageService>();
 builder.Services.AddScoped<NotificationStubService>();
 builder.Services.AddScoped<ApprovalService>();
 builder.Services.AddSingleton<ActDraftService>();
@@ -300,7 +302,12 @@ app.MapPost("/api/insight/search", async (InsightSearchRequest request, JobServi
     catch (TimeoutException ex) { return Results.Json(new { error = ex.Message }, statusCode: 504); }
 });
 
-app.MapPost("/api/insight/chat", async (ChatMessageRequest request, ReadOnlyChatService chat, HttpContext http, CancellationToken ct) =>
+app.MapPost("/api/insight/chat", async (
+    ChatMessageRequest request,
+    ReadOnlyChatService chat,
+    HttpContext http,
+    ILogger<ReadOnlyChatService> logger,
+    CancellationToken ct) =>
 {
     var tenantId = http.Request.Headers.TryGetValue("X-Tenant-Id", out var t) ? t.ToString() : "pilot-tenant";
     try
@@ -308,10 +315,36 @@ app.MapPost("/api/insight/chat", async (ChatMessageRequest request, ReadOnlyChat
         return Results.Ok(await chat.AskAsync(request, tenantId, ct));
     }
     catch (InvalidOperationException ex) { return Results.NotFound(ex.Message); }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Insight chat failed");
+        return Results.Ok(ReadOnlyChatService.BuildSafeErrorResponse(request.Message, ex));
+    }
 });
 
 app.MapGet("/api/insight/conversations", async (Guid siteId, string? tenantId, ReadOnlyChatService chat, CancellationToken ct) =>
     Results.Ok(await chat.ListConversationsAsync(tenantId ?? "pilot-tenant", siteId, ct)));
+
+app.MapPost("/api/insight/feedback", async (InsightFeedbackRequest request, InsightQueryLogService logs, CancellationToken ct) =>
+{
+    if (request.QueryLogId == Guid.Empty)
+        return Results.BadRequest("QueryLogId required.");
+    var (found, duplicate) = await logs.SetFeedbackAsync(
+        request.QueryLogId, request.Rating, request.Reason, request.Note, ct);
+    if (!found) return Results.NotFound();
+    return Results.Ok(new { saved = !duplicate, duplicate });
+});
+
+app.MapGet("/api/insight/triage", async (string? tenantId, int? days, InsightTriageService triage, CancellationToken ct) =>
+{
+    var report = await triage.BuildReportAsync(tenantId ?? "pilot-tenant", days ?? 7, ct);
+    return Results.Ok(new
+    {
+        report,
+        markdown = triage.FormatMarkdown(report),
+        candidateTestsJson = triage.ExportCandidateTestsJson(report)
+    });
+});
 
 app.MapGet("/api/insight/export/{jobId:guid}", async (Guid jobId, AppDbContext db, CancellationToken ct) =>
 {

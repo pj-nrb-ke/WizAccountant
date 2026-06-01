@@ -13,6 +13,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<UserRecord> Users => Set<UserRecord>();
     public DbSet<ChatConversationRecord> ChatConversations => Set<ChatConversationRecord>();
     public DbSet<ChatMessageRecord> ChatMessages => Set<ChatMessageRecord>();
+    public DbSet<InsightQueryLogRecord> InsightQueryLogs => Set<InsightQueryLogRecord>();
     public DbSet<NotificationLogRecord> NotificationLogs => Set<NotificationLogRecord>();
     public DbSet<ApprovalProposalRecord> ApprovalProposals => Set<ApprovalProposalRecord>();
     public DbSet<WriteAuditRecord> WriteAudits => Set<WriteAuditRecord>();
@@ -28,6 +29,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         modelBuilder.Entity<UserRecord>().HasKey(x => x.UserId);
         modelBuilder.Entity<ChatConversationRecord>().HasKey(x => x.ConversationId);
         modelBuilder.Entity<ChatMessageRecord>().HasKey(x => x.MessageId);
+        modelBuilder.Entity<InsightQueryLogRecord>().HasKey(x => x.LogId);
         modelBuilder.Entity<NotificationLogRecord>().HasKey(x => x.NotificationId);
         modelBuilder.Entity<ApprovalProposalRecord>().HasKey(x => x.ProposalId);
         modelBuilder.Entity<WriteAuditRecord>().HasKey(x => x.WriteAuditId);
@@ -117,6 +119,31 @@ public sealed class ChatMessageRecord
     public string Content { get; set; } = string.Empty;
     public string? ToolsUsedJson { get; set; }
     public DateTimeOffset TimestampUtc { get; set; }
+}
+
+/// <summary>Insight ask audit trail for self-training triage (Layer 6).</summary>
+public sealed class InsightQueryLogRecord
+{
+    public Guid LogId { get; set; }
+    public string TenantId { get; set; } = "";
+    public Guid SiteId { get; set; }
+    public Guid ConversationId { get; set; }
+    public string UserQuery { get; set; } = "";
+    public string? Operation { get; set; }
+    public string RouteStatus { get; set; } = "";
+    public string? BusinessProcess { get; set; }
+    public string? ContractJson { get; set; }
+    public string? ToolsUsedJson { get; set; }
+    public string? JobStatus { get; set; }
+    public string? ErrorSummary { get; set; }
+    public string InsightChatVersion { get; set; } = "";
+    public bool CompatibilityBlocked { get; set; }
+    public string? CompatibilityReason { get; set; }
+    public string? FeedbackRating { get; set; }
+    public string? FeedbackNote { get; set; }
+    public string? FeedbackAtUtc { get; set; }
+    /// <summary>ISO-8601 UTC string for SQLite-safe ordering/filtering.</summary>
+    public string CreatedAtUtc { get; set; } = "";
 }
 
 public sealed class NotificationLogRecord

@@ -1,0 +1,87 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --muted-foreground: #64748b;
+  --border: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.18);
+  --primary: #2563eb;
+  --primary-foreground: #f8fafc;
+  --ring: #2563eb;
+  --glow: rgba(37, 99, 235, 0.35);
+  --cyan: #0891b2;
+  --hero-glow-1: rgba(37, 99, 235, 0.12);
+  --hero-glow-2: rgba(8, 145, 178, 0.08);
+  --card-shadow: rgba(15, 23, 42, 0.08);
+}
+
+.dark {
+  --background: #070b12;
+  --foreground: #f1f5f9;
+  --surface: #0f1623;
+  --muted-foreground: #94a3b8;
+  --border: rgba(148, 163, 184, 0.14);
+  --border-strong: rgba(148, 163, 184, 0.28);
+  --primary: #3b82f6;
+  --primary-foreground: #f8fafc;
+  --ring: #3b82f6;
+  --glow: rgba(59, 130, 246, 0.55);
+  --cyan: #22d3ee;
+  --hero-glow-1: rgba(59, 130, 246, 0.22);
+  --hero-glow-2: rgba(34, 211, 238, 0.08);
+  --card-shadow: rgba(0, 0, 0, 0.4);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.hero-glow {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, var(--hero-glow-1), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, var(--hero-glow-2), transparent),
+    radial-gradient(ellipse 50% 30% at 0% 50%, var(--hero-glow-1), transparent);
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.35);
+  color: #fff;
+}
+
+.dark ::selection {
+  color: #fff;
+}
+
+:root:not(.dark) ::selection {
+  color: #0f172a;
+}

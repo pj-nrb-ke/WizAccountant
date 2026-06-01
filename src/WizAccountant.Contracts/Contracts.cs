@@ -207,6 +207,18 @@ public sealed class ChatMessageResponse
     public string GuardrailNotice { get; set; } = "Read-only assistant. No posting to Sage.";
     /// <summary>Changes when chat routing is updated — compare with /health insightChatVersion.</summary>
     public string InsightChatVersion { get; set; } = string.Empty;
+    /// <summary>Set when query logging is enabled — use for POST /api/insight/feedback.</summary>
+    public Guid? QueryLogId { get; set; }
+}
+
+public sealed class InsightFeedbackRequest
+{
+    public Guid QueryLogId { get; set; }
+    /// <summary>helpful | wrong | needs_improvement</summary>
+    public string Rating { get; set; } = "";
+    /// <summary>Quick reason: wrong_route, wrong_numbers, too_many_rows, missing_analysis, crashed, not_business_aware, incomplete_answer</summary>
+    public string? Reason { get; set; }
+    public string? Note { get; set; }
 }
 
 public sealed class ConversationDto

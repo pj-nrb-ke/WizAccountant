@@ -32,6 +32,8 @@ internal static class SageSdkPhase2Handlers
             "customer.aged.credit.top" => CustomerAgedCreditTopHandler.Execute(parameters),
             "customer.sales.top" => CustomerSalesTopHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "product.monthly.orders.analysis" => ProductMonthlyOrdersAnalysisHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
             "customer.payment.prompt.top" => CustomerPaymentPromptTopHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
             "customer.payment.late.top" => CustomerPaymentLateTopHandler.Execute(

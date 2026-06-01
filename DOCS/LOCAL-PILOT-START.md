@@ -48,7 +48,8 @@ Click **Restart local API** (stops any old API still on port 5278, then starts f
 
 - A **new console window** opens — **leave it open** (this is the API on port 5278).
 - Wait until you see **“Now listening on: http://localhost:5278”** (about 30–60 seconds).
-- In Insight, the header should show **Chat 2026-05-27-unpaid-invoices** (yellow = stale API — run Restart again).
+- In Insight, the header should show **Chat 2026-06-09-consolidation** (yellow = stale API — run Restart again).
+- Consolidation smoke queries: `DOCS/TEST-CONSOLIDATION-LOCAL.md`
 - Alternative: run `scripts\restart-local-api.ps1` from the repo if WizPilot is old.
 - If that window closes immediately or shows red errors, tell support — Admin will not work until this step succeeds.
 

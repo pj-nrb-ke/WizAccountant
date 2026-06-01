@@ -52,10 +52,29 @@ This index links the **Cursor Training Framework** (imported from `Sage_AI_Agent
 | Ranking / TOP policy | `src/WizAccountant.Api/Insight/RankingQueryPolicy.cs` |
 | Intent regression tests | `tests/intents/golden-intents.json` + `tests/WizAccountant.Insight.Intents.Tests/` |
 | Aggregation | `QueryAggregationMode.cs`, `AggregationReplyFormat.cs` |
-| Chat routing | `ChatIntentMatcher.cs`, `ReadOnlyChatService.PlanToolCall` |
+| Chat routing | `ChatRoutePlanner.cs`, `BusinessProcessClassifier.cs`, `CompatibilityGate.cs` |
+| Query logging / triage | `InsightQueryLogService.cs`, `InsightTriageService.cs` |
+| Intent contract | `QueryIntentContract.cs`, `HandlerCapabilityRegistry.cs` |
 | Mega digest | `MegaDigestCatalog.cs`, `MegaDigestRouter.cs`, `MegaDigestFallbackMatcher.cs` |
 | Sage SQL handlers | `src/WizConnector.Service/Sage/*Handler.cs`, `SageSdkPhase2Handlers.cs` |
 | Allowlist | `InsightReadOnlyTools.cs` |
+
+## Self-training loop (merged architecture)
+
+| Document | Use for |
+|----------|---------|
+| `Sage_AI_Self_Training_Roadmap.md` | Combined 9-layer plan + curriculum A–E + priorities |
+| **`Pilot_Stabilization_Workflow.md`** | **SOP: telemetry → triage → promote → sign-off** |
+| **`Real_Insight_Queries.md`** | **Permanent real query bank (training fuel)** |
+| **`Pilot_Query_Signoff.md`** | **UAT / Production Ready tracking** |
+| **`Query_Triage_Priority.md`** | **Critical / High / Medium priority matrix** |
+| **`Capability_Gap_Register.md`** | **Open gaps — no random handler growth** |
+| `Merge_Review_Cursor_Self_Analysis_vs_Roadmap.md` (Downloads) | Executive merge decision |
+| `InsightQueryLogs` + triage API | Production learning from real queries |
+| `scripts/export-insight-triage.ps1` | Weekly candidate test export |
+| `scripts/weekly-pilot-review.ps1` | Export + weekly checklist |
+
+**API:** `GET /api/insight/triage?days=7` · `POST /api/insight/feedback` · `QueryLogId` on chat response
 
 ## Training status (honest)
 

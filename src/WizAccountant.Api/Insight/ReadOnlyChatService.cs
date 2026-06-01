@@ -5,10 +5,16 @@ using WizAccountant.Contracts;
 
 namespace WizAccountant.Api.Insight;
 
-public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogger<ReadOnlyChatService> logger)
+public sealed class ReadOnlyChatService(
+    AppDbContext db,
+    JobService jobs,
+    InsightQueryLogService queryLog,
+    ILogger<ReadOnlyChatService> logger)
 {
-    private const string Guardrail =
+    public const string GuardrailText =
         "I only read live Sage data. I cannot post journals or payments. Ask an approver in Phase 3 for writes.";
+
+    private const string Guardrail = GuardrailText;
 
     public async Task<ChatMessageResponse> AskAsync(ChatMessageRequest request, string? tenantId, CancellationToken ct)
     {
@@ -44,7 +50,26 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
 
         var intentClassification = SageIntentEngine.Classify(request.Message);
         var intentResolution = SageIntentResolver.Resolve(request.Message);
-        var (operation, parameters, toolsUsed) = PlanToolCall(request.Message, intentClassification);
+        var businessProcess = BusinessProcessClassifier.Classify(request.Message);
+        var intentContract = QueryIntentContract.Parse(request.Message, intentClassification, businessProcess);
+
+        InvestigationContext? investigation = null;
+        if (conversation.ConversationId != Guid.Empty)
+        {
+            // SQLite cannot translate ORDER BY DateTimeOffset — order in memory (small per conversation).
+            var priorMessages = await db.ChatMessages.AsNoTracking()
+                .Where(x => x.ConversationId == conversation.ConversationId && x.Role == "assistant")
+                .ToListAsync(ct);
+            var priorAssistant = priorMessages
+                .OrderByDescending(x => x.TimestampUtc)
+                .FirstOrDefault();
+            investigation = InvestigationContext.FromPriorAssistantMessage(
+                priorAssistant?.ToolsUsedJson,
+                priorAssistant?.Content);
+        }
+
+        var (operation, parameters, toolsUsed) =
+            ChatRoutePlanner.Plan(request.Message, intentClassification, investigation);
 
         toolsUsed.Add($"domain:{intentClassification.Domain}:{intentClassification.DomainConfidence:F2}");
         if (intentResolution.HandlerId is not null)
@@ -64,15 +89,47 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
             toolsUsed.Clear();
         }
 
+        var compatibilityBlocked = false;
+        string? compatibilityReason = null;
+        if (operation is not null && !CompatibilityGate.IsCompatible(intentContract, operation, out compatibilityReason))
+        {
+            compatibilityBlocked = true;
+            var suggested = CompatibilityGate.SuggestCanonicalOperation(intentContract);
+            toolsUsed.Add($"compat:blocked:{operation}");
+            if (!string.IsNullOrEmpty(suggested) && InsightReadOnlyTools.IsAllowed(suggested))
+            {
+                operation = suggested;
+                toolsUsed.Add($"compat:reroute:{suggested}");
+                compatibilityBlocked = false;
+                compatibilityReason = null;
+            }
+            else
+            {
+                operation = null;
+            }
+        }
+
         string reply;
+        string routeStatus = "unmatched";
+        string? jobStatus = null;
+        string? errorSummary = null;
         ChatGridDto? grid = null;
         var citations = new List<string>();
         var dataAsOf = DateTimeOffset.UtcNow;
 
         if (operation is null)
         {
-            if (MegaDigestFallbackMatcher.TryBuildReply(request.Message, intentClassification, out var digestReply, out var digestCitations))
+            if (compatibilityBlocked)
             {
+                routeStatus = "compat_blocked";
+                reply = $"I understood your question as {businessProcess.BusinessMeaning ?? "a structured finance analysis"}, " +
+                        $"but the selected route was incompatible ({compatibilityReason}). " +
+                        "Try rephrasing or ask for a specific report type." + Environment.NewLine + Environment.NewLine + Guardrail;
+                toolsUsed.Add("compat:user-message");
+            }
+            else if (MegaDigestFallbackMatcher.TryBuildReply(request.Message, intentClassification, out var digestReply, out var digestCitations))
+            {
+                routeStatus = "mega_digest";
                 reply = digestReply;
                 citations.AddRange(digestCitations);
                 toolsUsed.Add("mega.digest.fallback");
@@ -102,10 +159,12 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
         }
         else if (!InsightReadOnlyTools.IsAllowed(operation))
         {
+            routeStatus = "not_allowlisted";
             reply = "That action is not in the read-only allowlist. " + Guardrail;
         }
         else
         {
+            routeStatus = "routed";
             try
             {
                 var job = await jobs.RunAndWaitAsync(new CreateJobRequest
@@ -117,39 +176,74 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
                 }, 90, ct);
 
                 dataAsOf = job.UpdatedAtUtc ?? job.CreatedAtUtc;
+                jobStatus = job.Status.ToString();
                 if (job.Status == JobStatus.Failed)
                 {
-                    reply = $"Sage read failed: {job.Error}";
-                    if (job.Error?.Contains("Unsupported operation: inventory.gl.reconcile", StringComparison.OrdinalIgnoreCase) == true)
-                        reply += "\n\nThe connector on this PC is out of date. Close WizConnector, run WizPilot → Build pilot apps, then Start service + tray.";
-                    reply += " " + Guardrail;
+                    routeStatus = "job_failed";
+                    errorSummary = job.Error;
+                    var safeReason = SafeExecutionBoundary.SanitizeForUser(job.Error);
+                    reply = SafeExecutionBoundary.FormatHandlerFailure(operation, safeReason);
                 }
                 else
                 {
-                    var queryDesc = FormatQueryDescription(operation, parameters, request.Message);
-                    (reply, citations) = FormatJobResult(operation, job.ResultJson, request.Message);
-                    if (!string.IsNullOrEmpty(queryDesc))
-                        reply = queryDesc + "\n\n" + reply;
-                    var layerNote = SageChatDomain.LayerFootnote(operation);
-                    if (!string.IsNullOrEmpty(layerNote))
-                        reply += "\n\n" + layerNote;
-                    reply += $"\n\n(Data as of {dataAsOf:u})";
+                    var validation = OutputContractValidator.Validate(intentContract, operation, job.ResultJson);
+                    if (!validation.IsValid)
+                    {
+                        routeStatus = "output_validation_failed";
+                        errorSummary = string.Join(", ", validation.MissingFields);
+                        toolsUsed.Add("output:validation_failed");
+                        reply = validation.SafeFailureMessage + Environment.NewLine + Environment.NewLine + Guardrail;
+                        grid = null;
+                    }
+                    else
+                    {
+                        var queryDesc = FormatQueryDescription(operation, parameters, request.Message);
+                        (reply, citations) = FormatJobResult(operation, job.ResultJson, request.Message);
+                        if (!string.IsNullOrEmpty(queryDesc))
+                            reply = queryDesc + "\n\n" + reply;
+                        var layerNote = SageChatDomain.LayerFootnote(operation);
+                        if (!string.IsNullOrEmpty(layerNote))
+                            reply += "\n\n" + layerNote;
+                        reply += $"\n\n(Data as of {dataAsOf:u})";
 
-                    grid = QueryAggregationMode.ShouldSuppressGrid(request.Message, operation, job.ResultJson)
-                        ? null
-                        : ChatResultGridBuilder.TryBuild(
-                            operation,
-                            job.ResultJson,
-                            intentClassification,
-                            RankingQueryPolicy.ResolveMaxGridRows(operation, parameters));
+                        grid = QueryAggregationMode.ShouldSuppressGrid(request.Message, operation, job.ResultJson)
+                            ? null
+                            : ChatResultGridBuilder.TryBuild(
+                                operation,
+                                job.ResultJson,
+                                intentClassification,
+                                RankingQueryPolicy.ResolveMaxGridRows(operation, parameters));
+                    }
                 }
             }
             catch (Exception ex)
             {
+                routeStatus = "exception";
+                errorSummary = ex.ToString();
                 logger.LogWarning(ex, "Chat tool {Operation} failed", operation);
-                reply = $"Could not complete read ({ex.Message}). Is the connector online? " + Guardrail;
+                reply = SafeExecutionBoundary.FormatHandlerFailure(
+                    operation,
+                    SafeExecutionBoundary.SanitizeForUser(ex.Message));
             }
         }
+
+        var logId = await queryLog.LogAsync(new InsightQueryLogEntry
+        {
+            TenantId = tenantId ?? site.TenantId,
+            SiteId = request.SiteId,
+            ConversationId = conversation.ConversationId,
+            UserQuery = request.Message,
+            Operation = operation,
+            RouteStatus = routeStatus,
+            BusinessProcess = businessProcess.Process.ToString(),
+            ContractJson = JsonSerializer.Serialize(intentContract),
+            ToolsUsedJson = JsonSerializer.Serialize(toolsUsed),
+            JobStatus = jobStatus,
+            ErrorSummary = errorSummary,
+            InsightChatVersion = InsightChatInfo.Version,
+            CompatibilityBlocked = compatibilityBlocked,
+            CompatibilityReason = compatibilityReason
+        }, ct);
 
         db.ChatMessages.Add(new ChatMessageRecord
         {
@@ -173,7 +267,8 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
             Citations = citations,
             DataAsOfUtc = dataAsOf,
             GuardrailNotice = Guardrail,
-            InsightChatVersion = InsightChatInfo.Version
+            InsightChatVersion = InsightChatInfo.Version,
+            QueryLogId = logId
         };
     }
 
@@ -203,184 +298,6 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
             return reply;
 
         return SageChatDomain.BuildUnmatchedReply(siteName, message);
-    }
-
-    private static (string? operation, Dictionary<string, string> parameters, List<string> tools) PlanToolCall(
-        string message,
-        SageIntentEngine.Classification classification)
-    {
-        var m = message.ToLowerInvariant();
-        var tools = new List<string> { $"intent:{classification.PrimaryIntent}" };
-        var parameters = new Dictionary<string, string> { ["top"] = "500" };
-        RankingQueryPolicy.ApplyRowLimits(message, classification, parameters);
-
-        if ((m.Contains("dashboard") || m.Contains("kpi")) && !m.Contains("treasury") &&
-            !m.Contains("vat") && !m.Contains("expense trend"))
-        {
-            tools.Add("dashboard.summary");
-            return ("dashboard.summary", parameters, tools);
-        }
-
-        if (m.StartsWith("search ") || m.Contains("find "))
-        {
-            var query = Regex.Replace(message, "(?i)^(search|find)\\s+", "").Trim();
-            parameters["query"] = query;
-            tools.Add("search.global");
-            return ("search.global", parameters, tools);
-        }
-
-        if (ChatIntentMatcher.TryInventoryBsNegativeLedgers(m, parameters, tools, out var negStockOp))
-            return (negStockOp, parameters, tools);
-
-        if (ReconciliationChatMatcher.TryRoute(message, m, parameters, tools, out var reconOp))
-            return (reconOp, parameters, tools);
-
-        if (ArPaymentBehaviorChatMatcher.TryRoute(message, m, parameters, tools, out var payBehOp))
-            return (payBehOp, parameters, tools);
-
-        if (ArSalesChatMatcher.TryRoute(message, m, parameters, tools, out var arSalesOp))
-            return (arSalesOp, parameters, tools);
-
-        if (ApPurchaseInvChatMatcher.TryRoute(message, m, parameters, tools, out var apOp))
-            return (apOp, parameters, tools);
-
-        if (InvWarehouseChatMatcher.TryRoute(message, m, parameters, tools, out var invOp))
-            return (invOp, parameters, tools);
-
-        if (GlFinanceChatMatcher.TryRoute(message, m, parameters, tools, out var finOp))
-            return (finOp, parameters, tools);
-
-        if (ChatIntentMatcher.TryCustomerAgedTop(m, parameters, tools, out var agedTopOp))
-            return (agedTopOp, parameters, tools);
-
-        if (ChatIntentMatcher.TryCustomerUnpaidSummary(m, parameters, tools, out var summaryOp))
-            return (summaryOp, parameters, tools);
-
-        if (SageChatDomain.TryGlTransactionList(m, parameters, tools, out var glOp) &&
-            !m.Contains("expense") && !m.Contains("vat") && !m.Contains("treasury"))
-            return (glOp, parameters, tools);
-
-        if (ChatIntentMatcher.TryUnpaidSalesInvoices(m, parameters, tools, out var unpaidOp))
-            return (unpaidOp, parameters, tools);
-
-        if (MegaDigestRouter.TryPlan(message, m, parameters, tools, out var digestOp))
-            return (digestOp, parameters, tools);
-
-        if (m.Contains("open item") && m.Contains("supplier"))
-        {
-            ExtractAccount(m, parameters);
-            tools.Add("supplier.openitems");
-            return ("supplier.openitems", parameters, tools);
-        }
-
-        if (m.Contains("open item") || m.Contains("outstanding"))
-        {
-            ExtractAccount(m, parameters);
-            tools.Add("customer.openitems");
-            return ("customer.openitems", parameters, tools);
-        }
-
-        if (m.Contains("supplier") && m.Contains("list") &&
-            !RankingQueryPolicy.IsRankingClassification(classification))
-        {
-            tools.Add("supplier.list");
-            return ("supplier.list", parameters, tools);
-        }
-
-        if (TryExtractThreshold(message, "valuation", out var minVal) &&
-            (m.Contains("inventory") || m.Contains("stock") || m.Contains("item")))
-        {
-            parameters["minValuation"] = minVal.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            tools.Add("inventoryitem.list");
-            return ("inventoryitem.list", parameters, tools);
-        }
-
-        if (TryExtractThreshold(message, "balance", out var minSupplierBal) && m.Contains("supplier"))
-        {
-            parameters["minBalance"] = minSupplierBal.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            tools.Add("supplier.list");
-            return ("supplier.list", parameters, tools);
-        }
-
-        if (TryExtractThreshold(message, "balance", out var minBalance) && m.Contains("customer"))
-        {
-            parameters["minBalance"] = minBalance.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            tools.Add("customer.list");
-            return ("customer.list", parameters, tools);
-        }
-
-        if (m.Contains("supplier") && m.Contains("list"))
-        {
-            tools.Add("supplier.list");
-            return ("supplier.list", parameters, tools);
-        }
-
-        if (m.Contains("customer") && m.Contains("list") && !ChatIntentMatcher.IsCustomerAgedTopQuery(m) &&
-            !RankingQueryPolicy.IsRankingClassification(classification))
-        {
-            tools.Add("customer.list");
-            return ("customer.list", parameters, tools);
-        }
-
-        if (m.Contains("customer") && !ChatIntentMatcher.IsCustomerAgedTopQuery(m) &&
-            !RankingQueryPolicy.IsRankingClassification(classification))
-        {
-            tools.Add("customer.list");
-            return ("customer.list", parameters, tools);
-        }
-
-        if (m.Contains("supplier") && !RankingQueryPolicy.IsRankingClassification(classification))
-        {
-            tools.Add("supplier.list");
-            return ("supplier.list", parameters, tools);
-        }
-
-        return (null, parameters, tools);
-    }
-
-    private static bool TryExtractThreshold(string message, string kind, out decimal amount)
-    {
-        amount = 0;
-        var keywordPattern = kind switch
-        {
-            "valuation" => @"(?:valuation|stock\s*value|inventory\s*value|item\s*value)",
-            "balance" => @"(?:balance|owing|outstanding)",
-            _ => kind
-        };
-
-        var match = Regex.Match(message,
-            keywordPattern + @"\s*(?:>|greater\s+than|over|above)\s*([\d][\d,\.]*)\s*(k|m|million|thousand)?",
-            RegexOptions.IgnoreCase);
-        if (!match.Success)
-        {
-            match = Regex.Match(message, @">\s*([\d][\d,\.]*)\s*(k|m|million|thousand)?", RegexOptions.IgnoreCase);
-            if (!match.Success) return false;
-            if (kind == "balance" && !message.Contains("balance", StringComparison.OrdinalIgnoreCase))
-                return false;
-            if (kind == "valuation" &&
-                !message.Contains("valuation", StringComparison.OrdinalIgnoreCase) &&
-                !message.Contains("stock", StringComparison.OrdinalIgnoreCase) &&
-                !message.Contains("inventory", StringComparison.OrdinalIgnoreCase))
-                return false;
-        }
-
-        var raw = match.Groups[1].Value.Replace(",", "");
-        if (!decimal.TryParse(raw, System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.InvariantCulture, out var parsed) &&
-            !decimal.TryParse(raw, System.Globalization.NumberStyles.Any,
-                System.Globalization.CultureInfo.CurrentCulture, out parsed))
-            return false;
-
-        var suffix = match.Groups.Count > 2 && match.Groups[2].Success
-            ? match.Groups[2].Value.ToLowerInvariant()
-            : "";
-        amount = suffix switch
-        {
-            "k" or "thousand" => parsed * 1000,
-            "m" or "million" => parsed * 1_000_000,
-            _ => parsed
-        };
-        return true;
     }
 
     private static string FormatQueryDescription(string operation, Dictionary<string, string> parameters, string? userMessage = null)
@@ -464,6 +381,8 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
             return "Query run: SAGE-AR-PAYMENT-BEHAVIOR-001 — customer payment behaviour summary.";
         if (operation == "customer.payment.detail")
             return "Query run: SAGE-AR-PAYMENT-BEHAVIOR-001 — single-customer payment discipline detail.";
+        if (operation == ProductOrderAnalysisChatMatcher.Operation)
+            return "Query run: SAGE-PRODUCT-MONTHLY-ORDERS-001 — product monthly order/sales analysis (quantity and value by month from posted sales invoices).";
         if (operation == "customer.openitems")
             return "Query run: CustomerTransaction.List (Outstanding <> 0) — open/unpaid AR including sales invoices.";
         if (operation == "dashboard.summary")
@@ -514,13 +433,20 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
             {
                 if (root.TryGetProperty("querySerial", out var qs))
                     citations.Add(qs.GetString() ?? operation);
-                return (reconReply + Environment.NewLine + Environment.NewLine + Guardrail, citations);
+                var enhanced = ExplainabilityEnvelope.EnhanceReply(operation, reconReply, root);
+                return (enhanced + Environment.NewLine + Environment.NewLine + Guardrail, citations);
             }
 
             if (ArPaymentBehaviorReplyFormat.TryFormat(operation, root, out var payReply))
             {
                 citations.Add("SAGE-AR-PAYMENT-BEHAVIOR-001");
                 return (payReply + Environment.NewLine + Environment.NewLine + Guardrail, citations);
+            }
+
+            if (ProductMonthlyOrdersReplyFormat.TryFormat(operation, root, out var productMonthlyReply))
+            {
+                citations.Add("SAGE-PRODUCT-MONTHLY-ORDERS-001");
+                return (productMonthlyReply + Environment.NewLine + Environment.NewLine + Guardrail, citations);
             }
 
             if (operation == "salesinvoice.discount.count")
@@ -831,5 +757,26 @@ public sealed class ReadOnlyChatService(AppDbContext db, JobService jobs, ILogge
             : "";
 
         return header + ArSalesReplyFormat.FormatInvoiceList(root);
+    }
+
+    public static ChatMessageResponse BuildSafeErrorResponse(string userMessage, Exception ex)
+    {
+        var understood = ProductOrderAnalysisChatMatcher.IsProductMonthlyOrderQuery(userMessage.ToLowerInvariant())
+            ? "Product Monthly Order Analysis"
+            : "your finance question";
+
+        var safeReason = SafeExecutionBoundary.SanitizeForUser(ex.Message);
+
+        var reply =
+            $"I understood this as {understood}, but the request could not be completed.\n\n" +
+            SafeExecutionBoundary.FormatHandlerFailure(null, safeReason);
+
+        return new ChatMessageResponse
+        {
+            Reply = reply,
+            Explanation = reply,
+            GuardrailNotice = GuardrailText,
+            InsightChatVersion = InsightChatInfo.Version
+        };
     }
 }

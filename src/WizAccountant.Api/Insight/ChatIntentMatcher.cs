@@ -188,6 +188,11 @@ internal static class ChatIntentMatcher
             return false;
 
         var m = messageLower;
+
+        if (m.Contains("top") && m.Contains("outstanding") && m.Contains("balance") &&
+            !m.Contains("unpaid") && !m.Contains("invoice"))
+            return false;
+
         if (!m.Contains("customer") || m.Contains("supplier"))
             return false;
 

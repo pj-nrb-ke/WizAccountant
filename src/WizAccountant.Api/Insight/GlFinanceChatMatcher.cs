@@ -41,6 +41,16 @@ internal static class GlFinanceChatMatcher
     private static bool TryTreasury(string m, Dictionary<string, string> parameters, List<string> tools, out string? op)
     {
         op = null;
+        if ((m.Contains("cash") || m.Contains("liquidity")) &&
+            (m.Contains("low") || m.Contains("shortage") ||
+             (m.Contains("why") && !m.Contains("customer") && !m.Contains("supplier"))) &&
+            !m.Contains("net cash") && !m.Contains("netcash") && !m.Contains("forecast"))
+        {
+            op = "treasury.dashboard";
+            tools.Add(op);
+            return true;
+        }
+
         if (!m.Contains("treasury") && !m.Contains("cash forecast") && !m.Contains("forecast") &&
             !m.Contains("cashflow") && !m.Contains("cash flow") && !m.Contains("cash position") &&
             !m.Contains("liquidity") && !m.Contains("cash burn") &&
@@ -196,7 +206,9 @@ internal static class GlFinanceChatMatcher
             return true;
         }
 
-        if (m.Contains("suspicious") || m.Contains("unusual") || m.Contains("anomal"))
+        if (m.Contains("suspicious") || m.Contains("unusual") || m.Contains("anomal") ||
+            (m.Contains("why") && m.Contains("vat") && !m.Contains("top") && !m.Contains("customer")) ||
+            (m.Contains("vat") && (m.Contains("increased") || m.Contains("increase")) && !m.Contains("output") && !m.Contains("input")))
         {
             op = "vat.anomalies";
             tools.Add(op);

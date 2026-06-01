@@ -1,3 +1,4 @@
+using System.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace WizAccountant.Api;
@@ -6,14 +7,46 @@ public static class DbSeed
 {
     public static async Task EnsureUsersRoleColumnAsync(AppDbContext db)
     {
-        try
-        {
-            await db.Database.ExecuteSqlRawAsync("ALTER TABLE Users ADD COLUMN Role TEXT NOT NULL DEFAULT 'Preparer';");
-        }
-        catch
-        {
-            // Column already exists.
-        }
+        if (!await SqliteTableExistsAsync(db, "Users"))
+            return;
+
+        if (await SqliteColumnExistsAsync(db, "Users", "Role"))
+            return;
+
+        await db.Database.ExecuteSqlRawAsync(
+            "ALTER TABLE Users ADD COLUMN Role TEXT NOT NULL DEFAULT 'Preparer';");
+    }
+
+    private static async Task<bool> SqliteTableExistsAsync(AppDbContext db, string tableName)
+    {
+        var connection = db.Database.GetDbConnection();
+        if (connection.State != ConnectionState.Open)
+            await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type = 'table' AND name = $name";
+        var param = command.CreateParameter();
+        param.ParameterName = "$name";
+        param.Value = tableName;
+        command.Parameters.Add(param);
+        var count = Convert.ToInt32(await command.ExecuteScalarAsync());
+        return count > 0;
+    }
+
+    private static async Task<bool> SqliteColumnExistsAsync(AppDbContext db, string tableName, string columnName)
+    {
+        var connection = db.Database.GetDbConnection();
+        if (connection.State != ConnectionState.Open)
+            await connection.OpenAsync();
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = $"SELECT COUNT(*) FROM pragma_table_info('{tableName}') WHERE name = $name";
+        var param = command.CreateParameter();
+        param.ParameterName = "$name";
+        param.Value = columnName;
+        command.Parameters.Add(param);
+        var count = Convert.ToInt32(await command.ExecuteScalarAsync());
+        return count > 0;
     }
 
     public static async Task EnsureJobAuditsTableAsync(AppDbContext db)
@@ -36,6 +69,7 @@ public static class DbSeed
     public static async Task EnsurePhase1SeedAsync(AppDbContext db)
     {
         await EnsureJobAuditsTableAsync(db);
+        await EnsureInsightQueryLogTableAsync(db);
 
         await db.Database.ExecuteSqlRawAsync("""
             CREATE TABLE IF NOT EXISTS Tenants (
@@ -52,6 +86,7 @@ public static class DbSeed
             );
             """);
 
+        // Legacy DBs: Users table without Role (new CREATE above already includes Role).
         await EnsureUsersRoleColumnAsync(db);
 
         if (!await db.Tenants.AnyAsync())
@@ -77,6 +112,33 @@ public static class DbSeed
         await EnsurePhase2TablesAsync(db);
         await EnsurePhase3TablesAsync(db);
         await EnsurePhase3UsersAsync(db);
+    }
+
+    public static async Task EnsureInsightQueryLogTableAsync(AppDbContext db)
+    {
+        await db.Database.ExecuteSqlRawAsync("""
+            CREATE TABLE IF NOT EXISTS InsightQueryLogs (
+                LogId TEXT NOT NULL PRIMARY KEY,
+                TenantId TEXT NOT NULL,
+                SiteId TEXT NOT NULL,
+                ConversationId TEXT NOT NULL,
+                UserQuery TEXT NOT NULL,
+                Operation TEXT NULL,
+                RouteStatus TEXT NOT NULL,
+                BusinessProcess TEXT NULL,
+                ContractJson TEXT NULL,
+                ToolsUsedJson TEXT NULL,
+                JobStatus TEXT NULL,
+                ErrorSummary TEXT NULL,
+                InsightChatVersion TEXT NOT NULL,
+                CompatibilityBlocked INTEGER NOT NULL DEFAULT 0,
+                CompatibilityReason TEXT NULL,
+                FeedbackRating TEXT NULL,
+                FeedbackNote TEXT NULL,
+                FeedbackAtUtc TEXT NULL,
+                CreatedAtUtc TEXT NOT NULL
+            );
+            """);
     }
 
     public static async Task EnsurePhase2TablesAsync(AppDbContext db)
@@ -111,8 +173,6 @@ public static class DbSeed
 
     public static async Task EnsurePhase3UsersAsync(AppDbContext db)
     {
-        await EnsureUsersRoleColumnAsync(db);
-
         var admin = await db.Users.FindAsync(Guid.Parse("11111111-1111-1111-1111-111111111111"));
         if (admin is not null)
         {

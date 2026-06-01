@@ -156,6 +156,13 @@ internal static class ReconciliationChatMatcher
             return true;
         }
 
+        if ((m.Contains("ar") || m.Contains("receivable")) && m.Contains("match") && m.Contains("gl"))
+        {
+            op = "ar.gl.reconcile";
+            tools.Add(op);
+            return true;
+        }
+
         return false;
     }
 

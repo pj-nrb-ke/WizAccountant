@@ -110,6 +110,30 @@
         <div class="assistant-explain-pane">
           <h3 class="assistant-pane-title">Explanation</h3>
           <textarea id="chat-explanation" class="assistant-explanation" readonly placeholder="Explanation of the query and Sage read will appear here after you run a query."></textarea>
+          <div id="chat-feedback" class="chat-feedback hidden" aria-live="polite">
+            <span class="chat-feedback-label">Was this answer useful?</span>
+            <div class="chat-feedback-buttons">
+              <button type="button" class="feedback-btn" data-rating="helpful">Correct</button>
+              <button type="button" class="feedback-btn" data-rating="wrong">Wrong</button>
+              <button type="button" class="feedback-btn" data-rating="needs_improvement">Needs improvement</button>
+            </div>
+            <div id="chat-feedback-wrong-panel" class="chat-feedback-wrong hidden">
+              <label for="chat-feedback-reason" class="small muted">What went wrong? (optional)</label>
+              <select id="chat-feedback-reason">
+                <option value="">— Select —</option>
+                <option value="wrong_route">Wrong route</option>
+                <option value="wrong_numbers">Wrong numbers</option>
+                <option value="too_many_rows">Too many rows</option>
+                <option value="missing_analysis">Missing analysis</option>
+                <option value="crashed">Crashed / error</option>
+                <option value="not_business_aware">Not business aware</option>
+                <option value="incomplete_answer">Incomplete answer</option>
+              </select>
+              <input type="text" id="chat-feedback-note" placeholder="Short note (optional)" maxlength="500" />
+              <button type="button" id="chat-feedback-submit-wrong" class="secondary small">Submit feedback</button>
+            </div>
+            <p id="chat-feedback-status" class="muted small"></p>
+          </div>
         </div>
       </div>
     </section>
