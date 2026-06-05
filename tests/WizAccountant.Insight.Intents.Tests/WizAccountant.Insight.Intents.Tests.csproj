@@ -32,6 +32,7 @@
     <None Include="..\intents\payment-behavior-handlers.json" Link="payment-behavior-handlers.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\intents\consolidation-handlers.json" Link="consolidation-handlers.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\intents\product-monthly-orders-handlers.json" Link="product-monthly-orders-handlers.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\intents\customer-collections-handlers.json" Link="customer-collections-handlers.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

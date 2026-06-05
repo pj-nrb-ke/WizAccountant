@@ -47,11 +47,27 @@ internal static class CompatibilityGate
             return false;
         }
 
+        if (contract.Period is not null && !contract.Period.IsContiguous)
+        {
+            if (cap is null || !cap.SupportsSegmentedPeriods)
+            {
+                reason = InsightPeriodPolicy.FormatSegmentedBlockMessage(operation);
+                return false;
+            }
+        }
+
         return true;
     }
 
     public static string? SuggestCanonicalOperation(QueryIntentContract contract)
     {
+        var m = contract.RawQuery.ToLowerInvariant();
+        if (DynamicAnalyticalQueryBuilder.IsItemPurchaseByPeriod(contract.RawQuery, m, contract))
+            return DynamicAnalyticalQueryBuilder.PurchaseItemPeriodSummaryOperation;
+
+        if (ChatIntentMatcher.IsSupplierUnpaidQuery(m))
+            return ChatIntentMatcher.ResolveSupplierUnpaidOperation(m);
+
         if (contract.Groupings.Contains("product") &&
             (contract.Groupings.Contains("month") || contract.Metrics.Count >= 2))
             return ProductOrderAnalysisChatMatcher.Operation;

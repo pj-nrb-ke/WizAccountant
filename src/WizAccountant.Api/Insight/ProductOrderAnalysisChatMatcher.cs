@@ -1,3 +1,5 @@
+using WizAccountant.Contracts;
+
 namespace WizAccountant.Api.Insight;
 
 /// <summary>Product monthly order/sales analysis routing (SAGE-PATCH-009).</summary>
@@ -23,9 +25,6 @@ internal static class ProductOrderAnalysisChatMatcher
         if (year.HasValue)
             parameters["year"] = year.Value.ToString();
 
-        if (m.Contains("from jan") || m.Contains("starting from jan") || m.Contains("january"))
-            parameters["dateFrom"] = $"{year ?? 2026}-01-01";
-
         if (m.Contains("by value") || m.Contains("sales value") || (m.Contains("value") && m.Contains("most") && !m.Contains("quantity")))
             parameters["rankBy"] = "value";
 
@@ -49,7 +48,8 @@ internal static class ProductOrderAnalysisChatMatcher
                              (m.Contains("stock") && !m.Contains("inventory valuation"));
 
         var orderSales = m.Contains("ordered") || m.Contains("order") || m.Contains("sell") ||
-                         m.Contains("sales") || m.Contains("sold");
+                         m.Contains("sales") || m.Contains("sold") || m.Contains("bought") ||
+                         m.Contains("buy") || m.Contains("frequently");
 
         var monthly = m.Contains("month") || m.Contains("per month") || m.Contains("monthly");
 

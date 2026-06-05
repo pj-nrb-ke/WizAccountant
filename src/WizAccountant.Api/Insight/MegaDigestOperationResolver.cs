@@ -55,11 +55,19 @@ internal static class MegaDigestOperationResolver
 
         if (domain.Contains("payable") || domain.Contains("supplier") || m.Contains("supplier"))
         {
-            if (title.Contains("oldest") || title.Contains("aged") || title.Contains("unpaid"))
+            if (ChatIntentMatcher.IsSupplierUnpaidQuery(m) ||
+                (title.Contains("not paid") && !title.Contains("paid after")) ||
+                (title.Contains("unpaid") && !title.Contains("paid after")))
+                return Op(ChatIntentMatcher.SupplierUnpaidCountOp, true, $"Digest #{entry.Id} — suppliers with unpaid AP balances");
+
+            if (title.Contains("oldest") || title.Contains("aged"))
                 return Op("supplier.aged.top", true, $"Digest #{entry.Id}");
 
+            if (title.Contains("paid after") || title.Contains("late payment") || title.Contains("paid twice"))
+                return Op(null, false, $"Digest #{entry.Id} — supplier payment timing; dedicated SQL not implemented");
+
             if (title.Contains("highest") && title.Contains("outstanding"))
-                return Op("supplier.openitems", false, $"Digest #{entry.Id} — implement AP outstanding ranking SQL");
+                return Op(ChatIntentMatcher.SupplierUnpaidTopOp, true, $"Digest #{entry.Id} — suppliers with highest outstanding AP");
 
             if (title.Contains("credit balance"))
                 return Op("supplier.list", false, $"Digest #{entry.Id} — supplier credit balances not dedicated yet");

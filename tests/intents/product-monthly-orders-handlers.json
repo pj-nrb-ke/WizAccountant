@@ -27,6 +27,17 @@
     "mustNotRoute": ["inventory.movement.top"]
   },
   {
+    "id": "pmo-07-user-bought",
+    "query": "which products are most frequently bought. I need Quantity sold per month starting Jan 2026",
+    "operation": "product.monthly.orders.analysis",
+    "mustNotRoute": ["inventory.movement.top", "customer.sales.top"]
+  },
+  {
+    "id": "pmo-08-q3-q4",
+    "query": "which products are most frequently bought. I need Quantity sold per month between Q3 and Q4 of 2025",
+    "operation": "product.monthly.orders.analysis"
+  },
+  {
     "id": "pmo-06",
     "query": "show monthly quantity and value by product from January 2026",
     "operation": "product.monthly.orders.analysis"

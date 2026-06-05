@@ -47,6 +47,7 @@ internal static class SageSdkWriteHandlers
                 "allocation.save" => SaveAllocation(payloadJson),
                 "customer.save" => SaveCustomer(payloadJson),
                 "supplier.save" => SaveSupplier(payloadJson),
+                "salesorder.save" => SalesOrderSaveHandler.Save(payloadJson),
                 _ => throw new NotSupportedException($"Write operation not implemented: {operation}")
             };
             return Finish(idempotency, idemKey, result);

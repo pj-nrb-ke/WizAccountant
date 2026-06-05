@@ -16,6 +16,7 @@ internal static class MegaDigestRouter
         if (ChatIntentMatcher.IsSalesInvoiceDiscountCountQuery(messageLower) ||
             ChatIntentMatcher.IsCustomerAgedTopQuery(messageLower) ||
             ChatIntentMatcher.IsCustomerUnpaidSummaryQuery(messageLower) ||
+            ChatIntentMatcher.IsSupplierUnpaidQuery(messageLower) ||
             ChatIntentMatcher.IsUnpaidSalesInvoiceQuery(messageLower) ||
             ChatIntentMatcher.IsInventoryBsNegativeLedgersQuery(messageLower) ||
             SageChatDomain.IsInventoryGlReconciliationQuestion(messageLower) ||

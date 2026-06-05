@@ -171,12 +171,16 @@ document.getElementById("search-form").addEventListener("submit", async (e) => {
   } catch (err) { out.textContent = err.message; }
 });
 
-function renderChatGrid(grid) {
-  const table = document.getElementById("chat-grid");
-  const head = document.getElementById("chat-grid-head");
-  const body = document.getElementById("chat-grid-body");
-  const empty = document.getElementById("chat-grid-empty");
-  const meta = document.getElementById("chat-grid-meta");
+function renderGrid(grid, ids = {}) {
+  const table = document.getElementById(ids.table || "chat-grid");
+  const head = document.getElementById(ids.head || "chat-grid-head");
+  const body = document.getElementById(ids.body || "chat-grid-body");
+  const empty = document.getElementById(ids.empty || "chat-grid-empty");
+  const meta = document.getElementById(ids.meta || "chat-grid-meta");
+  const emptyText = ids.emptyText || "No tabular rows for this answer — see Explanation.";
+  const sortable = ids.sortable === true;
+
+  if (!table || !head || !body || !empty) return;
 
   head.innerHTML = "";
   body.innerHTML = "";
@@ -184,24 +188,50 @@ function renderChatGrid(grid) {
   if (!grid || !grid.rows || grid.rows.length === 0) {
     table.classList.add("hidden");
     empty.classList.remove("hidden");
-    empty.textContent = "No tabular rows for this answer — see Explanation.";
-    meta.textContent = "";
+    empty.textContent = emptyText;
+    if (meta) meta.textContent = "";
     return;
   }
 
+  let rows = grid.rows.slice();
   const columns = grid.columns && grid.columns.length
     ? grid.columns
     : Object.keys(grid.rows[0]);
+
+  const sortState = sortable ? (window.__sqlGridSort || { col: null, dir: "asc" }) : null;
+  if (sortState?.col && columns.includes(sortState.col)) {
+    const col = sortState.col;
+    const dir = sortState.dir === "desc" ? -1 : 1;
+    rows.sort((a, b) => {
+      const av = a[col] ?? a[col.toLowerCase()] ?? "";
+      const bv = b[col] ?? b[col.toLowerCase()] ?? "";
+      const an = parseFloat(av);
+      const bn = parseFloat(bv);
+      if (!Number.isNaN(an) && !Number.isNaN(bn) && String(av).trim() !== "" && String(bv).trim() !== "")
+        return (an - bn) * dir;
+      return String(av).localeCompare(String(bv), undefined, { numeric: true, sensitivity: "base" }) * dir;
+    });
+  }
 
   const trHead = document.createElement("tr");
   columns.forEach((col) => {
     const th = document.createElement("th");
     th.textContent = col;
+    if (sortable) {
+      th.classList.add("sortable");
+      if (sortState?.col === col)
+        th.classList.add(sortState.dir === "desc" ? "sort-desc" : "sort-asc");
+      th.addEventListener("click", () => {
+        const next = window.__sqlGridSort?.col === col && window.__sqlGridSort.dir === "asc" ? "desc" : "asc";
+        window.__sqlGridSort = { col, dir: next };
+        renderGrid(grid, ids);
+      });
+    }
     trHead.appendChild(th);
   });
   head.appendChild(trHead);
 
-  grid.rows.forEach((row) => {
+  rows.forEach((row) => {
     const tr = document.createElement("tr");
     columns.forEach((col) => {
       const td = document.createElement("td");
@@ -214,7 +244,11 @@ function renderChatGrid(grid) {
 
   table.classList.remove("hidden");
   empty.classList.add("hidden");
-  meta.textContent = `${grid.rows.length} row(s)`;
+  if (meta) meta.textContent = `${rows.length} row(s)`;
+}
+
+function renderChatGrid(grid) {
+  renderGrid(grid);
 }
 
 function setChatExplanation(text) {
@@ -402,6 +436,260 @@ function setupFeedbackUi() {
 
 setupSpeechInput();
 setupFeedbackUi();
+setupSqlTab();
+
+const SQL_SAVED_KEY = "wiz-insight-saved-sql-v1";
+const SQL_SAVED_IMPORTED_KEY = "wiz-insight-saved-sql-imported-v1";
+const sqlGridIds = {
+  table: "sql-grid",
+  head: "sql-grid-head",
+  body: "sql-grid-body",
+  empty: "sql-grid-empty",
+  meta: "sql-grid-meta",
+  sortable: true,
+};
+
+let cachedSavedSqlQueries = [];
+
+function loadLocalSavedSqlQueries() {
+  try {
+    const raw = localStorage.getItem(SQL_SAVED_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function refreshSavedSqlSelect(selectedId) {
+  const sel = document.getElementById("sql-saved-select");
+  if (!sel) return;
+  const items = cachedSavedSqlQueries.slice().sort((a, b) => (b.updatedAtUtc || "").localeCompare(a.updatedAtUtc || ""));
+  sel.innerHTML = '<option value="">— Select a saved query —</option>'
+    + items.map((q) => `<option value="${escapeHtml(q.queryId)}">${escapeHtml(q.title || "Untitled")}</option>`).join("");
+  if (selectedId) sel.value = selectedId;
+}
+
+async function maybeImportLocalSavedQueries(siteIdValue) {
+  if (localStorage.getItem(SQL_SAVED_IMPORTED_KEY) === "1") return false;
+  const local = loadLocalSavedSqlQueries();
+  if (!local.length || cachedSavedSqlQueries.length > 0) {
+    localStorage.setItem(SQL_SAVED_IMPORTED_KEY, "1");
+    return false;
+  }
+  for (const item of local) {
+    if (!item.title || !item.sql) continue;
+    await json(`${api}/api/insight/sql/saved`, {
+      method: "POST",
+      body: JSON.stringify({
+        siteId: siteIdValue,
+        title: item.title,
+        aiPrompt: item.aiPrompt || "",
+        sql: item.sql,
+      }),
+    });
+  }
+  localStorage.removeItem(SQL_SAVED_KEY);
+  localStorage.setItem(SQL_SAVED_IMPORTED_KEY, "1");
+  return true;
+}
+
+async function refreshSavedSqlQueriesFromServer(selectedId) {
+  const status = document.getElementById("sql-saved-status");
+  try {
+    await loadSites();
+    const sid = siteId();
+    cachedSavedSqlQueries = await json(`${api}/api/insight/sql/saved?siteId=${encodeURIComponent(sid)}`);
+    if (await maybeImportLocalSavedQueries(sid)) {
+      cachedSavedSqlQueries = await json(`${api}/api/insight/sql/saved?siteId=${encodeURIComponent(sid)}`);
+      if (status) status.textContent = "Imported browser saved queries to the server.";
+    }
+    refreshSavedSqlSelect(selectedId);
+  } catch (err) {
+    cachedSavedSqlQueries = [];
+    refreshSavedSqlSelect();
+    if (status && !String(err.message || "").includes("Select a site")) status.textContent = "";
+  }
+}
+
+function setupSqlTab() {
+  const form = document.getElementById("sql-form");
+  if (!form) return;
+
+  refreshSavedSqlQueriesFromServer();
+
+  document.getElementById("site-select")?.addEventListener("change", () => {
+    refreshSavedSqlQueriesFromServer();
+  });
+
+  document.getElementById("sql-saved-save")?.addEventListener("click", async () => {
+    const title = document.getElementById("sql-saved-title")?.value?.trim();
+    const prompt = document.getElementById("sql-saved-prompt")?.value?.trim() || "";
+    const sql = document.getElementById("sql-text")?.value?.trim();
+    const status = document.getElementById("sql-saved-status");
+    const saveBtn = document.getElementById("sql-saved-save");
+    if (!title) {
+      if (status) status.textContent = "Enter a title before saving.";
+      return;
+    }
+    if (!sql) {
+      if (status) status.textContent = "Enter SQL in the editor before saving.";
+      return;
+    }
+    saveBtn.disabled = true;
+    try {
+      await loadSites();
+      const existingId = document.getElementById("sql-saved-select")?.value || null;
+      const saved = await json(`${api}/api/insight/sql/saved`, {
+        method: "POST",
+        body: JSON.stringify({
+          queryId: existingId || null,
+          siteId: siteId(),
+          title,
+          aiPrompt: prompt,
+          sql,
+        }),
+      });
+      await refreshSavedSqlQueriesFromServer(saved.queryId);
+      if (status) status.textContent = `Saved “${title}” to server.`;
+    } catch (err) {
+      if (status) status.textContent = err.message;
+    } finally {
+      saveBtn.disabled = false;
+    }
+  });
+
+  document.getElementById("sql-saved-load")?.addEventListener("click", () => {
+    const id = document.getElementById("sql-saved-select")?.value;
+    const status = document.getElementById("sql-saved-status");
+    if (!id) {
+      if (status) status.textContent = "Select a saved query first.";
+      return;
+    }
+    const item = cachedSavedSqlQueries.find((q) => q.queryId === id);
+    if (!item) {
+      if (status) status.textContent = "Saved query not found.";
+      return;
+    }
+    document.getElementById("sql-saved-title").value = item.title || "";
+    document.getElementById("sql-saved-prompt").value = item.aiPrompt || "";
+    document.getElementById("sql-text").value = item.sql || "";
+    if (status) status.textContent = `Loaded “${item.title}”.`;
+  });
+
+  document.getElementById("sql-saved-delete")?.addEventListener("click", async () => {
+    const id = document.getElementById("sql-saved-select")?.value;
+    const status = document.getElementById("sql-saved-status");
+    const delBtn = document.getElementById("sql-saved-delete");
+    if (!id) {
+      if (status) status.textContent = "Select a saved query to delete.";
+      return;
+    }
+    delBtn.disabled = true;
+    try {
+      await loadSites();
+      await json(`${api}/api/insight/sql/saved/${encodeURIComponent(id)}?siteId=${encodeURIComponent(siteId())}`, {
+        method: "DELETE",
+      });
+      document.getElementById("sql-saved-title").value = "";
+      document.getElementById("sql-saved-prompt").value = "";
+      await refreshSavedSqlQueriesFromServer();
+      if (status) status.textContent = "Deleted from server.";
+    } catch (err) {
+      if (status) status.textContent = err.message;
+    } finally {
+      delBtn.disabled = false;
+    }
+  });
+
+  document.getElementById("sql-saved-select")?.addEventListener("change", (e) => {
+    const id = e.target.value;
+    if (!id) return;
+    const item = cachedSavedSqlQueries.find((q) => q.queryId === id);
+    if (!item) return;
+    document.getElementById("sql-saved-title").value = item.title || "";
+    document.getElementById("sql-saved-prompt").value = item.aiPrompt || "";
+  });
+
+  document.getElementById("sql-schema-hint")?.addEventListener("click", async () => {
+    const status = document.getElementById("sql-status");
+    const out = document.getElementById("sql-schema-out");
+    const btn = document.getElementById("sql-schema-hint");
+    btn.disabled = true;
+    if (status) status.textContent = "Reading _btblInvoiceLines schema from Sage…";
+    if (out) out.classList.add("hidden");
+    try {
+      await loadSites();
+      const hint = await json(`${api}/api/insight/sql/invoice-lines-hint?siteId=${encodeURIComponent(siteId())}`);
+      const lines = [
+        `Table: ${hint.tableName}`,
+        `Qty column: ${hint.qtyColumn}`,
+        `Value source: ${hint.valueSource}`,
+        `Use for SUM(qty): ${hint.qtyExpression}`,
+        `Use for SUM(value): ${hint.valueExpression}`,
+        "",
+        "Sample product-by-month SQL (schema-aware) — loaded into editor.",
+      ];
+      if (out) {
+        out.textContent = lines.join("\n");
+        out.classList.remove("hidden");
+      }
+      if (hint.sampleProductMonthlySql)
+        document.getElementById("sql-text").value = hint.sampleProductMonthlySql.trim();
+      if (status) status.textContent = "Schema hint applied — review SQL then Run SQL.";
+    } catch (err) {
+      if (status) status.textContent = err.message;
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const sql = document.getElementById("sql-text")?.value?.trim();
+    const status = document.getElementById("sql-status");
+    const runBtn = document.getElementById("sql-run");
+    if (!sql) {
+      if (status) status.textContent = "Enter a SELECT query.";
+      return;
+    }
+
+    const maxRows = parseInt(document.getElementById("sql-max-rows")?.value || "500", 10);
+    runBtn.disabled = true;
+    window.__sqlGridSort = null;
+    if (status) status.textContent = "Running on Sage company database…";
+    renderGrid(null, { ...sqlGridIds, emptyText: "Running…" });
+
+    try {
+      await loadSites();
+      const res = await json(`${api}/api/insight/sql`, {
+        method: "POST",
+        body: JSON.stringify({
+          siteId: siteId(),
+          sql,
+          maxRows: Number.isFinite(maxRows) ? maxRows : 500,
+        }),
+      });
+      window.__lastSqlGrid = res.grid;
+      renderGrid(res.grid, { ...sqlGridIds, emptyText: "Query returned no rows." });
+      const meta = document.getElementById("sql-grid-meta");
+      if (meta && res.message) meta.textContent = res.message;
+      if (status) status.textContent = res.truncated ? "Results truncated — increase filters or max rows." : "Done.";
+      if (res.jobId) lastJobId = res.jobId;
+    } catch (err) {
+      const msg = err.message || "";
+      if (/fLineTotal|fLineTot|fQuantity/i.test(msg)) {
+        if (status) {
+          status.textContent = `${msg} — Click “Invoice line schema” for column names that work on your Sage database.`;
+        }
+      } else if (status) {
+        status.textContent = msg;
+      }
+      renderGrid(null, { ...sqlGridIds, emptyText: "Query failed." });
+    } finally {
+      runBtn.disabled = false;
+    }
+  });
+}
 
 function SafeExecutionBoundaryLooksLikeStack(msg) {
   return /Exception:|StackTrace|HEADERS|at Microsoft\.|at System\./i.test(msg || "");

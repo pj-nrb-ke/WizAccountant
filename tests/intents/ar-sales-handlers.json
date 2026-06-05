@@ -8,6 +8,14 @@
     "forbiddenOperations": ["customer.openitems"]
   },
   {
+    "id": "ar-01b-credit-note-count",
+    "query": "total credit notes issues in Q1 2025",
+    "operation": "salescreditnote.count",
+    "intent": "Aggregation",
+    "countOnly": true,
+    "mustNotRoute": ["customer.aged.credit.top", "customer.list"]
+  },
+  {
     "id": "ar-02-discount-top",
     "query": "Top 5 invoices with highest discount value in 2025",
     "operation": "salesinvoice.discount.top",

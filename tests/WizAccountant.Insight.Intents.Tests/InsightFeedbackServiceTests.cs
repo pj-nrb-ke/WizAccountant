@@ -64,10 +64,7 @@ public class InsightFeedbackServiceTests : IDisposable
     [Fact]
     public void Insight_index_includes_feedback_buttons()
     {
-        var path = Path.GetFullPath(Path.Combine(
-            AppContext.BaseDirectory,
-            "..", "..", "..", "..", "..",
-            "src", "WizAccountant.Api", "wwwroot", "insight", "index.html"));
+        var path = FindInsightIndexHtml();
         Assert.True(File.Exists(path), path);
         var html = File.ReadAllText(path);
         Assert.Contains("id=\"chat-feedback\"", html);
@@ -75,6 +72,23 @@ public class InsightFeedbackServiceTests : IDisposable
         Assert.Contains("data-rating=\"wrong\"", html);
         Assert.Contains("data-rating=\"needs_improvement\"", html);
         Assert.Contains("chat-feedback-reason", html);
+    }
+
+    private static string FindInsightIndexHtml()
+    {
+        const string relative = "src/WizAccountant.Api/wwwroot/insight/index.html";
+        foreach (var start in new[] { AppContext.BaseDirectory, Directory.GetCurrentDirectory() })
+        {
+            var dir = start;
+            for (var i = 0; i < 8 && !string.IsNullOrEmpty(dir); i++, dir = Path.GetDirectoryName(dir))
+            {
+                var candidate = Path.Combine(dir, relative);
+                if (File.Exists(candidate))
+                    return Path.GetFullPath(candidate);
+            }
+        }
+
+        return Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, relative));
     }
 
     private async Task<Guid> SeedLogAsync()

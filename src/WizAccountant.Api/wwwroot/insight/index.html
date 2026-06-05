@@ -4,20 +4,47 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>WizAccountant Insight</title>
+  <link rel="stylesheet" href="shell.css" />
   <link rel="stylesheet" href="insight.css" />
 </head>
 <body>
-  <header>
+  <div class="app-shell">
+    <aside class="side-nav">
+      <div class="side-nav-brand">
+        <h2>WizAccountant</h2>
+        <p>Remote Sage access</p>
+      </div>
+      <div class="side-nav-site">
+        <label>Site
+          <select id="site-select"><option value="">Loading sites…</option></select>
+        </label>
+      </div>
+      <nav class="side-nav-menu" aria-label="Main">
+        <div class="nav-group">
+          <span class="nav-group-title">Insight</span>
+          <a class="nav-link active" href="index.html">Dashboard &amp; AI</a>
+        </div>
+        <div class="nav-group">
+          <span class="nav-group-title">Orders</span>
+          <a class="nav-link sub" href="sales-order/index.html" data-nav="sales-order">Sales Order</a>
+        </div>
+        <div class="nav-group">
+          <span class="nav-group-title">System</span>
+          <a class="nav-link sub" href="/act/index.html">Act (Approvals)</a>
+          <a class="nav-link sub" href="/admin/index.html">Admin</a>
+        </div>
+      </nav>
+      <div class="side-nav-footer">
+        <span id="api-version" class="api-version muted">API …</span>
+      </div>
+    </aside>
+    <button type="button" id="side-nav-toggle" class="side-nav-toggle" aria-expanded="true" title="Hide side panel">◀</button>
+
+    <div class="app-main">
+  <header class="compact-header">
     <div class="brand">
       <h1>WizAccountant Insight</h1>
       <p class="tagline">Phase 2 — read-only workspaces &amp; AI assistant</p>
-    </div>
-    <div class="header-actions">
-      <label class="inline">Site
-        <select id="site-select"><option value="">Loading sites…</option></select>
-      </label>
-      <span id="api-version" class="api-version muted">API …</span>
-      <a href="/admin/index.html" class="link-btn">Admin</a>
     </div>
   </header>
 
@@ -28,6 +55,7 @@
     <button type="button" class="tab" data-tab="inventory">Inventory</button>
     <button type="button" class="tab" data-tab="search">Search</button>
     <button type="button" class="tab" data-tab="chat">AI Assistant</button>
+    <button type="button" class="tab" data-tab="sql">SQL Query</button>
   </nav>
 
   <main>
@@ -137,11 +165,67 @@
         </div>
       </div>
     </section>
+
+    <section id="panel-sql" class="panel card assistant-panel">
+      <h2>SQL query <span class="badge">read-only</span></h2>
+      <p class="muted small">Runs a <strong>SELECT</strong> against the Sage company database. Saved queries sync to the server (per site) so they are available on any machine.</p>
+
+      <div class="sql-workspace">
+        <aside class="sql-saved-pane card">
+          <h3 class="assistant-pane-title">Saved queries</h3>
+          <label for="sql-saved-select" class="small muted">Library</label>
+          <select id="sql-saved-select" class="sql-saved-select">
+            <option value="">— Select a saved query —</option>
+          </select>
+          <div class="sql-saved-actions">
+            <button type="button" id="sql-saved-load" class="secondary small">Load</button>
+            <button type="button" id="sql-saved-delete" class="secondary small">Delete</button>
+          </div>
+          <label for="sql-saved-title">Title</label>
+          <input type="text" id="sql-saved-title" placeholder="e.g. Product sales Q3–Q4 2025" maxlength="120" />
+          <label for="sql-saved-prompt">AI Assistant prompt</label>
+          <textarea id="sql-saved-prompt" rows="4" placeholder="Paste the question you asked on the AI Assistant tab…" spellcheck="true"></textarea>
+          <button type="button" id="sql-saved-save" class="secondary">Save current query</button>
+          <p id="sql-saved-status" class="muted small" aria-live="polite"></p>
+        </aside>
+
+        <div class="sql-main">
+          <form id="sql-form" class="sql-query-form">
+            <label for="sql-text">SQL</label>
+            <textarea id="sql-text" class="sql-textarea" rows="12" placeholder="SELECT TOP 100 Code, Description_1, ItemActive FROM StkItem ORDER BY Code" spellcheck="false"></textarea>
+            <div class="assistant-query-actions sql-toolbar">
+              <label class="inline small">Max rows
+                <input type="number" id="sql-max-rows" min="1" max="2000" value="500" />
+              </label>
+              <button type="button" id="sql-schema-hint" class="secondary" title="Detect _btblInvoiceLines columns for this Sage database">Invoice line schema</button>
+              <button type="submit" id="sql-run" class="primary">Run SQL</button>
+            </div>
+            <p id="sql-status" class="muted small" aria-live="polite"></p>
+            <pre id="sql-schema-out" class="sql-schema-out hidden muted small"></pre>
+          </form>
+
+          <div class="assistant-grid-pane sql-grid-pane">
+            <h3 class="assistant-pane-title">Results <span class="muted small">(click column headers to sort)</span></h3>
+            <div class="assistant-grid-wrap">
+              <table id="sql-grid" class="assistant-grid hidden">
+                <thead id="sql-grid-head"></thead>
+                <tbody id="sql-grid-body"></tbody>
+              </table>
+            </div>
+            <p id="sql-grid-meta" class="muted small"></p>
+            <p id="sql-grid-empty" class="muted small">Paste SQL above and click Run SQL.</p>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="muted small">
     Data is live from Sage via WizConnector. Writes require Phase 3 approvals.
   </footer>
+    </div>
+  </div>
+  <script src="shell.js"></script>
   <script src="insight.js"></script>
 </body>
 </html>

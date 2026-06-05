@@ -15,6 +15,10 @@ internal static class ArSalesChatMatcher
         operation = null;
         ApplyCommonParameters(message, m, parameters);
 
+        if (TryCreditNoteCount(message, m, parameters, tools, out operation))
+            return true;
+        if (TryDebitNote(message, m, parameters, tools, out operation))
+            return true;
         if (TryDiscountCount(message, m, parameters, tools, out operation))
             return true;
         if (TryDiscountTop(m, parameters, tools, out operation))
@@ -52,6 +56,31 @@ internal static class ArSalesChatMatcher
             parameters["minDaysOutstanding"] = minDays.Value.ToString();
 
         parameters["message"] = message;
+    }
+
+    private static bool TryDebitNote(string message, string m, Dictionary<string, string> parameters, List<string> tools, out string? op)
+    {
+        op = DebitNoteChatHelper.ResolveOperation(m);
+        if (!DebitNoteChatHelper.IsSalesDebitNoteQuery(m))
+            return false;
+
+        parameters["message"] = message;
+        if (op == DebitNoteChatHelper.CountOperation)
+            parameters["top"] = "1";
+        tools.Add(op);
+        return true;
+    }
+
+    private static bool TryCreditNoteCount(string message, string m, Dictionary<string, string> parameters, List<string> tools, out string? op)
+    {
+        op = CreditNoteChatHelper.SalesCreditNoteCountOperation;
+        if (!CreditNoteChatHelper.IsSalesCreditNoteCountQuery(m))
+            return false;
+
+        parameters["message"] = message;
+        parameters["top"] = "1";
+        tools.Add(op);
+        return true;
     }
 
     private static bool TryDiscountCount(string message, string m, Dictionary<string, string> parameters, List<string> tools, out string? op)

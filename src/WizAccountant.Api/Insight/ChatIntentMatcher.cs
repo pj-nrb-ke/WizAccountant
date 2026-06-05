@@ -9,6 +9,10 @@ internal static class ChatIntentMatcher
 {
     public const string UnpaidSalesInvoicesOp = "customer.openitems";
     public const string CustomerUnpaidSummaryOp = "customer.unpaid.summary";
+    public const string SupplierUnpaidCountOp = "supplier.unpaid.count";
+    public const string SupplierUnpaidListOp = "supplier.unpaid.list";
+    public const string SupplierUnpaidTopOp = "supplier.unpaid.top";
+    public const string SupplierUnpaidSummaryOp = "supplier.unpaid.summary";
     public const string CustomerAgedTopOp = "customer.aged.top";
     public const string InventoryBsNegativeLedgersOp = "inventory.bs.negative_ledgers";
     public const string SalesInvoiceDiscountCountOp = "salesinvoice.discount.count";
@@ -208,6 +212,105 @@ internal static class ChatIntentMatcher
                (m.Contains("highest") && m.Contains("customer") && m.Contains("balance")) ||
                (m.Contains("count") && m.Contains("invoice")) ||
                (m.Contains("list") && (m.Contains("name") || m.Contains("total")));
+    }
+
+    public static bool TrySupplierUnpaidRoute(
+        string messageLower,
+        Dictionary<string, string> parameters,
+        List<string> tools,
+        out string operation)
+    {
+        operation = SupplierUnpaidCountOp;
+        if (!IsSupplierUnpaidQuery(messageLower))
+            return false;
+
+        operation = ResolveSupplierUnpaidOperation(messageLower);
+        parameters["top"] = ResolveTopCount(messageLower, defaultTop: operation switch
+        {
+            _ when operation == SupplierUnpaidTopOp => 10,
+            _ when operation == SupplierUnpaidListOp => 500,
+            _ => 15
+        }).ToString();
+
+        if (operation == SupplierUnpaidCountOp)
+            parameters["countOnly"] = "true";
+
+        tools.Add(operation);
+        return true;
+    }
+
+    [Obsolete("Use TrySupplierUnpaidRoute")]
+    public static bool TrySupplierUnpaidSummary(
+        string messageLower,
+        Dictionary<string, string> parameters,
+        List<string> tools,
+        out string operation) =>
+        TrySupplierUnpaidRoute(messageLower, parameters, tools, out operation);
+
+    public static bool IsSupplierUnpaidQuery(string messageLower) =>
+        IsSupplierUnpaidSummaryQuery(messageLower);
+
+    [Obsolete("Use IsSupplierUnpaidQuery")]
+    public static bool IsSupplierUnpaidSummaryQuery(string messageLower)
+    {
+        if (string.IsNullOrWhiteSpace(messageLower))
+            return false;
+
+        var m = messageLower;
+
+        if (!m.Contains("supplier") && !m.Contains("creditor") && !m.Contains("payable") && !m.Contains("vendor"))
+            return false;
+        if (m.Contains("customer"))
+            return false;
+
+        if (m.Contains("paid after") || m.Contains("pay after") || m.Contains("after due") ||
+            m.Contains("late payment") || m.Contains("paid late") || m.Contains("paid twice") ||
+            m.Contains("payment behaviour") || m.Contains("payment behavior"))
+            return false;
+
+        if (m.Contains("oldest") || m.Contains("aged"))
+            return false;
+
+        var unpaid = m.Contains("not paid") || m.Contains("unpaid") || m.Contains("outstanding") ||
+                     m.Contains("still owing") || m.Contains("still payable") || m.Contains("open invoice") ||
+                     m.Contains("yet to be paid") || m.Contains("pending payment") ||
+                     (m.Contains("not") && m.Contains("paid"));
+        if (!unpaid)
+            return false;
+
+        if (QueryAggregationMode.IsAggregationQuery(m))
+            return true;
+
+        if (m.Contains("till date") || m.Contains("to date") || m.Contains("till now") || m.Contains("to now") ||
+            m.Contains("as of today"))
+            return true;
+
+        return m.Contains("list") || m.Contains("which") || m.Contains("show") ||
+               m.Contains("highest") || m.Contains("most") || m.Contains("largest") || m.Contains("biggest") ||
+               m.Contains("top supplier") || m.Contains("top creditors") || m.Contains("per supplier") ||
+               m.Contains("by supplier") || m.Contains("which supplier") ||
+               (m.Contains("which") && m.Contains("supplier"));
+    }
+
+    internal static string ResolveSupplierUnpaidOperation(string messageLower)
+    {
+        var m = messageLower;
+
+        if ((m.Contains("top") || m.Contains("highest") || m.Contains("most") ||
+             m.Contains("biggest") || m.Contains("largest")) &&
+            !QueryAggregationMode.IsAggregationQuery(m))
+            return SupplierUnpaidTopOp;
+
+        if (QueryAggregationMode.IsAggregationQuery(m))
+            return SupplierUnpaidCountOp;
+
+        if (m.Contains("list") || m.Contains("which") || m.Contains("show me") || m.StartsWith("show "))
+            return SupplierUnpaidListOp;
+
+        if (m.Contains("till date") || m.Contains("to date") || m.Contains("as of today"))
+            return SupplierUnpaidCountOp;
+
+        return SupplierUnpaidListOp;
     }
 
     /// <summary>

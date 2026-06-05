@@ -1,4 +1,5 @@
 using System.Data;
+using System.Data.SqlClient;
 using System.Text.Json;
 using Pastel.Evolution;
 
@@ -17,6 +18,10 @@ internal static class SageSdkPhase2Handlers
             "customertransaction.get" => CustomerTransactionGet(parameters),
             "customer.openitems" => CustomerOpenItems(parameters),
             "customer.unpaid.summary" => CustomerUnpaidSummary(parameters),
+            "supplier.unpaid.count" => SupplierUnpaidHandlers.ExecuteCount(parameters),
+            "supplier.unpaid.list" => SupplierUnpaidHandlers.ExecuteList(parameters),
+            "supplier.unpaid.top" => SupplierUnpaidHandlers.ExecuteTop(parameters),
+            "supplier.unpaid.summary" => SupplierUnpaidHandlers.ExecuteSummary(parameters),
             "customer.aged.top" => CustomerAgedTopHandler.Execute(parameters),
             "customer.credit.balances" => CustomerCreditBalancesHandler.Execute(parameters),
             "supplier.aged.top" => SupplierAgedTopHandler.Execute(parameters),
@@ -34,6 +39,16 @@ internal static class SageSdkPhase2Handlers
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
             "product.monthly.orders.analysis" => ProductMonthlyOrdersAnalysisHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "purchase.item.period.summary" => PurchaseProductQuarterlyHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "purchase.product.quarterly" => PurchaseProductQuarterlyHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "insight.sql.query" => AdhocSqlQueryHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "insight.sql.invoice-lines-hint" => InvoiceLineSchemaHintHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "insight.sql.invnum-documents-hint" => InvNumDocumentSchemaHintHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
             "customer.payment.prompt.top" => CustomerPaymentPromptTopHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
             "customer.payment.late.top" => CustomerPaymentLateTopHandler.Execute(
@@ -41,6 +56,32 @@ internal static class SageSdkPhase2Handlers
             "customer.payment.behavior.summary" => CustomerPaymentBehaviorSummaryHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
             "customer.payment.detail" => CustomerPaymentDetailHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "salescreditnote.count" => SalesCreditNoteCountHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "salesdebitnote.count" => SalesDebitNoteCountHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "salesdebitnote.list" => SalesDebitNoteListHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "salesdebitnote.summary" => SalesDebitNoteSummaryHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "salesdebitnote.top" => SalesDebitNoteTopHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "suppliercreditnote.count" => SupplierCreditNoteCountHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "suppliercreditnote.list" => SupplierCreditNoteListHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "suppliercreditnote.summary" => SupplierCreditNoteSummaryHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "suppliercreditnote.top" => SupplierCreditNoteTopHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "customer.collections.summary" => CustomerCollectionsSummaryHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "customer.collections.by.month" => CustomerCollectionsByMonthHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "customer.collections.by.customer" => CustomerCollectionsByCustomerHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "customer.collections.top" => CustomerCollectionsTopHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
             "supplier.credit.balances" => SupplierCreditBalancesHandler.Execute(parameters),
             "ap.invoice.overdue.count" => ApOverdueInvoiceCountHandler.Execute(parameters),
@@ -83,6 +124,14 @@ internal static class SageSdkPhase2Handlers
             "warehouse.nonmoving" => WarehouseNonMovingHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
             "warehouse.transfer.summary" => WarehouseTransferSummaryHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "warehouse.transfer.detail" => WarehouseTransferDetailHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "warehouse.transfer.top" => WarehouseTransferTopHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "warehouse.transfer.by.item" => WarehouseTransferByItemHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "warehouse.transfer.by.warehouse" => WarehouseTransferByWarehouseHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
             "warehouse.discrepancy" => WarehouseDiscrepancyHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
@@ -191,6 +240,23 @@ internal static class SageSdkPhase2Handlers
             "project.list" => ProjectList(parameters),
             "warehouse.list" => WarehouseList(parameters),
             "taxrate.list" => TaxRateList(parameters),
+            "salesrepresentative.list" => SalesRepresentativeList(parameters),
+            "settlementterms.list" => SettlementTermsList(parameters),
+            "orderstatus.list" => OrderStatusList(parameters),
+            "priority.list" => PriorityList(parameters),
+            "currency.list" => CurrencyList(parameters),
+            "customer.address" => SalesOrderEnrichmentHandler.CustomerAddress(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "inventoryitem.stock.qty" => SalesOrderEnrichmentHandler.ItemStockQty(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "inventoryitem.sellingprice" => SalesOrderEnrichmentHandler.ItemSellingPrice(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "inventoryitem.salestax" => SalesOrderEnrichmentHandler.ItemSalesTax(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "inventoryitem.units" => SalesOrderEnrichmentHandler.ItemUnits(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "salesorder.nextnumber" => SalesOrderNumberHandler.AllocateNext(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
             "transactioncode.list" => TransactionCodeList(parameters),
             "search.global" => SearchGlobal(parameters),
             "dashboard.summary" => DashboardSummary(parameters),
@@ -471,11 +537,13 @@ internal static class SageSdkPhase2Handlers
 
                 items.Add(new InventoryListItem(
                     code,
-                    SageListHelpers.Col(row, "Description") ?? "",
+                    SageListHelpers.Col(row, "Description_1", "Description", "Description1", "cDescription", "Name") ?? "",
                     qty,
                     valuation));
             }
         }
+
+        EnrichInventoryDescriptionsFromSql(items, _sageSettings?.CompanyConnectionString);
 
         string? note = null;
         if (minValuation.HasValue)
@@ -490,6 +558,7 @@ internal static class SageSdkPhase2Handlers
         var dtoItems = items.Select(i => new
         {
             code = i.Code,
+            description_1 = i.Description,
             description = i.Description,
             qtyOnHand = i.QtyOnHand,
             valuation = i.Valuation
@@ -526,6 +595,52 @@ internal static class SageSdkPhase2Handlers
         }
 
         return null;
+    }
+
+    private static void EnrichInventoryDescriptionsFromSql(List<InventoryListItem> items, string? companyConnectionString)
+    {
+        if (items.Count == 0 || string.IsNullOrWhiteSpace(companyConnectionString))
+            return;
+        if (items.All(i => !string.IsNullOrWhiteSpace(i.Description)))
+            return;
+
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        const string sql = """
+            SELECT Code, Description_1
+            FROM StkItem
+            WHERE ItemActive = 1
+            """;
+
+        try
+        {
+            using var conn = new SqlConnection(companyConnectionString);
+            conn.Open();
+            using var cmd = new SqlCommand(sql, conn) { CommandTimeout = 60 };
+            using var reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+                var code = reader["Code"]?.ToString()?.Trim();
+                var desc = reader["Description_1"]?.ToString()?.Trim();
+                if (!string.IsNullOrWhiteSpace(code) && !string.IsNullOrWhiteSpace(desc))
+                    map[code] = desc;
+            }
+        }
+        catch
+        {
+            return;
+        }
+
+        if (map.Count == 0)
+            return;
+
+        for (var i = 0; i < items.Count; i++)
+        {
+            var item = items[i];
+            if (!string.IsNullOrWhiteSpace(item.Description))
+                continue;
+            if (map.TryGetValue(item.Code, out var desc))
+                items[i] = item with { Description = desc };
+        }
     }
 
     private readonly record struct InventoryListItem(string Code, string Description, string? QtyOnHand, decimal? Valuation);
@@ -578,6 +693,75 @@ internal static class SageSdkPhase2Handlers
             rate = SageListHelpers.Col(row, "TaxRate", "Rate")
         });
         return SageListHelpers.SerializePaged(items, criteria, parameters);
+    }
+
+    private static string SalesRepresentativeList(Dictionary<string, string> parameters)
+    {
+        try
+        {
+            var criteria = SageListHelpers.BuildCriteria(parameters, "1=1");
+            var table = SalesRepresentative.List(criteria);
+            var items = SageListHelpers.MapRows(table, row => new
+            {
+                code = SageListHelpers.Col(row, "Code"),
+                name = SageListHelpers.Col(row, "Name", "Description")
+            });
+            return SageListHelpers.SerializePaged(items, criteria, parameters);
+        }
+        catch
+        {
+            return SageListHelpers.SerializePaged(new List<object>(), "1=1", parameters);
+        }
+    }
+
+    private static string SettlementTermsList(Dictionary<string, string> parameters)
+    {
+        var conn = _sageSettings?.CompanyConnectionString;
+        return SalesOrderLookupSql.TryList(conn, parameters,
+            "SELECT TOP 500 Code, Description FROM SettlementTerms WHERE Code IS NOT NULL ORDER BY Code",
+            "SELECT TOP 500 Code, cDescription AS Description FROM _rtblSettlementTerms ORDER BY Code");
+    }
+
+    private static string OrderStatusList(Dictionary<string, string> parameters)
+    {
+        var conn = _sageSettings?.CompanyConnectionString;
+        return SalesOrderLookupSql.TryList(conn, parameters,
+            "SELECT TOP 500 Code, Description FROM OrdStatus ORDER BY Code",
+            "SELECT TOP 500 Code, cDescription AS Description FROM _rtblOrderStatus ORDER BY Code");
+    }
+
+    private static string PriorityList(Dictionary<string, string> parameters)
+    {
+        var conn = _sageSettings?.CompanyConnectionString;
+        return SalesOrderLookupSql.TryList(conn, parameters,
+            "SELECT TOP 100 Code, Description FROM Priority ORDER BY Code",
+            "SELECT TOP 100 Code, cDescription AS Description FROM _rtblPriority ORDER BY Code");
+    }
+
+    private static string CurrencyList(Dictionary<string, string> parameters)
+    {
+        var conn = _sageSettings?.CompanyConnectionString;
+        return SalesOrderLookupSql.List(conn, parameters,
+            """
+            SELECT c.CurrencyCode AS Code, CAST(c.CurrencyCode AS NVARCHAR(20)) AS Description, c.cCurrencySymbol AS Symbol
+            FROM Currency c
+            ORDER BY c.CurrencyCode
+            """,
+            """
+            SELECT c.CurrencyCode AS Code, c.Description, c.cCurrencySymbol AS Symbol
+            FROM Currency c
+            ORDER BY c.CurrencyCode
+            """,
+            """
+            SELECT c.CurrencyCode AS Code, ISNULL(c.Description, c.cDescription) AS Description, c.cCurrencySymbol AS Symbol
+            FROM Currency c
+            ORDER BY c.CurrencyCode
+            """,
+            """
+            SELECT CurrencyCode AS Code, Description, cCurrencySymbol AS Symbol
+            FROM Currency
+            ORDER BY CurrencyCode
+            """);
     }
 
     private static string TransactionCodeList(Dictionary<string, string> parameters)
@@ -665,9 +849,25 @@ internal static class SageSdkPhase2Handlers
             connectorVersion = typeof(SageSdkJobExecutor).Assembly.GetName().Version?.ToString(),
             sdkVersion = typeof(DatabaseContext).Assembly.GetName().Version?.ToString(),
             sageConfigPresent = File.Exists(WizAccountant.Contracts.ConnectorPaths.SageConfigFilePath),
+            companyDatabase = ParseConnectionCatalog(_sageSettings?.CompanyConnectionString),
+            commonDatabase = ParseConnectionCatalog(_sageSettings?.CommonConnectionString),
             logTail,
             timestampUtc = DateTimeOffset.UtcNow
         });
+    }
+
+    private static string? ParseConnectionCatalog(string? connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString)) return null;
+        try
+        {
+            var builder = new SqlConnectionStringBuilder(connectionString);
+            return string.IsNullOrWhiteSpace(builder.InitialCatalog) ? null : builder.InitialCatalog;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static int TryCount(Func<DataTable?> list)

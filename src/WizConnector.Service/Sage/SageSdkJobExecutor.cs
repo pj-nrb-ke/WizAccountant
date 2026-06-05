@@ -59,7 +59,7 @@ public sealed class SageSdkJobExecutor(
         };
     }
 
-    private static string SiteHealth()
+    private string SiteHealth()
     {
         var table = Customer.List("DCLink > 0");
         var count = table?.Rows.Count ?? 0;
@@ -69,8 +69,24 @@ public sealed class SageSdkJobExecutor(
             source = "Pastel.Evolution",
             sdkVersion = typeof(DatabaseContext).Assembly.GetName().Version?.ToString(),
             customerCountSample = count,
+            companyDatabase = ParseConnectionCatalog(_sage.CompanyConnectionString),
+            commonDatabase = ParseConnectionCatalog(_sage.CommonConnectionString),
             timestampUtc = DateTimeOffset.UtcNow
         });
+    }
+
+    private static string? ParseConnectionCatalog(string? connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString)) return null;
+        try
+        {
+            var builder = new System.Data.SqlClient.SqlConnectionStringBuilder(connectionString);
+            return string.IsNullOrWhiteSpace(builder.InitialCatalog) ? null : builder.InitialCatalog;
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static string CustomerList(Dictionary<string, string> parameters)

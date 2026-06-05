@@ -44,6 +44,11 @@ internal static class ChatResultGridBuilder
                 "supplier.aged.top" => FromAgedSuppliers(root, cap),
                 "inventory.gl.reconcile" => FromInventoryReconcile(root),
                 "inventory.bs.negative_ledgers" => FromNegativeStockLedgers(root),
+                "product.monthly.orders.analysis" => FromProductMonthlyBreakdown(root, cap),
+                PurchaseProductQuarterlyChatMatcher.Operation => FromPurchaseProductQuarterly(root, cap),
+                CustomerCollectionsHelper.ByMonthOperation => FromCollectionsMonthly(root),
+                CustomerCollectionsHelper.ByCustomerOperation or CustomerCollectionsHelper.TopOperation => FromCollectionsByCustomer(root, cap),
+                CustomerCollectionsHelper.SummaryOperation => FromCollectionsMonthly(root) ?? FromCollectionsSummary(root),
                 "search.global" => FromHits(root, cap),
                 _ => FromItemsArray(root, cap) ?? FromKpis(root)
             };
@@ -293,6 +298,47 @@ internal static class ChatResultGridBuilder
         };
     }
 
+    private static ChatGridDto? FromProductMonthlyBreakdown(JsonElement root, int maxRows)
+    {
+        if (!root.TryGetProperty("monthlyBreakdown", out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return null;
+
+        var rows = arr.EnumerateArray().Take(maxRows).Select(r => new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["Year"] = Prop(r, "salesYear"),
+            ["Month"] = Prop(r, "salesMonthName").Length > 0 ? Prop(r, "salesMonthName") : Prop(r, "month"),
+            ["Product code"] = Prop(r, "productCode"),
+            ["Product name"] = Prop(r, "productName"),
+            ["Quantity sold"] = Prop(r, "quantity"),
+            ["Value"] = FormatMoney(r, "value")
+        }).ToList();
+
+        return rows.Count == 0 ? null : new ChatGridDto { Columns = rows[0].Keys.ToList(), Rows = rows };
+    }
+
+    private static ChatGridDto? FromPurchaseProductQuarterly(JsonElement root, int maxRows)
+    {
+        if (!root.TryGetProperty("periodBreakdown", out var arr) || arr.ValueKind != JsonValueKind.Array)
+        {
+            if (!root.TryGetProperty("quarterlyBreakdown", out arr) || arr.ValueKind != JsonValueKind.Array)
+                return null;
+        }
+
+        var periodLabel = root.TryGetProperty("groupBy", out var gb) &&
+                          string.Equals(gb.GetString(), "month", StringComparison.OrdinalIgnoreCase)
+            ? "Month"
+            : "Quarter";
+
+        var rows = arr.EnumerateArray().Take(maxRows).Select(r => new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            [periodLabel] = string.IsNullOrEmpty(Prop(r, "periodName")) ? Prop(r, "quarterName") : Prop(r, "periodName"),
+            ["Quantity"] = FormatMoney(r, "totalQuantity"),
+            ["Value"] = FormatMoney(r, "totalValue")
+        }).ToList();
+
+        return rows.Count == 0 ? null : new ChatGridDto { Columns = rows[0].Keys.ToList(), Rows = rows };
+    }
+
     private static ChatGridDto? FromHits(JsonElement root, int maxRows = 50)
     {
         if (!root.TryGetProperty("hits", out var arr) || arr.ValueKind != JsonValueKind.Array)
@@ -434,6 +480,63 @@ internal static class ChatResultGridBuilder
         JsonValueKind.Null => "",
         _ => v.ToString()
     };
+
+    private static ChatGridDto? FromCollectionsMonthly(JsonElement root)
+    {
+        if (!root.TryGetProperty("monthlyBreakdown", out var arr) || arr.ValueKind != JsonValueKind.Array ||
+            arr.GetArrayLength() == 0)
+            return null;
+
+        var rows = arr.EnumerateArray().Select(r =>
+        {
+            var row = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Year"] = Prop(r, "year"),
+                ["Month"] = Prop(r, "month"),
+                ["Collection amount"] = FormatMoney(r, "collectionAmount")
+            };
+            var seg = Prop(r, "segmentLabel");
+            if (!string.IsNullOrWhiteSpace(seg))
+                row["Period segment"] = seg;
+            return row;
+        }).ToList();
+
+        return rows.Count == 0 ? null : new ChatGridDto { Columns = rows[0].Keys.ToList(), Rows = rows };
+    }
+
+    private static ChatGridDto? FromCollectionsSummary(JsonElement root)
+    {
+        if (!root.TryGetProperty("totalCollections", out var total) || total.ValueKind != JsonValueKind.Number)
+            return null;
+
+        var rows = new List<Dictionary<string, string?>>
+        {
+            new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Period from"] = root.TryGetProperty("dateFrom", out var df) ? df.GetString() : "",
+                ["Period to"] = root.TryGetProperty("dateTo", out var dt) ? dt.GetString() : "",
+                ["Total collections"] = total.GetDecimal().ToString("N2")
+            }
+        };
+
+        return new ChatGridDto { Columns = rows[0].Keys.ToList(), Rows = rows };
+    }
+
+    private static ChatGridDto? FromCollectionsByCustomer(JsonElement root, int maxRows)
+    {
+        if (!root.TryGetProperty("byCustomer", out var arr) || arr.ValueKind != JsonValueKind.Array)
+            return null;
+
+        var rows = arr.EnumerateArray().Take(maxRows).Select(r => new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["#"] = Prop(r, "rank"),
+            ["Customer code"] = Prop(r, "customerCode"),
+            ["Customer name"] = Prop(r, "customerName"),
+            ["Collection amount"] = FormatMoney(r, "collectionAmount")
+        }).ToList();
+
+        return rows.Count == 0 ? null : new ChatGridDto { Columns = rows[0].Keys.ToList(), Rows = rows };
+    }
 
     private static string HumanizeColumn(string name) =>
         name switch

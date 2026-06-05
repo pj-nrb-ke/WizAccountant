@@ -29,7 +29,8 @@ internal static class ChatRoutePlanner
             return Finalize(message, earlyOp, parameters, tools);
         }
 
-        var (operation, parameters2, tools2) = RouteMatchers(message, m, classification, parameters, tools);
+        var intentContract = QueryIntentContract.Parse(message, classification);
+        var (operation, parameters2, tools2) = RouteMatchers(message, m, classification, intentContract, parameters, tools);
         return Finalize(message, operation, parameters2, tools2);
     }
 
@@ -44,6 +45,10 @@ internal static class ChatRoutePlanner
         operation = null;
         if (string.IsNullOrEmpty(bp.CanonicalOperation))
             return false;
+
+        if (bp.Process == BusinessProcessType.CustomerCollections &&
+            CustomerCollectionsChatMatcher.TryRoute(message, m, parameters, tools, out operation))
+            return true;
 
         if (bp.Process == BusinessProcessType.PaymentBehavior &&
             ArPaymentBehaviorChatMatcher.TryRoute(message, m, parameters, tools, out operation))
@@ -79,6 +84,7 @@ internal static class ChatRoutePlanner
         string message,
         string m,
         SageIntentEngine.Classification classification,
+        QueryIntentContract intentContract,
         Dictionary<string, string> parameters,
         List<string> tools)
     {
@@ -100,11 +106,21 @@ internal static class ChatRoutePlanner
         if (ChatIntentMatcher.TryInventoryBsNegativeLedgers(m, parameters, tools, out var negStockOp))
             return (negStockOp, parameters, tools);
 
+        if (CustomerCollectionsHelper.IsCollectionsForecastQuery(m) &&
+            GlFinanceChatMatcher.TryRoute(message, m, parameters, tools, out var treasuryCollectionsOp))
+            return (treasuryCollectionsOp, parameters, tools);
+
         if (ReconciliationChatMatcher.TryRoute(message, m, parameters, tools, out var reconOp))
             return (reconOp, parameters, tools);
 
+        if (CustomerCollectionsChatMatcher.TryRoute(message, m, parameters, tools, out var collectionsOp))
+            return (collectionsOp, parameters, tools);
+
         if (ArPaymentBehaviorChatMatcher.TryRoute(message, m, parameters, tools, out var payBehOp))
             return (payBehOp, parameters, tools);
+
+        if (DynamicAnalyticalQueryBuilder.TryPlan(message, intentContract, parameters, tools, out var dynamicOp))
+            return (dynamicOp, parameters, tools);
 
         if (ProductOrderAnalysisChatMatcher.TryRoute(message, m, parameters, tools, out var productMonthlyOp))
             return (productMonthlyOp, parameters, tools);

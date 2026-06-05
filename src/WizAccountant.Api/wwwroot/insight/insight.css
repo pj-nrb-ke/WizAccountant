@@ -75,10 +75,17 @@ select, input {
   color: #fff;
 }
 
+.app-main > main,
 main {
   max-width: 1000px;
   margin: 0 auto;
   padding: 1rem 1.5rem 2rem;
+}
+
+.app-main > footer {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1.5rem 1.5rem;
 }
 
 .card {
@@ -349,6 +356,129 @@ button:hover { filter: brightness(1.08); }
   }
   .feedback-btn {
     width: 100%;
+  }
+}
+
+.sql-textarea {
+  width: 100%;
+  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  font-size: 0.9rem;
+  padding: 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0f172a;
+  color: #e2e8f0;
+  resize: vertical;
+  min-height: 10rem;
+}
+
+.sql-query-form label.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.sql-query-form input[type="number"] {
+  width: 5rem;
+  font: inherit;
+  padding: 0.25rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.sql-grid-pane {
+  margin-top: 1rem;
+}
+
+.sql-workspace {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.sql-saved-pane {
+  padding: 0.75rem;
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.sql-saved-pane label {
+  display: block;
+  margin-top: 0.65rem;
+  font-size: 0.85rem;
+}
+
+.sql-saved-pane input[type="text"],
+.sql-saved-select,
+.sql-saved-pane textarea {
+  width: 100%;
+  margin-top: 0.25rem;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.45rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+.sql-saved-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0.5rem 0;
+}
+
+.sql-saved-pane #sql-saved-save {
+  margin-top: 0.65rem;
+  width: 100%;
+}
+
+.sql-toolbar {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sql-schema-out {
+  margin-top: 0.5rem;
+  padding: 0.65rem;
+  border-radius: 8px;
+  background: #0f172a;
+  border: 1px solid var(--border);
+  white-space: pre-wrap;
+  max-height: 14rem;
+  overflow: auto;
+  font-family: ui-monospace, "Cascadia Code", "Consolas", monospace;
+  font-size: 0.8rem;
+}
+
+.assistant-grid th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.assistant-grid th.sortable:hover {
+  background: rgba(148, 163, 184, 0.15);
+}
+
+.assistant-grid th.sort-asc::after {
+  content: " ▲";
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+.assistant-grid th.sort-desc::after {
+  content: " ▼";
+  font-size: 0.65rem;
+  opacity: 0.7;
+}
+
+@media (max-width: 900px) {
+  .sql-workspace {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -71,6 +71,26 @@ public sealed class ReadOnlyChatService(
         var (operation, parameters, toolsUsed) =
             ChatRoutePlanner.Plan(request.Message, intentClassification, investigation);
 
+        operation = await InsightSavedSqlPromptMatcher.TryApplyReferenceAsync(
+            db,
+            tenantId ?? site.TenantId,
+            request.SiteId,
+            request.Message,
+            operation,
+            parameters,
+            toolsUsed,
+            ct);
+
+        string? periodBlockedReply = null;
+        if (operation is not null &&
+            !InsightChatPeriodHelper.TryApplyForOperation(
+                operation, request.Message, parameters, intentContract, out var periodBlockReason))
+        {
+            periodBlockedReply = periodBlockReason ?? InsightPeriodPolicy.FormatSegmentedBlockMessage(operation);
+            operation = null;
+            toolsUsed.Add("period:segmented_blocked");
+        }
+
         toolsUsed.Add($"domain:{intentClassification.Domain}:{intentClassification.DomainConfidence:F2}");
         if (intentResolution.HandlerId is not null)
             toolsUsed.Add($"handler:{intentResolution.HandlerId}");
@@ -117,9 +137,21 @@ public sealed class ReadOnlyChatService(
         var citations = new List<string>();
         var dataAsOf = DateTimeOffset.UtcNow;
 
+        if (operation is null &&
+            DynamicAnalyticalQueryBuilder.TryPlan(request.Message, intentContract, parameters, toolsUsed, out var dynamicOp))
+        {
+            operation = dynamicOp;
+            toolsUsed.Add("dynamic:retry");
+        }
+
         if (operation is null)
         {
-            if (compatibilityBlocked)
+            if (periodBlockedReply is not null)
+            {
+                routeStatus = "period_blocked";
+                reply = periodBlockedReply + Environment.NewLine + Environment.NewLine + Guardrail;
+            }
+            else if (compatibilityBlocked)
             {
                 routeStatus = "compat_blocked";
                 reply = $"I understood your question as {businessProcess.BusinessMeaning ?? "a structured finance analysis"}, " +
@@ -345,6 +377,8 @@ public sealed class ReadOnlyChatService(
             return "Query run: GLTransaction.List — sample general ledger postings (PostGL layer). Not inventory valuation.";
         if (operation == "salesinvoice.discount.count")
             return QueryWithDigest("SAGE-SALES-INV-DISC-COUNT-001 — count distinct InvNum sales invoices with discounts (not open AR lines).", parameters);
+        if (operation == CreditNoteChatHelper.SalesCreditNoteCountOperation)
+            return QueryWithDigest("SAGE-AR-CREDIT-NOTE-COUNT-001 — count sales credit notes posted in period (InvNum DocType 1).", parameters);
         if (operation == "salesinvoice.discount.top")
             return QueryWithDigest("SAGE-SALES-INV-DISC-TOP-001 — top invoices by discount value (InvNum).", parameters);
         if (operation == "ar.invoice.overdue.buckets")
@@ -373,6 +407,14 @@ public sealed class ReadOnlyChatService(
 
         if (operation == "customer.unpaid.summary")
             return "Query run: CustomerTransaction.List (Outstanding <> 0), grouped by customer — excludes payment lines, sums open invoice/order amounts.";
+        if (operation == ChatIntentMatcher.SupplierUnpaidCountOp)
+            return "Query run: SAGE-AP-SUPPLIER-UNPAID-COUNT-001 — count of suppliers with open AP balances as of today.";
+        if (operation == ChatIntentMatcher.SupplierUnpaidListOp)
+            return "Query run: SAGE-AP-SUPPLIER-UNPAID-LIST-001 — suppliers with unpaid AP balances as of today.";
+        if (operation == ChatIntentMatcher.SupplierUnpaidTopOp)
+            return "Query run: SAGE-AP-SUPPLIER-UNPAID-TOP-001 — top suppliers by outstanding AP balance as of today.";
+        if (operation == ChatIntentMatcher.SupplierUnpaidSummaryOp)
+            return "Query run: supplier unpaid AP summary (legacy alias).";
         if (operation == "customer.payment.prompt.top")
             return "Query run: SAGE-AR-PAYMENT-BEHAVIOR-001 — top prompt-paying customers by payment discipline score (InvNum due dates vs PostAR payment dates). Not unpaid balance ranking.";
         if (operation == "customer.payment.late.top")
@@ -381,8 +423,26 @@ public sealed class ReadOnlyChatService(
             return "Query run: SAGE-AR-PAYMENT-BEHAVIOR-001 — customer payment behaviour summary.";
         if (operation == "customer.payment.detail")
             return "Query run: SAGE-AR-PAYMENT-BEHAVIOR-001 — single-customer payment discipline detail.";
+        if (operation == CustomerCollectionsHelper.SummaryOperation)
+            return QueryWithDigest("SAGE-AR-COLLECTIONS-001 — total customer collections (PostAR credit receipts) for period.", parameters);
+        if (operation == CustomerCollectionsHelper.ByMonthOperation)
+            return QueryWithDigest("SAGE-AR-COLLECTIONS-001 — customer collections by month (PostAR credit receipts).", parameters);
+        if (operation == CustomerCollectionsHelper.ByCustomerOperation)
+            return QueryWithDigest("SAGE-AR-COLLECTIONS-001 — customer collections by customer (PostAR credit receipts).", parameters);
+        if (operation == CustomerCollectionsHelper.TopOperation)
+            return QueryWithDigest("SAGE-AR-COLLECTIONS-001 — top customers by collection amount (PostAR credit receipts).", parameters);
         if (operation == ProductOrderAnalysisChatMatcher.Operation)
+        {
+            if (parameters.TryGetValue("savedSqlReferenceTitle", out var refTitle) && !string.IsNullOrWhiteSpace(refTitle))
+                return $"Query run: SAGE-PRODUCT-MONTHLY-ORDERS-001 — product monthly analysis using saved SQL reference “{refTitle}”.";
             return "Query run: SAGE-PRODUCT-MONTHLY-ORDERS-001 — product monthly order/sales analysis (quantity and value by month from posted sales invoices).";
+        }
+        if (operation == PurchaseProductQuarterlyChatMatcher.Operation)
+        {
+            if (parameters.TryGetValue("savedSqlReferenceTitle", out var refTitle) && !string.IsNullOrWhiteSpace(refTitle))
+                return $"Query run: SAGE-PURCHASE-PRODUCT-QUARTERLY-001 — purchase quantity by quarter using saved SQL reference “{refTitle}”.";
+            return "Query run: SAGE-PURCHASE-PRODUCT-QUARTERLY-001 — purchased quantity and value by calendar quarter (InvNum GRV/PO lines).";
+        }
         if (operation == "customer.openitems")
             return "Query run: CustomerTransaction.List (Outstanding <> 0) — open/unpaid AR including sales invoices.";
         if (operation == "dashboard.summary")
@@ -449,11 +509,24 @@ public sealed class ReadOnlyChatService(
                 return (productMonthlyReply + Environment.NewLine + Environment.NewLine + Guardrail, citations);
             }
 
+            if (PurchaseProductQuarterlyReplyFormat.TryFormat(operation, root, out var purchaseQuarterlyReply))
+            {
+                citations.Add("SAGE-PURCHASE-PRODUCT-QUARTERLY-001");
+                return (purchaseQuarterlyReply + Environment.NewLine + Environment.NewLine + Guardrail, citations);
+            }
+
             if (operation == "salesinvoice.discount.count")
             {
                 citations.Add("SAGE-SALES-INV-DISC-COUNT-001");
                 var body = AggregationReplyFormat.FormatSalesInvoiceDiscountCount(root);
                 return (ArSalesReplyFormat.Wrap("SAGE-SALES-INV-DISC-COUNT-001", body), citations);
+            }
+
+            if (operation == CreditNoteChatHelper.SalesCreditNoteCountOperation)
+            {
+                citations.Add(CreditNoteChatHelper.QuerySerial);
+                var body = AggregationReplyFormat.FormatSalesCreditNoteCount(root);
+                return (ArSalesReplyFormat.Wrap(CreditNoteChatHelper.QuerySerial, body), citations);
             }
 
             if (operation == "ar.invoice.overdue.buckets")
@@ -468,6 +541,16 @@ public sealed class ReadOnlyChatService(
                 citations.Add("SAGE-SALES-INV-DISC-TOP-001");
                 var body = ArSalesReplyFormat.FormatInvoiceList(root, "topInvoices");
                 return (ArSalesReplyFormat.Wrap("SAGE-SALES-INV-DISC-TOP-001", body), citations);
+            }
+
+            if (operation is CustomerCollectionsHelper.SummaryOperation
+                or CustomerCollectionsHelper.ByMonthOperation
+                or CustomerCollectionsHelper.ByCustomerOperation
+                or CustomerCollectionsHelper.TopOperation)
+            {
+                var (body, serial) = CustomerCollectionsReplyFormat.Build(root);
+                citations.Add(serial);
+                return (body, citations);
             }
 
             if (operation is "customer.outstanding.debit.top" or "customer.aged.credit.top" or "customer.sales.top")
@@ -612,6 +695,117 @@ public sealed class ReadOnlyChatService(
 
                 return ($"Highest unpaid: {leaderName} ({leaderCode}) — {leaderCount} open line(s), total outstanding {leaderTotal}.\n\n" +
                         $"Top {rows.Count} customer(s) by unpaid invoice total (from {totalLines} open AR lines):{unallocNote}{skipNote}\n{table}",
+                    citations);
+            }
+
+            if (operation == ChatIntentMatcher.SupplierUnpaidCountOp &&
+                root.TryGetProperty("totalUnpaidSuppliers", out var unpaidCountEl))
+            {
+                var supplierCount = unpaidCountEl.GetInt32();
+                var totalPayable = root.TryGetProperty("totalOutstandingPayable", out var tp) && tp.ValueKind == JsonValueKind.Number
+                    ? tp.GetDecimal().ToString("N2")
+                    : "?";
+                var asOf = root.TryGetProperty("asOfDate", out var ad) ? ad.GetString() : DateTime.Today.ToString("yyyy-MM-dd");
+                citations.Add($"{ChatIntentMatcher.SupplierUnpaidCountOp}: {supplierCount} supplier(s)");
+                var finding = root.TryGetProperty("finding", out var f) ? f.GetString() : null;
+                return ($"Query run:\n{ChatIntentMatcher.SupplierUnpaidCountOp}\n\nResult:\n" +
+                        (finding ?? $"Total Unpaid Suppliers as of Today: {supplierCount:N0}") +
+                        $"\n\nTotal Outstanding Payable:\n{totalPayable}\n\nData as of:\n{asOf}",
+                    citations);
+            }
+
+            if (operation == ChatIntentMatcher.SupplierUnpaidListOp &&
+                root.TryGetProperty("suppliers", out var supplierRows) &&
+                supplierRows.ValueKind == JsonValueKind.Array)
+            {
+                var supplierCount = root.TryGetProperty("totalUnpaidSuppliers", out var tc) ? tc.GetInt32() : supplierRows.GetArrayLength();
+                var totalPayable = root.TryGetProperty("totalOutstandingPayable", out var tp) && tp.ValueKind == JsonValueKind.Number
+                    ? tp.GetDecimal().ToString("N2")
+                    : "?";
+                var asOf = root.TryGetProperty("asOfDate", out var ad) ? ad.GetString() : DateTime.Today.ToString("yyyy-MM-dd");
+                citations.Add($"{ChatIntentMatcher.SupplierUnpaidListOp}: {supplierCount} supplier(s)");
+
+                var rows = supplierRows.EnumerateArray().ToList();
+                if (rows.Count == 0)
+                    return ("No suppliers with unpaid AP balances as of today.", citations);
+
+                var table = string.Join("\n", rows.Select((r, i) =>
+                {
+                    var code = r.TryGetProperty("code", out var c) ? c.GetString() : "";
+                    var name = r.TryGetProperty("name", out var n) ? n.GetString() : "";
+                    var count = r.TryGetProperty("invoiceCount", out var cnt) ? cnt.GetInt32() : 0;
+                    var total = r.TryGetProperty("totalOutstanding", out var t) && t.ValueKind == JsonValueKind.Number
+                        ? t.GetDecimal().ToString("N2")
+                        : "?";
+                    return $"  {i + 1}. {name} ({code}) — {count} open line(s), outstanding {total}";
+                }));
+
+                return ($"Suppliers not paid as of {asOf}: {supplierCount:N0}\nTotal outstanding payable: {totalPayable}\n\n{table}",
+                    citations);
+            }
+
+            if (operation == ChatIntentMatcher.SupplierUnpaidTopOp &&
+                root.TryGetProperty("topSuppliers", out var topSuppliers) &&
+                topSuppliers.ValueKind == JsonValueKind.Array)
+            {
+                var rows = topSuppliers.EnumerateArray().ToList();
+                citations.Add($"{ChatIntentMatcher.SupplierUnpaidTopOp}: {rows.Count} supplier(s)");
+                if (rows.Count == 0)
+                    return ("No suppliers with unpaid AP balances as of today.", citations);
+
+                var table = string.Join("\n", rows.Select(r =>
+                {
+                    var rank = r.TryGetProperty("rank", out var rk) ? rk.GetInt32() : 0;
+                    var code = r.TryGetProperty("code", out var c) ? c.GetString() : "";
+                    var name = r.TryGetProperty("name", out var n) ? n.GetString() : "";
+                    var total = r.TryGetProperty("totalOutstanding", out var t) && t.ValueKind == JsonValueKind.Number
+                        ? t.GetDecimal().ToString("N2")
+                        : "?";
+                    return $"  {rank}. {name} ({code}) — outstanding {total}";
+                }));
+                return ($"Top suppliers with unpaid AP balances:\n\n{table}", citations);
+            }
+
+            if (operation == ChatIntentMatcher.SupplierUnpaidSummaryOp &&
+                root.TryGetProperty("suppliersWithUnpaidInvoices", out var supplierCountEl))
+            {
+                var supplierCount = supplierCountEl.GetInt32();
+                var totalLines = root.TryGetProperty("totalOpenLines", out var tl) ? tl.GetInt32() : 0;
+                var unalloc = root.TryGetProperty("unallocatedLines", out var ua) ? ua.GetInt32() : 0;
+                citations.Add($"{ChatIntentMatcher.SupplierUnpaidSummaryOp}: {supplierCount} supplier(s)");
+
+                if (QueryAggregationMode.IsAggregationQuery(userMessage) ||
+                    (root.TryGetProperty("countOnly", out var co) && co.ValueKind == JsonValueKind.True))
+                {
+                    var finding = root.TryGetProperty("finding", out var f) ? f.GetString() : null;
+                    return (finding ?? $"Suppliers with unpaid AP balances to date: {supplierCount:N0}.", citations);
+                }
+
+                if (!root.TryGetProperty("topSuppliers", out var summaryTopSuppliers) ||
+                    summaryTopSuppliers.ValueKind != JsonValueKind.Array)
+                    return ($"Suppliers with unpaid AP balances to date: {supplierCount:N0}.", citations);
+
+                var rows = summaryTopSuppliers.EnumerateArray().ToList();
+                if (rows.Count == 0)
+                    return ("No suppliers with open unpaid AP lines (after excluding payments).", citations);
+
+                var table = string.Join("\n", rows.Select((r, i) =>
+                {
+                    var code = r.TryGetProperty("code", out var c) ? c.GetString() : "";
+                    var name = r.TryGetProperty("name", out var n) ? n.GetString() : "";
+                    var count = r.TryGetProperty("invoiceCount", out var cnt) ? cnt.GetInt32() : 0;
+                    var total = r.TryGetProperty("totalOutstanding", out var t) && t.ValueKind == JsonValueKind.Number
+                        ? t.GetDecimal().ToString("N2")
+                        : "?";
+                    return $"  {i + 1}. {name} ({code}) — {count} open line(s), total outstanding {total}";
+                }));
+
+                var unallocNote = unalloc > 0
+                    ? $"\n({unalloc} AP line(s) had no supplier code — check Sage allocation.)"
+                    : "";
+
+                return ($"Suppliers with unpaid AP balances to date: {supplierCount:N0}.\n\n" +
+                        $"Top {rows.Count} supplier(s) by outstanding AP (from {totalLines} open AP lines):{unallocNote}\n{table}",
                     citations);
             }
 

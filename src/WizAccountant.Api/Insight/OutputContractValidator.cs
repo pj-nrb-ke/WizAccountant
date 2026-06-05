@@ -33,6 +33,9 @@ internal static class OutputContractValidator
         if (string.Equals(operation, ProductOrderAnalysisChatMatcher.Operation, StringComparison.OrdinalIgnoreCase))
             return ValidateProductMonthly(contract, root);
 
+        if (string.Equals(operation, ChatIntentMatcher.SupplierUnpaidCountOp, StringComparison.OrdinalIgnoreCase))
+            return ValidateSupplierUnpaidCount(root);
+
         var cap = HandlerCapabilityRegistry.Get(operation);
         if (cap is null)
             return new ValidationResult(true, null, []);
@@ -61,13 +64,34 @@ internal static class OutputContractValidator
     {
         var missing = new List<string>();
 
-        if (!root.TryGetProperty("monthlyBreakdown", out var rows) || rows.ValueKind != JsonValueKind.Array)
+        if (contract.Period is not null)
+        {
+            if (!root.TryGetProperty("dateFrom", out var df) || df.GetString() != contract.Period.DateFrom.ToString("yyyy-MM-dd"))
+                missing.Add("dateFrom echo");
+            if (!root.TryGetProperty("dateTo", out var dt) || dt.GetString() != contract.Period.DateTo.ToString("yyyy-MM-dd"))
+                missing.Add("dateTo echo");
+            if (!root.TryGetProperty("periodType", out _))
+                missing.Add("periodType");
+
+            if (!contract.Period.IsContiguous)
+            {
+                var first = root.TryGetProperty("monthlyBreakdown", out var rows) &&
+                            rows.ValueKind == JsonValueKind.Array &&
+                            rows.GetArrayLength() > 0
+                    ? rows[0]
+                    : default;
+                if (first.ValueKind == JsonValueKind.Object && !first.TryGetProperty("segmentLabel", out _))
+                    missing.Add("segmentLabel");
+            }
+        }
+
+        if (!root.TryGetProperty("monthlyBreakdown", out var breakdown) || breakdown.ValueKind != JsonValueKind.Array)
             missing.Add("monthlyBreakdown");
-        else if (rows.GetArrayLength() == 0)
+        else if (breakdown.GetArrayLength() == 0)
             missing.Add("monthlyBreakdown rows");
         else
         {
-            var first = rows[0];
+            var first = breakdown[0];
             if (!first.TryGetProperty("productCode", out _))
                 missing.Add("productCode");
             if (!first.TryGetProperty("month", out _))
@@ -83,6 +107,25 @@ internal static class OutputContractValidator
 
         if (missing.Count > 0)
             return new ValidationResult(false, BuildFailureMessage(ProductOrderAnalysisChatMatcher.Operation, contract), missing);
+
+        return new ValidationResult(true, null, []);
+    }
+
+    private static ValidationResult ValidateSupplierUnpaidCount(JsonElement root)
+    {
+        var missing = new List<string>();
+        if (!root.TryGetProperty("totalUnpaidSuppliers", out _))
+            missing.Add("totalUnpaidSuppliers");
+        if (!root.TryGetProperty("totalOutstandingPayable", out _))
+            missing.Add("totalOutstandingPayable");
+        if (!root.TryGetProperty("asOfDate", out _))
+            missing.Add("asOfDate");
+
+        if (missing.Count > 0)
+            return new ValidationResult(false,
+                "The handler executed, but the response did not include required supplier unpaid count fields " +
+                "(totalUnpaidSuppliers, totalOutstandingPayable, asOfDate).",
+                missing);
 
         return new ValidationResult(true, null, []);
     }

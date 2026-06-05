@@ -18,6 +18,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<ApprovalProposalRecord> ApprovalProposals => Set<ApprovalProposalRecord>();
     public DbSet<WriteAuditRecord> WriteAudits => Set<WriteAuditRecord>();
     public DbSet<SiteConfigRecord> SiteConfigs => Set<SiteConfigRecord>();
+    public DbSet<InsightSavedSqlQueryRecord> InsightSavedSqlQueries => Set<InsightSavedSqlQueryRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -34,6 +35,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         modelBuilder.Entity<ApprovalProposalRecord>().HasKey(x => x.ProposalId);
         modelBuilder.Entity<WriteAuditRecord>().HasKey(x => x.WriteAuditId);
         modelBuilder.Entity<SiteConfigRecord>().HasKey(x => x.SiteId);
+        modelBuilder.Entity<InsightSavedSqlQueryRecord>().HasKey(x => x.QueryId);
     }
 }
 
@@ -195,5 +197,18 @@ public sealed class SiteConfigRecord
     public Guid SiteId { get; set; }
     public string ConfigJson { get; set; } = "{}";
     public DateTimeOffset SyncedAtUtc { get; set; }
+}
+
+/// <summary>Insight SQL tab — saved queries linked to AI Assistant prompts (tenant + site scoped).</summary>
+public sealed class InsightSavedSqlQueryRecord
+{
+    public Guid QueryId { get; set; }
+    public string TenantId { get; set; } = "";
+    public Guid SiteId { get; set; }
+    public string Title { get; set; } = "";
+    public string? AiPrompt { get; set; }
+    public string Sql { get; set; } = "";
+    public string CreatedAtUtc { get; set; } = "";
+    public string UpdatedAtUtc { get; set; } = "";
 }
 

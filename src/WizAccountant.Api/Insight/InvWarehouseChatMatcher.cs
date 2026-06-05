@@ -21,13 +21,13 @@ internal static class InvWarehouseChatMatcher
         if (SageChatDomain.IsInventoryGlReconciliationQuestion(m))
             return false;
 
+        if (TryWarehouseTransfer(m, parameters, tools, out operation))
+            return true;
         if (TryWarehouseValue(m, parameters, tools, out operation))
             return true;
         if (TryWarehouseNegative(m, parameters, tools, out operation))
             return true;
         if (TryWarehouseNonMoving(m, parameters, tools, out operation))
-            return true;
-        if (TryWarehouseTransfer(m, parameters, tools, out operation))
             return true;
         if (TryWarehouseDiscrepancy(m, parameters, tools, out operation))
             return true;
@@ -107,11 +107,11 @@ internal static class InvWarehouseChatMatcher
 
     private static bool TryWarehouseTransfer(string m, Dictionary<string, string> parameters, List<string> tools, out string? op)
     {
-        op = "warehouse.transfer.summary";
+        op = null;
         if (!m.Contains("transfer"))
             return false;
-        if (!m.Contains("warehouse") && !m.Contains("whse"))
-            return false;
+
+        op = WarehouseTransferChatHelper.ResolveOperation(m);
         tools.Add(op);
         return true;
     }

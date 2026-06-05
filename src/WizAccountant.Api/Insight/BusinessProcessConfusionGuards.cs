@@ -5,6 +5,11 @@ internal static class BusinessProcessConfusionGuards
 {
     private static readonly (Func<string, bool> Query, string WrongOperation, string? CanonicalOverride)[] Guards =
     [
+        (CustomerCollectionsQuery, "customer.list", null),
+        (CustomerCollectionsQuery, "customer.outstanding.debit.top", null),
+        (CustomerCollectionsQuery, "customer.aged.top", null),
+        (CustomerCollectionsQuery, "customer.unpaid.summary", null),
+        (CustomerCollectionsQuery, "customer.openitems", null),
         (PaymentBehaviorQuery, "customer.outstanding.debit.top", "customer.payment.prompt.top"),
         (PaymentBehaviorQuery, "customer.unpaid.summary", "customer.payment.prompt.top"),
         (PaymentBehaviorQuery, "customer.aged.top", "customer.payment.late.top"),
@@ -35,6 +40,9 @@ internal static class BusinessProcessConfusionGuards
         (ProductMonthlyOrderQuery, "customer.openitems", ProductOrderAnalysisChatMatcher.Operation),
         (ProductMonthlyOrderQuery, "inventory.movement.top", ProductOrderAnalysisChatMatcher.Operation),
         (ProductMonthlyOrderQuery, "inventoryitem.list", ProductOrderAnalysisChatMatcher.Operation),
+        (PurchaseProductQuarterlyQuery, "product.monthly.orders.analysis", PurchaseProductQuarterlyChatMatcher.Operation),
+        (PurchaseProductQuarterlyQuery, "customer.sales.top", PurchaseProductQuarterlyChatMatcher.Operation),
+        (PurchaseProductQuarterlyQuery, "purchaseinvoice.count", PurchaseProductQuarterlyChatMatcher.Operation),
     ];
 
     public static bool IsBlocked(string message, string operation)
@@ -76,6 +84,7 @@ internal static class BusinessProcessConfusionGuards
     }
 
     public static bool ShouldBlockOutstandingListing(string messageLower) =>
+        CustomerCollectionsHelper.IsCustomerCollectionsQuery(messageLower) ||
         CustomerPaymentBehaviorHelper.IsPaymentBehaviorQuery(messageLower) ||
         PromptPayerQuery(messageLower) ||
         BusinessProcessClassifier.Classify(messageLower).Process == BusinessProcessType.PaymentBehavior;
@@ -121,4 +130,9 @@ internal static class BusinessProcessConfusionGuards
 
     private static bool ProductMonthlyOrderQuery(string m) =>
         ProductOrderAnalysisChatMatcher.IsProductMonthlyOrderQuery(m);
+
+    private static bool PurchaseProductQuarterlyQuery(string m) =>
+        PurchaseProductQuarterlyChatMatcher.IsPurchaseProductQuarterlyQuery(m);
+
+    private static bool CustomerCollectionsQuery(string m) => CustomerCollectionsHelper.IsCustomerCollectionsQuery(m);
 }

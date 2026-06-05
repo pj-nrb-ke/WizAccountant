@@ -6,7 +6,7 @@ internal static class CustomerPaymentBehaviorEngine
 {
     public const string QuerySerial = "SAGE-AR-PAYMENT-BEHAVIOR-001";
 
-    private const string MetricsSql = """
+    private static readonly string MetricsSql = $"""
         WITH InvoiceBase AS (
             SELECT
                 C.Account AS CustomerCode,
@@ -20,7 +20,8 @@ internal static class CustomerPaymentBehaviorEngine
             INNER JOIN Client C ON C.DCLink = H.AccountID
             WHERE CAST(H.InvDate AS DATE) >= @pDateFrom
               AND CAST(H.InvDate AS DATE) <= @pDateTo
-              AND (H.DocType = 4 OR H.DocType IN (0, 4))
+              AND {InvNumSqlHelper.DocStateAnalyticsExclusionFilter}
+              AND {InvNumSqlHelper.SalesDocTypeFilter}
         ),
         Payments AS (
             SELECT P.InvNumKey, MAX(CAST(P.TxDate AS DATE)) AS PaymentDate

@@ -15,5 +15,6 @@ internal enum BusinessProcessType
     SupplierRisk,
     BankReconciliation,
     FraudAudit,
-    CashflowIntelligence
+    CashflowIntelligence,
+    CustomerCollections
 }

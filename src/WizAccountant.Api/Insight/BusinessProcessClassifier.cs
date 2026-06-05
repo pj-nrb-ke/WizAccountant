@@ -34,6 +34,12 @@ internal static class BusinessProcessClassifier
             (m.Contains("reconcil") || m.Contains("valuation") || m.Contains("match")))
             return new Classification(BusinessProcessType.Reconciliation, "inventory.gl.reconcile", "inventory GL reconciliation", 0.85);
 
+        if (CustomerCollectionsHelper.IsCustomerCollectionsQuery(m))
+        {
+            var op = CustomerCollectionsHelper.ResolveOperation(m);
+            return new Classification(BusinessProcessType.CustomerCollections, op, "customer collections received", 0.9);
+        }
+
         if (CustomerPaymentBehaviorHelper.IsPaymentBehaviorQuery(m))
         {
             var op = CustomerPaymentBehaviorHelper.IsLatePayerQuery(m)

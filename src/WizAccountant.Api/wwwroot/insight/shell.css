@@ -1,0 +1,233 @@
+/* Shared app shell — left navigation + main content */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+.side-nav {
+  width: 220px;
+  flex-shrink: 0;
+  background: #1a2332;
+  border-right: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.2s ease, margin 0.2s ease, opacity 0.2s ease;
+  overflow: hidden;
+}
+
+.app-shell.side-nav-collapsed .side-nav {
+  width: 0;
+  border-right-width: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.side-nav-toggle {
+  position: absolute;
+  left: 220px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  width: 18px;
+  height: 52px;
+  padding: 0;
+  border: 1px solid #475569;
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  background: #1e293b;
+  color: #cbd5e1;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  transition: left 0.2s ease, background 0.15s ease;
+}
+
+.side-nav-toggle:hover {
+  background: #334155;
+  color: #fff;
+}
+
+.app-shell.side-nav-collapsed .side-nav-toggle {
+  left: 0;
+  border-left: 1px solid #475569;
+  border-radius: 0 6px 6px 0;
+}
+
+.side-nav-toggle:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 1px;
+}
+
+.side-nav-brand {
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid #334155;
+}
+
+.side-nav-brand h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: #f1f5f9;
+}
+
+.side-nav-brand p {
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.side-nav-site {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #334155;
+}
+
+.side-nav-site label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.side-nav-site select {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #475569;
+  border-radius: 4px;
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.side-nav-menu {
+  flex: 1;
+  padding: 0.5rem 0;
+  overflow-y: auto;
+}
+
+.nav-group {
+  margin-bottom: 0.25rem;
+}
+
+.nav-group-title {
+  display: block;
+  padding: 0.5rem 1rem 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.nav-link {
+  display: block;
+  padding: 0.45rem 1rem 0.45rem 1.25rem;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+
+.nav-link:hover {
+  background: #243044;
+  color: #fff;
+}
+
+.nav-link.active {
+  background: #2d3a52;
+  color: #38bdf8;
+  border-left-color: #38bdf8;
+  font-weight: 600;
+}
+
+.nav-link.sub {
+  padding-left: 1.75rem;
+  font-size: 0.82rem;
+}
+
+.side-nav-footer {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #334155;
+  font-size: 0.72rem;
+}
+
+.side-nav-footer a {
+  color: #94a3b8;
+  text-decoration: none;
+}
+
+.side-nav-footer a:hover {
+  color: #38bdf8;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main > header.compact-header {
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #1e3a5f, #312e81);
+  border-bottom: 1px solid #334155;
+}
+
+.app-main > header.compact-header h1 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.app-main > header.compact-header .tagline {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.app-main > .tabs {
+  padding-left: 1.25rem;
+}
+
+.app-main > main {
+  max-width: none;
+  flex: 1;
+}
+
+@media (max-width: 900px) {
+  .app-shell {
+    flex-direction: column;
+  }
+  .side-nav {
+    width: 100%;
+    max-height: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .app-shell.side-nav-collapsed .side-nav {
+    display: none;
+  }
+  .side-nav-toggle {
+    left: auto;
+    right: 0.5rem;
+    top: 0.5rem;
+    transform: none;
+    height: 32px;
+    width: 32px;
+    border-radius: 6px;
+    border: 1px solid #475569;
+  }
+  .app-shell.side-nav-collapsed .side-nav-toggle {
+    left: auto;
+    right: 0.5rem;
+  }
+  .side-nav-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.5rem;
+  }
+  .nav-group-title { display: none; }
+  .nav-link { border-left: none; border-radius: 4px; padding: 0.4rem 0.65rem; }
+  .nav-link.sub { padding-left: 0.65rem; }
+}

@@ -15,6 +15,9 @@ internal static class MegaDigestFallbackMatcher
         citations = new List<string>();
         var messageLower = message.ToLowerInvariant();
 
+        if (ChatIntentMatcher.IsSupplierUnpaidQuery(messageLower))
+            return false;
+
         var match = MegaDigestCatalog.Instance.FindBestMatchDetailed(message, minScore: 2);
         if (match.Entry is not null && match.Kind != MegaDigestMatchKind.None)
         {
@@ -188,6 +191,10 @@ internal static class MegaDigestFallbackMatcher
         reply = "";
         if (classification.PrimaryIntent == SageIntentEngine.IntentType.Unknown ||
             classification.Confidence < 0.4)
+            return false;
+
+        var contract = QueryIntentContract.Parse(message, classification);
+        if (DynamicAnalyticalQueryBuilder.CanAnswer(message, contract))
             return false;
 
         var shape = classification.ExpectedResponse switch

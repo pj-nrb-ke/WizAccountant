@@ -39,6 +39,11 @@ internal static class QueryAggregationMode
         if (m.Contains("count of") || m.Contains("count the"))
             return true;
 
+        if (m.Contains("credit note") &&
+            (m.Contains("total") || m.Contains("how many") || m.Contains("number of") ||
+             m.Contains("issued") || m.Contains("issues") || m.Contains("raised")))
+            return true;
+
         // Word-boundary count (avoids "discounted", "account", etc.)
         if (CountWord.IsMatch(m) && !WantsExplicitRowListing(m))
             return true;
@@ -112,6 +117,14 @@ internal static class QueryAggregationMode
             return "Aggregation mode: your question asks for a **count** of discounted sales invoices" + yearBit +
                    ", not an open AR transaction list. " +
                    "Re-run after connector rebuild — expected operation: salesinvoice.discount.count (SAGE-SALES-INV-DISC-COUNT-001). " +
+                   $"Mis-routed operation blocked: {operation}.";
+        }
+
+        if (message.Contains("credit note", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Aggregation mode: your question asks for a **count/total of sales credit notes**" + yearBit +
+                   ", not a customer credit balance listing. " +
+                   $"Expected operation: {CreditNoteChatHelper.SalesCreditNoteCountOperation} ({CreditNoteChatHelper.QuerySerial}). " +
                    $"Mis-routed operation blocked: {operation}.";
         }
 

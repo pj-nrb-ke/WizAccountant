@@ -180,6 +180,54 @@ public sealed class InsightSearchHit
     public string Name { get; set; } = string.Empty;
 }
 
+public sealed class InsightSqlQueryRequest
+{
+    public Guid SiteId { get; set; }
+    public string Sql { get; set; } = "";
+    public int? MaxRows { get; set; }
+}
+
+public sealed class InsightSqlQueryResponse
+{
+    public ChatGridDto Grid { get; set; } = new();
+    public int RowCount { get; set; }
+    public bool Truncated { get; set; }
+    public string? Message { get; set; }
+    public DateTimeOffset DataAsOfUtc { get; set; }
+    public Guid? JobId { get; set; }
+}
+
+public sealed class InvoiceLineSqlHintResponse
+{
+    public string TableName { get; set; } = "_btblInvoiceLines";
+    public List<string> Columns { get; set; } = [];
+    public string QtyColumn { get; set; } = "";
+    public string QtyExpression { get; set; } = "";
+    public string ValueExpression { get; set; } = "";
+    public string ValueSource { get; set; } = "";
+    public string? SampleProductMonthlySql { get; set; }
+}
+
+public sealed class InsightSavedSqlQueryDto
+{
+    public Guid QueryId { get; set; }
+    public Guid SiteId { get; set; }
+    public string Title { get; set; } = "";
+    public string? AiPrompt { get; set; }
+    public string Sql { get; set; } = "";
+    public string CreatedAtUtc { get; set; } = "";
+    public string UpdatedAtUtc { get; set; } = "";
+}
+
+public sealed class UpsertInsightSavedSqlQueryRequest
+{
+    public Guid? QueryId { get; set; }
+    public Guid SiteId { get; set; }
+    public string Title { get; set; } = "";
+    public string? AiPrompt { get; set; }
+    public string Sql { get; set; } = "";
+}
+
 public sealed class ChatMessageRequest
 {
     public Guid SiteId { get; set; }

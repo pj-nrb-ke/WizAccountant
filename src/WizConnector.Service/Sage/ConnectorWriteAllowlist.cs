@@ -9,7 +9,8 @@ public static class ConnectorWriteAllowlist
         "suppliertransaction.post",
         "allocation.save",
         "customer.save",
-        "supplier.save"
+        "supplier.save",
+        "salesorder.save"
     };
 
     public static bool IsWrite(string operation) => Operations.Contains(operation);

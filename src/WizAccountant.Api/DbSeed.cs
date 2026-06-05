@@ -70,6 +70,7 @@ public static class DbSeed
     {
         await EnsureJobAuditsTableAsync(db);
         await EnsureInsightQueryLogTableAsync(db);
+        await EnsureInsightSavedSqlQueriesTableAsync(db);
 
         await db.Database.ExecuteSqlRawAsync("""
             CREATE TABLE IF NOT EXISTS Tenants (
@@ -138,6 +139,24 @@ public static class DbSeed
                 FeedbackAtUtc TEXT NULL,
                 CreatedAtUtc TEXT NOT NULL
             );
+            """);
+    }
+
+    public static async Task EnsureInsightSavedSqlQueriesTableAsync(AppDbContext db)
+    {
+        await db.Database.ExecuteSqlRawAsync("""
+            CREATE TABLE IF NOT EXISTS InsightSavedSqlQueries (
+                QueryId TEXT NOT NULL PRIMARY KEY,
+                TenantId TEXT NOT NULL,
+                SiteId TEXT NOT NULL,
+                Title TEXT NOT NULL,
+                AiPrompt TEXT NULL,
+                Sql TEXT NOT NULL,
+                CreatedAtUtc TEXT NOT NULL,
+                UpdatedAtUtc TEXT NOT NULL
+            );
+            CREATE INDEX IF NOT EXISTS IX_InsightSavedSqlQueries_TenantSite
+                ON InsightSavedSqlQueries (TenantId, SiteId);
             """);
     }
 

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sales Order — WizAccountant</title>
+  <link rel="stylesheet" href="../shell.css" />
+  <link rel="stylesheet" href="sales-order.css" />
+</head>
+<body class="so-body">
+  <div class="app-shell">
+    <aside class="side-nav">
+      <div class="side-nav-brand">
+        <h2>WizAccountant</h2>
+        <p>Remote Sage access</p>
+      </div>
+      <div class="side-nav-site">
+        <label>Site
+          <select id="site-select"><option value="">Loading…</option></select>
+        </label>
+      </div>
+      <nav class="side-nav-menu" aria-label="Main">
+        <div class="nav-group">
+          <span class="nav-group-title">Insight</span>
+          <a class="nav-link" href="../index.html">Dashboard &amp; AI</a>
+        </div>
+        <div class="nav-group">
+          <span class="nav-group-title">Orders</span>
+          <a class="nav-link sub active" href="index.html" data-nav="sales-order">Sales Order</a>
+        </div>
+        <div class="nav-group">
+          <span class="nav-group-title">System</span>
+          <a class="nav-link sub" href="/act/index.html">Act (Approvals)</a>
+          <a class="nav-link sub" href="/admin/index.html">Admin</a>
+        </div>
+      </nav>
+      <div class="side-nav-footer">
+        <a href="../index.html">← Back to Insight</a>
+      </div>
+    </aside>
+    <button type="button" id="side-nav-toggle" class="side-nav-toggle" aria-expanded="true" title="Hide side panel">◀</button>
+
+    <div class="app-main so-main">
+      <header class="so-titlebar">
+        <div class="so-titlebar-left">
+          <h1 id="so-window-title">Editing Sales Order (new)</h1>
+          <span id="so-load-status" class="so-status-pill muted">Loading lookups…</span>
+        </div>
+        <div class="so-toolbar">
+          <button type="button" class="so-btn" id="btn-close" title="Close">Close</button>
+          <button type="button" class="so-btn" id="btn-new">New</button>
+          <button type="button" class="so-btn" id="btn-open" disabled title="Phase 2">Open…</button>
+          <button type="button" class="so-btn so-btn-primary" id="btn-place-order" title="Place sales order in Sage">Place Order</button>
+          <button type="button" class="so-btn" id="btn-quote" title="Save as sales quotation">Quote</button>
+          <button type="button" class="so-btn so-btn-accent" id="btn-process" title="Save order and process to sales invoice">Process</button>
+          <button type="button" class="so-btn so-btn-ai" id="btn-ai-assist" title="AI-assisted order entry">✨ AI Assist</button>
+        </div>
+      </header>
+
+      <form id="so-form" class="so-form" autocomplete="off">
+        <!-- Customer + Address -->
+        <section class="so-header-grid">
+          <div class="so-customer-block">
+            <label class="so-field-row">
+              <span class="so-label">Customer</span>
+              <div class="so-search-field" id="so-customer-wrap">
+                <input type="text" id="so-customer-search" class="so-search-input" placeholder="Search code or name…" autocomplete="off" spellcheck="false" />
+                <input type="hidden" id="so-customer" />
+                <ul id="so-customer-list" class="so-search-list hidden" role="listbox" aria-label="Customers"></ul>
+              </div>
+              <button type="button" class="so-icon-btn" id="btn-customer-enquiry" title="Quick enquiry (Phase 2)">🔍</button>
+            </label>
+            <div class="so-address-panel">
+              <div class="so-address-header">Address</div>
+              <div class="so-address-tabs">
+                <button type="button" class="so-addr-tab active" data-addr="delivery">Delivery Address</button>
+                <button type="button" class="so-addr-tab" data-addr="postal">Physical Address</button>
+                <button type="button" class="so-addr-tab" data-addr="contact">Contact</button>
+              </div>
+              <textarea id="so-address" class="so-address-text" rows="3" readonly placeholder="Select a customer…"></textarea>
+            </div>
+          </div>
+
+          <div class="so-meta-col">
+            <fieldset class="so-fieldset">
+              <legend>Order</legend>
+              <label>Order Number <input id="so-order-no" readonly placeholder="(auto)" /></label>
+              <label>External Order <input id="so-ext-order" /></label>
+              <label>Order Date <input type="date" id="so-order-date" /></label>
+              <label>Due Date <input type="date" id="so-due-date" /></label>
+              <label>Order Status
+                <select id="so-order-status"><option value="">—</option></select>
+              </label>
+              <label>Priority
+                <select id="so-priority"><option value="">—</option></select>
+              </label>
+            </fieldset>
+            <fieldset class="so-fieldset">
+              <legend>Document</legend>
+              <label>Invoice Number <input id="so-invoice-no" readonly placeholder="(on process)" /></label>
+              <label>Invoice Date <input type="date" id="so-invoice-date" /></label>
+              <label>Project
+                <select id="so-project"><option value="">—</option></select>
+              </label>
+              <label>Representative
+                <select id="so-rep"><option value="">—</option></select>
+              </label>
+              <label>Settlement Terms
+                <select id="so-settlement"><option value="">—</option></select>
+              </label>
+            </fieldset>
+          </div>
+        </section>
+
+        <!-- Header tabs -->
+        <div class="so-header-tabs">
+          <button type="button" class="so-htab active" data-htab="document">Document</button>
+          <button type="button" class="so-htab" data-htab="delivery">Delivery</button>
+          <button type="button" class="so-htab" data-htab="currency">Foreign Currency</button>
+          <button type="button" class="so-htab" data-htab="other" disabled title="User-defined fields — next phase">Additional Fields</button>
+          <button type="button" class="so-htab" data-htab="other2">Other</button>
+        </div>
+
+        <section id="so-panel-delivery" class="so-subpanel hidden">
+          <label>Delivery Date <input type="date" id="so-delivery-date" /></label>
+          <label>Delivery Method <input id="so-delivery-method" placeholder="Code or description" /></label>
+        </section>
+
+        <section id="so-panel-currency" class="so-subpanel">
+          <div class="so-currency-grid">
+            <label>Currency
+              <select id="so-currency"><option value="">Home currency</option></select>
+            </label>
+            <label>Exchange Rate <input type="number" id="so-exchange-rate" step="0.000001" min="0" placeholder="1.000000" /></label>
+            <label class="so-check-label">
+              <input type="checkbox" id="so-print-fc" /> Print documents in foreign currency
+            </label>
+          </div>
+          <p class="so-hint muted small">Foreign currency tab mirrors Sage Order Entry. Rates apply to this document only.</p>
+        </section>
+
+        <div class="so-lines-region">
+        <!-- Line grid -->
+        <div class="so-grid-wrap">
+          <table class="so-grid" id="so-lines">
+            <thead>
+              <tr>
+                <th>Line</th>
+                <th>Module</th>
+                <th>Item</th>
+                <th>Description</th>
+                <th>Warehouse</th>
+                <th>Available</th>
+                <th>Quantity</th>
+                <th>UOM</th>
+                <th>Proc Qty</th>
+                <th>Confirm Qty</th>
+                <th>Price (Incl)</th>
+                <th>Tax Type</th>
+                <th>Tax %</th>
+                <th>Disc %</th>
+                <th>Disc Amt</th>
+                <th>Line Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="so-lines-body"></tbody>
+          </table>
+        </div>
+        <div class="so-line-actions">
+          <button type="button" class="so-btn" id="btn-add-line">+ Add line</button>
+          <button type="button" class="so-btn" id="btn-remove-line">Remove selected</button>
+        </div>
+        </div>
+
+        <!-- Footer — pinned to bottom of form -->
+        <section class="so-footer-grid">
+          <div class="so-footer-left">
+            <label>Description <input id="so-description" placeholder="Statement / GL description" /></label>
+            <label>Sales Order <input id="so-memo" placeholder="Internal memo" /></label>
+            <label>Messages <textarea id="so-messages" rows="3" placeholder="Linked messages (read-only in Phase 2)"></textarea></label>
+          </div>
+          <div class="so-footer-right">
+            <div class="so-footer-right-stack">
+              <div class="so-footer-controls">
+                <label class="so-discount-row">Discount % <input type="text" id="so-discount-pct" class="so-discount-input" inputmode="decimal" autocomplete="off" value="0" /></label>
+                <label class="so-discount-row">Discount Amount <input type="text" id="so-discount-amt" class="so-discount-input" inputmode="decimal" autocomplete="off" value="0" /></label>
+                <label class="so-check-label"><input type="checkbox" id="so-tax-inclusive" checked /> Inclusive pricing (line)</label>
+              </div>
+              <div class="so-totals-box">
+              <table class="so-totals">
+                <thead>
+                  <tr><th></th><th>Ordered</th><th>Confirmed</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Exclusive Total</td><td id="tot-excl-ordered">0.00</td><td id="tot-excl-confirmed">0.00</td></tr>
+                  <tr><td>Tax Amount</td><td id="tot-tax-ordered">0.00</td><td id="tot-tax-confirmed">0.00</td></tr>
+                  <tr><td>Inclusive Total</td><td id="tot-incl-ordered">0.00</td><td id="tot-incl-confirmed">0.00</td></tr>
+                </tbody>
+              </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      </form>
+
+      <footer class="so-statusbar">
+        <span id="so-status-tax">Tax Inclusive (Line)</span>
+        <span id="so-status-tax-hint" class="error"></span>
+        <span id="so-status-doc">Unprocessed</span>
+        <span id="so-status-mode">Editing</span>
+        <span id="so-status-company-db" class="muted"></span>
+        <span id="so-status-common-db" class="muted"></span>
+        <span id="so-status-data" class="muted so-status-data"></span>
+      </footer>
+
+      <dialog id="so-ai-dialog" class="so-ai-dialog">
+        <form method="dialog">
+          <h2>AI Assist — Sales Order</h2>
+          <p class="muted small">Describe what to sell and to whom. AI will suggest header defaults and line items (preview only until Act posting is wired).</p>
+          <textarea id="so-ai-prompt" rows="4" placeholder="e.g. Create a sales order for CAMEL PLUS LTD — 25 units of DFHW1000ML at list price, warehouse DS, due next Friday"></textarea>
+          <div class="so-ai-actions">
+            <button type="button" class="so-btn" id="so-ai-cancel">Cancel</button>
+            <button type="button" class="so-btn so-btn-ai" id="so-ai-run">Generate draft</button>
+          </div>
+          <pre id="so-ai-result" class="so-ai-result muted"></pre>
+        </form>
+      </dialog>
+    </div>
+  </div>
+
+  <script src="../shell.js"></script>
+  <script src="sales-order.js"></script>
+</body>
+</html>

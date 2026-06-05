@@ -41,6 +41,9 @@ internal static class GlFinanceChatMatcher
     private static bool TryTreasury(string m, Dictionary<string, string> parameters, List<string> tools, out string? op)
     {
         op = null;
+        if (CustomerCollectionsHelper.IsCustomerCollectionsQuery(m))
+            return false;
+
         if ((m.Contains("cash") || m.Contains("liquidity")) &&
             (m.Contains("low") || m.Contains("shortage") ||
              (m.Contains("why") && !m.Contains("customer") && !m.Contains("supplier"))) &&
@@ -54,7 +57,8 @@ internal static class GlFinanceChatMatcher
         if (!m.Contains("treasury") && !m.Contains("cash forecast") && !m.Contains("forecast") &&
             !m.Contains("cashflow") && !m.Contains("cash flow") && !m.Contains("cash position") &&
             !m.Contains("liquidity") && !m.Contains("cash burn") &&
-            !m.Contains("collections next") && !m.Contains("payments next"))
+            !m.Contains("collections next") && !m.Contains("payments next") &&
+            !CustomerCollectionsHelper.IsCollectionsForecastQuery(m))
             return false;
 
         if (m.Contains("dashboard") || m.Contains("summary") || m.Contains("treasury summary"))
@@ -64,7 +68,7 @@ internal static class GlFinanceChatMatcher
             return true;
         }
 
-        if (m.Contains("collections") || m.Contains("expected customer") ||
+        if (m.Contains("expected collection") || m.Contains("collections next") || m.Contains("expected customer") ||
             (m.Contains("receivable") && m.Contains("forecast")))
         {
             op = "treasury.collections.forecast";

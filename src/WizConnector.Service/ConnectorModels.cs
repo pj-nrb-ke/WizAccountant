@@ -158,6 +158,24 @@ public sealed class MockJobExecutor(ILogger<MockJobExecutor> logger) : IJobExecu
             return Task.FromResult<(string?, string?)>((payload, null));
         }
 
+        if (string.Equals(operation, "salescreditnote.count", StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = "SAGE-AR-CREDIT-NOTE-COUNT-001",
+                dateFrom = "2025-01-01",
+                dateTo = "2025-03-31",
+                periodLabel = "Q1 2025",
+                creditNoteCount = 7,
+                totalValue = 125000m,
+                countOnly = true,
+                aggregationMode = true,
+                finding = "Mock: 7 sales credit notes in Q1 2025.",
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
         if (string.Equals(operation, "customer.credit.balances", StringComparison.OrdinalIgnoreCase))
         {
             var payload = JsonSerializer.Serialize(new
@@ -192,6 +210,34 @@ public sealed class MockJobExecutor(ILogger<MockJobExecutor> logger) : IJobExecu
                 {
                     new { rank = 1, code = "DEMO01", name = "Demo Debtor Ltd", totalOutstanding = 1_245_000m, oldestInvoiceDate = "2024-04-15", daysOutstanding = 412, openLineCount = 3 }
                 },
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (operation is "customer.collections.summary"
+            or "customer.collections.by.month"
+            or "customer.collections.by.customer"
+            or "customer.collections.top")
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = "SAGE-AR-COLLECTIONS-001",
+                operation,
+                dateFrom = "2025-04-01",
+                dateTo = "2025-06-30",
+                totalCollections = 125000m,
+                monthlyBreakdown = new[]
+                {
+                    new { year = 2025, monthNo = 4, month = "April", collectionAmount = 40000m },
+                    new { year = 2025, monthNo = 5, month = "May", collectionAmount = 45000m },
+                    new { year = 2025, monthNo = 6, month = "June", collectionAmount = 40000m }
+                },
+                byCustomer = new[]
+                {
+                    new { rank = 1, customerCode = "A001", customerName = "Demo Customer", collectionAmount = 50000m }
+                },
+                note = "Phase 2 mock — rebuild connector for live PostAR collections.",
                 dataAsOfUtc = DateTimeOffset.UtcNow
             });
             return Task.FromResult<(string?, string?)>((payload, null));
@@ -246,10 +292,79 @@ public sealed class MockJobExecutor(ILogger<MockJobExecutor> logger) : IJobExecu
             return Task.FromResult<(string?, string?)>((payload, null));
         }
 
+        if (string.Equals(operation, SupplierUnpaidHandlers.CountOperation, StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = SupplierUnpaidHandlers.CountQuerySerial,
+                operation = SupplierUnpaidHandlers.CountOperation,
+                countOnly = true,
+                aggregationMode = true,
+                asOfDate = DateTime.Today.ToString("yyyy-MM-dd"),
+                totalUnpaidSuppliers = 12,
+                totalOutstandingPayable = 458_920.55m,
+                suppliersWithUnpaidInvoices = 12,
+                finding = "Total unpaid suppliers as of today: 12.",
+                note = "Phase 2 mock — rebuild connector for live Sage AP open balances.",
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (string.Equals(operation, SupplierUnpaidHandlers.ListOperation, StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = SupplierUnpaidHandlers.ListQuerySerial,
+                operation = SupplierUnpaidHandlers.ListOperation,
+                asOfDate = DateTime.Today.ToString("yyyy-MM-dd"),
+                totalUnpaidSuppliers = 2,
+                totalOutstandingPayable = 125_000m,
+                suppliers = new[]
+                {
+                    new { code = "SUPP001", name = "Demo Supplier 1", invoiceCount = 3, totalOutstanding = 80_000m },
+                    new { code = "SUPP002", name = "Demo Supplier 2", invoiceCount = 1, totalOutstanding = 45_000m }
+                },
+                finding = "2 supplier(s) with unpaid AP balances as of today.",
+                note = "Phase 2 mock — rebuild connector for live Sage AP open balances.",
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
+        if (string.Equals(operation, SupplierUnpaidHandlers.TopOperation, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(operation, SupplierUnpaidHandlers.SummaryOperation, StringComparison.OrdinalIgnoreCase))
+        {
+            var payload = JsonSerializer.Serialize(new
+            {
+                querySerial = SupplierUnpaidHandlers.TopQuerySerial,
+                operation = SupplierUnpaidHandlers.TopOperation,
+                asOfDate = DateTime.Today.ToString("yyyy-MM-dd"),
+                totalUnpaidSuppliers = 2,
+                totalOutstandingPayable = 125_000m,
+                topSuppliers = new[]
+                {
+                    new { rank = 1, code = "SUPP001", name = "Demo Supplier 1", invoiceCount = 3, totalOutstanding = 80_000m }
+                },
+                finding = "Top 1 supplier(s) by outstanding AP balance as of today.",
+                note = "Phase 2 mock — rebuild connector for live Sage AP open balances.",
+                dataAsOfUtc = DateTimeOffset.UtcNow
+            });
+            return Task.FromResult<(string?, string?)>((payload, null));
+        }
+
         if (operation is "site.diagnostics"
-            or "customer.openitems" or "customer.unpaid.summary" or "supplier.openitems" or "gltransaction.list"
+            or "customer.openitems" or "customer.unpaid.summary"
+            or "supplier.openitems" or "gltransaction.list"
             or "salesorder.list" or "purchaseorder.list" or "inventoryitem.list"
-            or "project.list" or "warehouse.list" or "taxrate.list" or "transactioncode.list")
+            or "project.list" or "warehouse.list" or "taxrate.list"
+            or "salesrepresentative.list" or "settlementterms.list" or "orderstatus.list"
+            or "priority.list" or "currency.list"
+            or "customer.address" or "inventoryitem.stock.qty" or "inventoryitem.sellingprice"
+            or "inventoryitem.salestax"
+            or "inventoryitem.units"
+            or "salesorder.nextnumber"
+            or "transactioncode.list")
         {
             var payload = JsonSerializer.Serialize(new
             {

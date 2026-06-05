@@ -38,6 +38,10 @@ internal static class ApPurchaseInvChatMatcher
 
 
 
+        if (TrySupplierUnpaidSummary(m, parameters, tools, out operation))
+
+            return true;
+
         if (TrySupplierAgedTop(m, parameters, tools, out operation))
 
             return true;
@@ -56,6 +60,9 @@ internal static class ApPurchaseInvChatMatcher
 
         if (TryDuplicate(m, parameters, tools, out operation))
 
+            return true;
+
+        if (TrySupplierCreditNote(m, parameters, tools, out operation))
             return true;
 
         if (TryCreditBalances(m, parameters, tools, out operation))
@@ -139,6 +146,15 @@ internal static class ApPurchaseInvChatMatcher
     }
 
 
+
+    private static bool TrySupplierUnpaidSummary(string m, Dictionary<string, string> parameters, List<string> tools, out string? op)
+    {
+        op = null;
+        if (!ChatIntentMatcher.TrySupplierUnpaidRoute(m, parameters, tools, out var operation))
+            return false;
+        op = operation;
+        return true;
+    }
 
     private static bool TrySupplierAgedTop(string m, Dictionary<string, string> parameters, List<string> tools, out string? op)
 
@@ -294,11 +310,28 @@ internal static class ApPurchaseInvChatMatcher
 
 
 
+    private static bool TrySupplierCreditNote(string m, Dictionary<string, string> parameters, List<string> tools, out string? op)
+    {
+        op = SupplierCreditNoteChatHelper.ResolveOperation(m);
+        if (!SupplierCreditNoteChatHelper.IsSupplierCreditNoteQuery(m))
+            return false;
+
+        if (op == SupplierCreditNoteChatHelper.CountOperation)
+            parameters["top"] = "1";
+        tools.Add(op);
+        return true;
+    }
+
+
+
     private static bool TryCreditBalances(string m, Dictionary<string, string> parameters, List<string> tools, out string? op)
 
     {
 
         op = "supplier.credit.balances";
+
+        if (SupplierCreditNoteChatHelper.IsSupplierCreditNoteQuery(m))
+            return false;
 
         if (!m.Contains("supplier") && !m.Contains("creditor"))
 

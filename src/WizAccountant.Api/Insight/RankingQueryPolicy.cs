@@ -35,7 +35,13 @@ internal static class RankingQueryPolicy
         "inventory.value.top",
         "inventory.movement.top",
         "warehouse.value.summary",
-        "warehouse.transfer.summary"
+        "warehouse.transfer.summary",
+        "warehouse.transfer.detail",
+        "warehouse.transfer.top",
+        "warehouse.transfer.by.item",
+        "warehouse.transfer.by.warehouse",
+        "salesdebitnote.top",
+        "suppliercreditnote.top"
     };
 
     public static bool IsRankingClassification(SageIntentEngine.Classification c) =>

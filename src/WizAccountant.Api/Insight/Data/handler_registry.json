@@ -10,6 +10,14 @@
       "keywords": ["how many", "count", "discount", "sales invoice", "invoice"]
     },
     {
+      "id": "AR-COUNT-CREDIT-NOTES",
+      "domain": "AR",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "salescreditnote.count",
+      "keywords": ["credit note", "credit notes", "issued", "total credit"]
+    },
+    {
       "id": "AR-TOP-DISCOUNT-INVOICES",
       "domain": "AR",
       "intent": "ranking",
@@ -80,6 +88,42 @@
       "implemented": true,
       "operation": "customer.sales.top",
       "keywords": ["top", "sales", "customer", "revenue", "period"]
+    },
+    {
+      "id": "AR-COLLECTIONS-SUMMARY",
+      "domain": "AR",
+      "intent": "aggregation",
+      "business_process": "customer_collections",
+      "implemented": true,
+      "operation": "customer.collections.summary",
+      "keywords": ["collection", "customer", "receipts", "Q2", "received"]
+    },
+    {
+      "id": "AR-COLLECTIONS-BY-MONTH",
+      "domain": "AR",
+      "intent": "aggregation",
+      "business_process": "customer_collections",
+      "implemented": true,
+      "operation": "customer.collections.by.month",
+      "keywords": ["collections", "by month", "customer"]
+    },
+    {
+      "id": "AR-COLLECTIONS-BY-CUSTOMER",
+      "domain": "AR",
+      "intent": "aggregation",
+      "business_process": "customer_collections",
+      "implemented": true,
+      "operation": "customer.collections.by.customer",
+      "keywords": ["collections", "by customer"]
+    },
+    {
+      "id": "AR-COLLECTIONS-TOP",
+      "domain": "AR",
+      "intent": "aggregation",
+      "business_process": "customer_collections",
+      "implemented": true,
+      "operation": "customer.collections.top",
+      "keywords": ["top", "collections", "customer"]
     },
     {
       "id": "AR-RANK-UNPAID-SUMMARY",
@@ -180,6 +224,38 @@
       "implemented": true,
       "operation": "supplier.invoice.unpaid.olderthan",
       "keywords": ["supplier", "unpaid", "older", "days"]
+    },
+    {
+      "id": "AP-SUPPLIER-UNPAID-COUNT",
+      "domain": "AP",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "supplier.unpaid.count",
+      "keywords": ["how many", "supplier", "not paid", "unpaid", "outstanding", "to date", "creditor"]
+    },
+    {
+      "id": "AP-SUPPLIER-UNPAID-LIST",
+      "domain": "AP",
+      "intent": "listing",
+      "implemented": true,
+      "operation": "supplier.unpaid.list",
+      "keywords": ["list", "which", "supplier", "not paid", "unpaid", "outstanding"]
+    },
+    {
+      "id": "AP-SUPPLIER-UNPAID-TOP",
+      "domain": "AP",
+      "intent": "ranking",
+      "implemented": true,
+      "operation": "supplier.unpaid.top",
+      "keywords": ["top", "supplier", "not paid", "unpaid", "outstanding"]
+    },
+    {
+      "id": "AP-UNPAID-SUMMARY",
+      "domain": "AP",
+      "intent": "aggregation",
+      "implemented": true,
+      "operation": "supplier.unpaid.summary",
+      "keywords": ["how many", "supplier", "not paid", "unpaid", "outstanding", "to date"]
     },
     {
       "id": "AP-OUTSTANDING-TOP",
@@ -587,7 +663,7 @@
       "intent": "aggregation",
       "implemented": true,
       "operation": "treasury.collections.forecast",
-      "keywords": ["expected collections", "customer collections"]
+      "keywords": ["expected collections", "collections next month"]
     },
     {
       "id": "TREASURY-PAY",

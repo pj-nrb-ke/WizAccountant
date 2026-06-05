@@ -12,7 +12,7 @@ internal static class SalesInvoiceDiscountCountHandler
 {
     public const string QuerySerial = "SAGE-SALES-INV-DISC-COUNT-001";
 
-    private const string CountSql = """
+    private static readonly string CountSql = $"""
         DECLARE @From DATE = @pDateFrom;
         DECLARE @To DATE = @pDateTo;
 
@@ -20,7 +20,8 @@ internal static class SalesInvoiceDiscountCountHandler
         FROM InvNum H
         WHERE CAST(H.InvDate AS DATE) >= @From
           AND CAST(H.InvDate AS DATE) <= @To
-          AND (H.DocType = 4 OR H.DocType IN (0, 4))
+          AND {InvNumSqlHelper.DocStateAnalyticsExclusionFilter}
+          AND {InvNumSqlHelper.SalesDocTypeFilter}
           AND (
                 ISNULL(H.InvDisc, 0) <> 0
                 OR ISNULL(H.InvDiscAmnt, 0) <> 0
@@ -40,19 +41,21 @@ internal static class SalesInvoiceDiscountCountHandler
               );
         """;
 
-    private const string AvgDiscSql = """
+    private static readonly string AvgDiscSql = $"""
         SELECT AVG(CAST(ISNULL(H.InvDiscAmnt, 0) AS DECIMAL(18, 2)))
         FROM InvNum H
         WHERE CAST(H.InvDate AS DATE) >= @pDateFrom AND CAST(H.InvDate AS DATE) <= @pDateTo
-          AND (H.DocType = 4 OR H.DocType IN (0, 4))
+          AND {InvNumSqlHelper.DocStateAnalyticsExclusionFilter}
+          AND {InvNumSqlHelper.SalesDocTypeFilter}
           AND (ISNULL(H.InvDiscAmnt, 0) <> 0 OR ISNULL(H.DiscValue, 0) > 0);
         """;
 
-    private const string TopDiscSql = """
+    private static readonly string TopDiscSql = $"""
         SELECT TOP 1 H.InvNumber
         FROM InvNum H
         WHERE CAST(H.InvDate AS DATE) >= @pDateFrom AND CAST(H.InvDate AS DATE) <= @pDateTo
-          AND (H.DocType = 4 OR H.DocType IN (0, 4))
+          AND {InvNumSqlHelper.DocStateAnalyticsExclusionFilter}
+          AND {InvNumSqlHelper.SalesDocTypeFilter}
           AND (ISNULL(H.InvDiscAmnt, 0) <> 0 OR ISNULL(H.DiscValue, 0) > 0)
         ORDER BY ISNULL(H.InvDiscAmnt, 0) DESC;
         """;

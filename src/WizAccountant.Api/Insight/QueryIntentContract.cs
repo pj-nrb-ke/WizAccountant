@@ -1,3 +1,5 @@
+using WizAccountant.Contracts;
+
 namespace WizAccountant.Api.Insight;
 
 /// <summary>Parsed business intent structure for routing, capability checks, and query logging (Layer 2).</summary>
@@ -13,6 +15,9 @@ internal sealed class QueryIntentContract
     public IReadOnlyList<string> OutputShape { get; init; } = [];
     public bool WantsRanking { get; init; }
     public bool WantsAggregation { get; init; }
+    public InsightPeriodResolution? Period { get; init; }
+    public int? YearHint { get; init; }
+    public IReadOnlyList<string> ItemCodes { get; init; } = [];
 
     public static QueryIntentContract Parse(
         string message,
@@ -34,6 +39,9 @@ internal sealed class QueryIntentContract
             groupings.Add("warehouse");
         if (m.Contains("month") || m.Contains("per month") || m.Contains("monthly"))
             groupings.Add("month");
+        if (m.Contains("quarter") || m.Contains("per quarter") || m.Contains("by quarter") ||
+            System.Text.RegularExpressions.Regex.IsMatch(m, @"\bq[1-4]\b"))
+            groupings.Add("quarter");
 
         if (m.Contains("quantity") || m.Contains("qty"))
             metrics.Add("quantity");
@@ -51,11 +59,26 @@ internal sealed class QueryIntentContract
         if (QueryAggregationMode.IsAggregationQuery(m))
             output.Add("aggregation");
 
-        string? dateFilter = null;
-        if (m.Contains("from jan") || m.Contains("starting from jan") || m.Contains("january 20"))
-            dateFilter = "from-month-year";
-        else if (ChatIntentMatcher.ExtractYearFromMessage(message).HasValue)
-            dateFilter = "year-range";
+        var yearHint = ChatIntentMatcher.ExtractYearFromMessage(message);
+        var itemCodes = System.Text.RegularExpressions.Regex.Matches(message, @"\b[A-Z]{2,}[A-Z0-9]*\d+\b")
+            .Select(match => match.Value)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        if (itemCodes.Count == 0 &&
+            (m.Contains("cpo") || m.Contains("crude palm oil") || m.Contains("palm oil")))
+            groupings.Add("product");
+        InsightPeriodResolution? period = null;
+        if (InsightDateRangeParser.TryResolvePeriod(message, yearHint, out var parsed))
+            period = parsed;
+
+        string? dateFilter = period?.PeriodType;
+        if (dateFilter is null)
+        {
+            if (m.Contains("from jan") || m.Contains("starting from jan") || m.Contains("january 20"))
+                dateFilter = InsightPeriodTypes.FromMonthOnward;
+            else if (yearHint.HasValue)
+                dateFilter = InsightPeriodTypes.DefaultFullYear;
+        }
 
         return new QueryIntentContract
         {
@@ -69,7 +92,10 @@ internal sealed class QueryIntentContract
             OutputShape = output,
             WantsRanking = classification.PrimaryIntent == SageIntentEngine.IntentType.Ranking ||
                            m.Contains("top") || m.Contains("most"),
-            WantsAggregation = QueryAggregationMode.IsAggregationQuery(m)
+            WantsAggregation = QueryAggregationMode.IsAggregationQuery(m),
+            Period = period,
+            YearHint = yearHint,
+            ItemCodes = itemCodes
         };
     }
 }

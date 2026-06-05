@@ -42,7 +42,8 @@ internal static class SageChatDomain
         if (m.Contains("dashboard") || m.Contains("kpi") || m.Contains("summary"))
             return Layer.Dashboard;
 
-        if (m.Contains("customer") || m.Contains("invoice") || m.Contains("receivable") || m.Contains(" ar "))
+        if (m.Contains("customer") || m.Contains("invoice") || m.Contains("receivable") || m.Contains(" ar ") ||
+            m.Contains("credit note"))
             return Layer.AccountsReceivable;
 
         return Layer.Unknown;
@@ -168,6 +169,8 @@ internal static class SageChatDomain
         {
             "salesinvoice.discount.count" =>
                 "Sales invoices (InvNum): count of distinct invoices with header/line discount in the requested year — not open AR lines.",
+            CreditNoteChatHelper.SalesCreditNoteCountOperation =>
+                "Sales credit notes (InvNum DocType 1): count and total value in period — not customer credit balances.",
             "customer.aged.top" =>
                 "AR aging: ranked by oldest open invoice date per customer (Outstanding > 0), not Customer.List master dump.",
             "customer.credit.balances" =>

@@ -29,6 +29,8 @@ internal static class BusinessProcessSemantics
         new("month-end ready", BusinessProcessType.MonthEndClose, "gl.journal.periodend", "finance close checklist"),
         new("ready to close", BusinessProcessType.MonthEndClose, "gl.journal.periodend", "finance close checklist"),
         new("ar vs gl", BusinessProcessType.Reconciliation, "ar.gl.reconcile", "AR subledger reconciliation"),
+        new("collection from customer", BusinessProcessType.CustomerCollections, CustomerCollectionsHelper.SummaryOperation, "customer collections received"),
+        new("receipts from customer", BusinessProcessType.CustomerCollections, CustomerCollectionsHelper.SummaryOperation, "customer collections received"),
         new("ap vs gl", BusinessProcessType.Reconciliation, "ap.gl.reconcile", "AP subledger reconciliation"),
         new("inventory vs gl", BusinessProcessType.Reconciliation, "inventory.gl.reconcile", "inventory GL reconciliation"),
     ];

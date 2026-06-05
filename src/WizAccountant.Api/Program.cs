@@ -18,6 +18,8 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ReadOnlyChatService>();
 builder.Services.AddScoped<InsightQueryLogService>();
 builder.Services.AddScoped<InsightTriageService>();
+builder.Services.AddScoped<InsightSqlQueryService>();
+builder.Services.AddScoped<InsightSavedSqlQueryService>();
 builder.Services.AddScoped<NotificationStubService>();
 builder.Services.AddScoped<ApprovalService>();
 builder.Services.AddSingleton<ActDraftService>();
@@ -300,6 +302,71 @@ app.MapPost("/api/insight/search", async (InsightSearchRequest request, JobServi
     }
     catch (InvalidOperationException ex) { return Results.NotFound(ex.Message); }
     catch (TimeoutException ex) { return Results.Json(new { error = ex.Message }, statusCode: 504); }
+});
+
+app.MapPost("/api/insight/sql", async (InsightSqlQueryRequest request, InsightSqlQueryService sqlQuery, CancellationToken ct) =>
+{
+    try
+    {
+        return Results.Ok(await sqlQuery.RunAsync(request, ct));
+    }
+    catch (InvalidOperationException ex) { return Results.BadRequest(new { error = ex.Message }); }
+    catch (TimeoutException ex) { return Results.Json(new { error = ex.Message }, statusCode: 504); }
+});
+
+app.MapGet("/api/insight/sql/invoice-lines-hint", async (Guid siteId, InsightSqlQueryService sqlQuery, CancellationToken ct) =>
+{
+    try
+    {
+        return Results.Ok(await sqlQuery.GetInvoiceLineHintAsync(siteId, ct));
+    }
+    catch (InvalidOperationException ex) { return Results.BadRequest(new { error = ex.Message }); }
+    catch (TimeoutException ex) { return Results.Json(new { error = ex.Message }, statusCode: 504); }
+});
+
+app.MapGet("/api/insight/sql/saved", async (
+    Guid siteId,
+    HttpContext http,
+    InsightSavedSqlQueryService savedQueries,
+    CancellationToken ct) =>
+{
+    var tenantId = http.Request.Headers.TryGetValue("X-Tenant-Id", out var t) ? t.ToString() : "pilot-tenant";
+    try
+    {
+        return Results.Ok(await savedQueries.ListAsync(tenantId, siteId, ct));
+    }
+    catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); }
+});
+
+app.MapPost("/api/insight/sql/saved", async (
+    UpsertInsightSavedSqlQueryRequest request,
+    HttpContext http,
+    InsightSavedSqlQueryService savedQueries,
+    CancellationToken ct) =>
+{
+    var tenantId = http.Request.Headers.TryGetValue("X-Tenant-Id", out var t) ? t.ToString() : "pilot-tenant";
+    try
+    {
+        return Results.Ok(await savedQueries.UpsertAsync(tenantId, request, ct));
+    }
+    catch (InvalidOperationException ex) { return Results.BadRequest(new { error = ex.Message }); }
+    catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); }
+});
+
+app.MapDelete("/api/insight/sql/saved/{queryId:guid}", async (
+    Guid queryId,
+    Guid siteId,
+    HttpContext http,
+    InsightSavedSqlQueryService savedQueries,
+    CancellationToken ct) =>
+{
+    var tenantId = http.Request.Headers.TryGetValue("X-Tenant-Id", out var t) ? t.ToString() : "pilot-tenant";
+    try
+    {
+        var deleted = await savedQueries.DeleteAsync(tenantId, siteId, queryId, ct);
+        return deleted ? Results.NoContent() : Results.NotFound(new { error = "Saved query not found." });
+    }
+    catch (ArgumentException ex) { return Results.BadRequest(new { error = ex.Message }); }
 });
 
 app.MapPost("/api/insight/chat", async (
