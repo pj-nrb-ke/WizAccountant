@@ -271,6 +271,10 @@ internal static class SageSdkPhase2Handlers
             "search.global" => SearchGlobal(parameters),
             "dashboard.summary" => DashboardSummary(parameters),
             "site.diagnostics" => SiteDiagnostics(),
+            "site.schema.probe" => SiteSchemaProbeHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "site.metadata" => SiteMetadataHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
             _ => null
         };
 

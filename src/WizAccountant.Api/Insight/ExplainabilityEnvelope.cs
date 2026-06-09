@@ -11,7 +11,8 @@ internal static class ExplainabilityEnvelope
         operation.Contains("contributors", StringComparison.Ordinal) ||
         operation.Contains("reconcile", StringComparison.Ordinal) ||
         operation.Contains("anomal", StringComparison.Ordinal) ||
-        operation.Contains("unusual", StringComparison.Ordinal);
+        operation.Contains("unusual", StringComparison.Ordinal) ||
+        operation.StartsWith("treasury.", StringComparison.Ordinal);
 
     public static string EnhanceReply(string operation, string body, JsonElement root)
     {
@@ -76,6 +77,8 @@ internal static class ExplainabilityEnvelope
             return "Ask for VAT by account or missing-VAT invoices.";
         if (operation.StartsWith("bank.", StringComparison.Ordinal))
             return "Ask for unmatched deposits, unpresented cheques, or daily cash movement.";
+        if (operation.StartsWith("treasury.", StringComparison.Ordinal))
+            return "Ask for top overdue customers (AR aging) to address inflow constraints, or top AP supplier outstanding to manage outflow pressure.";
         if (operation.Contains("ar.", StringComparison.Ordinal) || operation.Contains("ap.", StringComparison.Ordinal))
             return "Ask for variance contributors or unallocated payments.";
         return null;

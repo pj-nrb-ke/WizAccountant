@@ -28,12 +28,34 @@ internal sealed class InvestigationContext
                                                   !t.StartsWith("domain:", StringComparison.Ordinal) &&
                                                   !t.StartsWith("businessProcess:", StringComparison.Ordinal) &&
                                                   !t.StartsWith("handler:", StringComparison.Ordinal) &&
-                                                  !t.StartsWith("route:", StringComparison.Ordinal));
+                                                  !t.StartsWith("route:", StringComparison.Ordinal) &&
+                                                  !t.StartsWith("entity:", StringComparison.Ordinal));
+
+            // Recover entity codes persisted in prior turn (GAP-014)
+            string? customerCode = null, supplierCode = null, stockCode = null, warehouseCode = null;
+            foreach (var tag in tools.Where(t => t.StartsWith("entity:", StringComparison.Ordinal)))
+            {
+                var sep = tag.IndexOf(':', 7); // skip "entity:"
+                if (sep < 0) continue;
+                var key = tag[7..sep];
+                var val = tag[(sep + 1)..];
+                switch (key)
+                {
+                    case "customerCode":  customerCode  = val; break;
+                    case "supplierCode":  supplierCode  = val; break;
+                    case "stockCode":     stockCode     = val; break;
+                    case "warehouseCode": warehouseCode = val; break;
+                }
+            }
 
             return new InvestigationContext
             {
                 LastOperation = lastOp,
-                ActiveTopic = InferTopic(lastOp, lastReplySnippet)
+                ActiveTopic   = InferTopic(lastOp, lastReplySnippet),
+                CustomerCode  = customerCode,
+                SupplierCode  = supplierCode,
+                StockCode     = stockCode,
+                WarehouseCode = warehouseCode
             };
         }
         catch
@@ -46,6 +68,7 @@ internal sealed class InvestigationContext
     {
         var m = message.ToLowerInvariant();
 
+        // Extract entity codes from current message (takes priority over persisted values)
         var wh = Regex.Match(message, @"(?:warehouse|whse)\s*[#:]?\s*(\w+)", RegexOptions.IgnoreCase);
         if (wh.Success)
             parameters["warehouseCode"] = wh.Groups[1].Value;
@@ -57,6 +80,14 @@ internal sealed class InvestigationContext
         var stock = Regex.Match(message, @"(?:item|stock)\s+([A-Z0-9][A-Z0-9\-]{1,20})\b", RegexOptions.IgnoreCase);
         if (stock.Success)
             parameters["stockCode"] = stock.Groups[1].Value.ToUpperInvariant();
+
+        // Apply persisted entity codes as fallback when not captured from current message (GAP-014)
+        if (!parameters.ContainsKey("customerCode")  && !string.IsNullOrEmpty(CustomerCode))
+            parameters["customerCode"]  = CustomerCode;
+        if (!parameters.ContainsKey("supplierCode")  && !string.IsNullOrEmpty(SupplierCode))
+            parameters["supplierCode"]  = SupplierCode;
+        if (!parameters.ContainsKey("warehouseCode") && !string.IsNullOrEmpty(WarehouseCode))
+            parameters["warehouseCode"] = WarehouseCode;
 
         if (LastOperation is not null)
             parameters["investigationPriorOp"] = LastOperation;

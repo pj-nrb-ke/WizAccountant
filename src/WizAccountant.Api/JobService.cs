@@ -9,6 +9,7 @@ public sealed class JobService(
     AppDbContext db,
     IConnectorRegistry registry,
     IHubContext<ConnectorHub> hub,
+    WizNotificationService notifications,
     ILogger<JobService> logger)
 {
     public async Task<JobRecord> CreateAndDispatchAsync(CreateJobRequest request, CancellationToken ct)
@@ -93,6 +94,15 @@ public sealed class JobService(
             job.RequestedBy,
             result.Error,
             ct);
+
+        // B5-B: push real-time notification to UI
+        var site = await db.Sites.AsNoTracking().FirstOrDefaultAsync(s => s.SiteId == job.SiteId, ct);
+        if (site is not null)
+        {
+            await notifications.PushJobCompletedAsync(
+                site.TenantId, job.SiteId, job.JobId,
+                job.Status == JobStatus.Completed, ct);
+        }
     }
 
     /// <summary>P1-26: long-poll next pending job for a paired connector (REST fallback).</summary>

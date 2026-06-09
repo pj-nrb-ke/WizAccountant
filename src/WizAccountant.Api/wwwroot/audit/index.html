@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WizAccountant — Audit &amp; Compliance</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f7fa; color: #1a1a2e; }
+    header { background: #1a1a2e; color: #fff; padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    header h1 { font-size: 1.2rem; }
+    header a { color: #8ecae6; font-size: 0.85rem; text-decoration: none; }
+    header a:hover { text-decoration: underline; }
+    nav { display: flex; gap: 0.5rem; background: #fff; border-bottom: 2px solid #e0e7ef; padding: 0.5rem 2rem; }
+    nav button { padding: 0.5rem 1.2rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; background: #f0f4f8; color: #1a1a2e; }
+    nav button.active { background: #1a1a2e; color: #fff; }
+    main { padding: 1.5rem 2rem; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .toolbar { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+    .toolbar input, .toolbar select { padding: 0.4rem 0.7rem; border: 1px solid #cdd5e0; border-radius: 6px; font-size: 0.9rem; }
+    .btn { padding: 0.45rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.88rem; font-weight: 600; }
+    .btn-primary { background: #1a1a2e; color: #fff; }
+    .btn-secondary { background: #f0f4f8; color: #1a1a2e; border: 1px solid #cdd5e0; }
+    .btn-success { background: #2a9d8f; color: #fff; }
+    .btn-danger { background: #e76f51; color: #fff; }
+    .btn:hover { opacity: 0.88; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.07); font-size: 0.85rem; }
+    thead tr { background: #1a1a2e; color: #fff; }
+    th, td { padding: 0.6rem 0.9rem; text-align: left; border-bottom: 1px solid #e8edf2; }
+    tbody tr:hover { background: #f7fafc; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+    .badge-pending { background: #fef9c3; color: #854d0e; }
+    .badge-approved { background: #dcfce7; color: #15803d; }
+    .badge-rejected { background: #fee2e2; color: #b91c1c; }
+    .badge-executed { background: #dbeafe; color: #1e40af; }
+    .badge-ok { background: #dcfce7; color: #15803d; }
+    .badge-fail { background: #fee2e2; color: #b91c1c; }
+    .status-bar { background: #e8f4fd; border: 1px solid #bee3f8; border-radius: 6px; padding: 0.5rem 1rem; margin-bottom: 1rem; font-size: 0.875rem; color: #1a56db; min-height: 2rem; }
+    .empty { color: #888; padding: 1.5rem; text-align: center; }
+    .export-section { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.07); padding: 1.5rem; }
+    .export-section h3 { margin-bottom: 0.5rem; }
+    .export-section p { color: #555; font-size: 0.9rem; margin-bottom: 1rem; }
+    .export-row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>WizAccountant — Audit &amp; Compliance</h1>
+  <a href="/admin">← Admin</a>
+  <a href="/act">Act</a>
+  <a href="/insight">Insight</a>
+</header>
+
+<nav>
+  <button class="active" data-tab="proposals">Proposal History</button>
+  <button data-tab="write-audit">Write Audit Log</button>
+  <button data-tab="compliance">Compliance Export</button>
+</nav>
+
+<main>
+  <div id="status" class="status-bar">Loading…</div>
+
+  <!-- ── Proposals Panel ───────────────────────────────────────────────── -->
+  <div id="panel-proposals" class="panel active">
+    <div class="toolbar">
+      <select id="proposals-status">
+        <option value="">All statuses</option>
+        <option value="0">Pending</option>
+        <option value="1">Approved</option>
+        <option value="2">Rejected</option>
+        <option value="3">Executed</option>
+      </select>
+      <button class="btn btn-primary" onclick="loadProposals()">Refresh</button>
+    </div>
+    <div id="proposals-table-wrap">
+      <div class="empty">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ── Write Audit Panel ─────────────────────────────────────────────── -->
+  <div id="panel-write-audit" class="panel">
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="loadWriteAudit()">Refresh</button>
+    </div>
+    <div id="audit-table-wrap">
+      <div class="empty">Loading…</div>
+    </div>
+  </div>
+
+  <!-- ── Compliance Export Panel ──────────────────────────────────────── -->
+  <div id="panel-compliance" class="panel">
+    <div class="export-section">
+      <h3>GDPR / Compliance Data Export</h3>
+      <p>
+        Download a full JSON export of all write-audit records, proposal history and user data for
+        a tenant. Required for GDPR data subject access requests and accounting audit trails.
+      </p>
+      <div class="export-row">
+        <label>Tenant ID <input id="export-tenant" value="pilot-tenant" style="margin-left:0.4rem" /></label>
+        <button class="btn btn-success" onclick="downloadCompliance()">Download JSON</button>
+      </div>
+      <br/>
+      <h3>Insight Query Log Export</h3>
+      <p>Export the Insight chat query log for a tenant/site (job result must be a list export).</p>
+      <div class="export-row">
+        <label>Job ID <input id="export-job-id" placeholder="paste job GUID" style="width:22rem;margin-left:0.4rem" /></label>
+        <select id="export-format">
+          <option value="csv">CSV</option>
+          <option value="excel">Excel (.xlsx)</option>
+          <option value="pdf">PDF</option>
+        </select>
+        <button class="btn btn-success" onclick="downloadJobExport()">Download</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const API = '';  // same origin
+
+// ── Nav tabs ──────────────────────────────────────────────────────────────
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`panel-${btn.dataset.tab}`).classList.add('active');
+    if (btn.dataset.tab === 'proposals') loadProposals();
+    if (btn.dataset.tab === 'write-audit') loadWriteAudit();
+  });
+});
+
+function setStatus(msg) { document.getElementById('status').textContent = msg; }
+function authHeader() {
+  const token = localStorage.getItem('wiz_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+// ── Proposals ─────────────────────────────────────────────────────────────
+async function loadProposals() {
+  const status = document.getElementById('proposals-status').value;
+  const qs = status !== '' ? `?status=${status}` : '';
+  setStatus('Fetching proposals…');
+  try {
+    const res = await fetch(`${API}/api/act/proposals${qs}`, { headers: authHeader() });
+    if (!res.ok) { setStatus(`Error ${res.status}`); return; }
+    const rows = await res.json();
+    setStatus(`${rows.length} proposal(s) loaded.`);
+    renderProposals(rows);
+  } catch(e) { setStatus('Network error: ' + e.message); }
+}
+
+function statusBadge(s) {
+  const map = { 0: ['Pending','pending'], 1: ['Approved','approved'], 2: ['Rejected','rejected'], 3: ['Executed','executed'] };
+  const [label, cls] = map[s] ?? ['Unknown','pending'];
+  return `<span class="badge badge-${cls}">${label}</span>`;
+}
+
+function renderProposals(rows) {
+  const wrap = document.getElementById('proposals-table-wrap');
+  if (!rows.length) { wrap.innerHTML = '<div class="empty">No proposals found.</div>'; return; }
+  wrap.innerHTML = `<table>
+    <thead><tr>
+      <th>Title</th><th>Type</th><th>Status</th><th>Prepared By</th><th>Created</th><th>Resolved</th>
+    </tr></thead>
+    <tbody>
+    ${rows.map(r => `<tr>
+      <td>${esc(r.title)}</td>
+      <td>${esc(r.proposalType)}</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${esc(r.preparedByUserId)}</td>
+      <td>${fmt(r.createdAtUtc)}</td>
+      <td>${r.resolvedAtUtc ? fmt(r.resolvedAtUtc) : '—'}</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ── Write Audit ───────────────────────────────────────────────────────────
+async function loadWriteAudit() {
+  setStatus('Fetching write audit log…');
+  try {
+    const res = await fetch(`${API}/api/act/write-audit`, { headers: authHeader() });
+    if (!res.ok) { setStatus(`Error ${res.status}`); return; }
+    const rows = await res.json();
+    setStatus(`${rows.length} write audit record(s) loaded.`);
+    renderWriteAudit(rows);
+  } catch(e) { setStatus('Network error: ' + e.message); }
+}
+
+function renderWriteAudit(rows) {
+  const wrap = document.getElementById('audit-table-wrap');
+  if (!rows.length) { wrap.innerHTML = '<div class="empty">No write audit records found.</div>'; return; }
+  wrap.innerHTML = `<table>
+    <thead><tr>
+      <th>Operation</th><th>Proposal</th><th>Site</th><th>Success</th><th>Evolution Ref</th><th>Preparer</th><th>Approver</th><th>Timestamp</th>
+    </tr></thead>
+    <tbody>
+    ${rows.map(r => `<tr>
+      <td>${esc(r.operation)}</td>
+      <td style="font-size:0.75rem;color:#666">${esc((r.proposalId||'').substring(0,8))}…</td>
+      <td style="font-size:0.75rem">${esc((r.siteId||'').substring(0,8))}…</td>
+      <td>${r.success ? '<span class="badge badge-ok">✓ OK</span>' : '<span class="badge badge-fail">✗ Failed</span>'}</td>
+      <td>${esc(r.evolutionRef || '—')}</td>
+      <td style="font-size:0.75rem">${esc((r.preparerUserId||'—').substring(0,8))}…</td>
+      <td style="font-size:0.75rem">${esc((r.approverUserId||'—').substring(0,8))}…</td>
+      <td>${fmt(r.timestampUtc)}</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ── Compliance export ─────────────────────────────────────────────────────
+async function downloadCompliance() {
+  const tenantId = document.getElementById('export-tenant').value.trim();
+  if (!tenantId) { alert('Enter a tenant ID.'); return; }
+  setStatus('Generating compliance export…');
+  try {
+    const res = await fetch(`${API}/api/compliance/data-export?tenantId=${encodeURIComponent(tenantId)}`,
+      { headers: authHeader() });
+    if (!res.ok) { setStatus(`Error ${res.status}`); return; }
+    const blob = await res.blob();
+    triggerDownload(blob, `compliance-${tenantId}.json`, 'application/json');
+    setStatus('Compliance export downloaded.');
+  } catch(e) { setStatus('Error: ' + e.message); }
+}
+
+async function downloadJobExport() {
+  const jobId = document.getElementById('export-job-id').value.trim();
+  const format = document.getElementById('export-format').value;
+  if (!jobId) { alert('Paste a job GUID.'); return; }
+  setStatus(`Downloading ${format} export…`);
+  const url = `${API}/api/insight/export/${jobId}?format=${format}`;
+  const mimeMap = { csv: 'text/csv', excel: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', pdf: 'application/pdf' };
+  const extMap = { csv: 'csv', excel: 'xlsx', pdf: 'pdf' };
+  try {
+    const res = await fetch(url, { headers: authHeader() });
+    if (!res.ok) { setStatus(`Export error: ${res.status}`); return; }
+    const blob = await res.blob();
+    triggerDownload(blob, `export-${jobId}.${extMap[format]}`, mimeMap[format]);
+    setStatus('Export downloaded.');
+  } catch(e) { setStatus('Error: ' + e.message); }
+}
+
+function triggerDownload(blob, filename, mime) {
+  const url = URL.createObjectURL(new Blob([blob], { type: mime }));
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+function fmt(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleString(); } catch { return iso; }
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// Auto-load on open
+loadProposals();
+setStatus('Ready.');
+</script>
+</body>
+</html>

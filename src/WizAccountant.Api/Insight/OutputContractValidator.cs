@@ -61,7 +61,9 @@ internal static class OutputContractValidator
                 "invoices"),
             "vat.summary" => ValidateShape(root,
                 "outputVat", "inputVat", "estimatedVatPayable", "finding"),
-            "vat.variance.contributors" => ValidateReconcileEnvelope(root),
+            "vat.variance.contributors" => ValidateShape(root,
+                "difference", "reconciled", "finding",
+                "outputVatTopContributors", "inputVatTopContributors"),
 
             // ── GL / AR / AP reconciliation ──────────────────────────────────
             "ar.gl.reconcile" => ValidateReconcileEnvelope(root),
@@ -111,6 +113,12 @@ internal static class OutputContractValidator
             // ── GL period-close readiness ────────────────────────────────────
             "gl.period.close.readiness" => ValidateShape(root,
                 "readyToClose", "finding", "checks", "periodLabel"),
+
+            // ── Schema probe / connector metadata (GAP-020/021) ──────────────
+            "site.schema.probe" => ValidateShape(root,
+                "tableCount", "tablesPresent", "tablesMissing", "tables", "finding"),
+            "site.metadata" => ValidateShape(root,
+                "connectorVersion", "schemaProof", "capabilities", "finding"),
 
             // ── Default: use capability registry ────────────────────────────
             _ => ValidateFromCapabilityRegistry(contract, operation, root)

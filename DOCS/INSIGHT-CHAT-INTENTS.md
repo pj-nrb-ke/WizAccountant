@@ -95,6 +95,127 @@ route to **`customer.openitems`** with criteria **`Outstanding <> 0`** (open AR 
 3. Insight → site **Test Local** (or your paired site) → **Ctrl+F5**
 4. Retry the question in **AI Assistant**
 
+---
+
+## GL Period-close readiness (GAP-011)
+
+Phrases such as:
+
+- *is month-end ready to close*
+- *are we ready to close the period*
+- *can I close* / *close readiness* / *period close check*
+
+route to **`gl.period.close.readiness`** — **SAGE-GL-PCLOSE-001**. Runs 5 SQL checks against `PostGL`:
+
+| Check | Severity | Meaning |
+|-------|----------|---------|
+| Backdated postings | blocker | `TxDate` in period but `DTStamp` after period-end |
+| Manual journals | warning | `PostGL.Id IN ('JL','JNL')` |
+| Round-figure journals | warning | manual + round-thousand amounts |
+| Unreconciled bank | blocker | `iReconciled = 0` on bank GL accounts |
+| Duplicate batches | blocker | same `cAuditNumber`, COUNT > 2, non-zero balance sum |
+
+Output: `{ readyToClose, finding, checks[], blockers[], warnings[], periodLabel }`.
+
+---
+
+## AP supplier payment behaviour (GAP-013)
+
+Four operations mirror the existing AR customer payment-behaviour suite:
+
+| Phrase | Operation |
+|--------|-----------|
+| *supplier payment discipline* / *how well do we pay* | `supplier.payment.behavior.summary` |
+| *prompt supplier* / *who do we pay on time* | `supplier.payment.prompt.top` |
+| *late supplier* / *overdue supplier* | `supplier.payment.late.top` |
+| single-supplier detail | `supplier.payment.detail` (requires `supplierCode` param) |
+
+**Data source:** `InvNum` (DocType=5) + `Vendor` — **NOT** `PostAP` (PostAP has no `InvNumKey`). Paid proxy: `Outstanding ≤ 0.01`. **PaymentDisciplineScore 0–100** (50pts paid-ratio, 20pts avg-days-overdue, 15pts zero-exposure, 15pts volume).
+
+---
+
+## Treasury explainability (GAP-030)
+
+`treasury.dashboard` now answers "why is cash low" with:
+
+- **`topContributors`** — top AR customers (inflow blockers) + top AP suppliers (outflow pressure)
+- **`cashDrivers`** — `{ topArBlockers[], topApPressure[] }`
+- **`likelyCause`** — deterministic string:
+  - AR > 2× bank → *"Collections lagging — AR outstanding exceeds 2× bank balance"*
+  - AP > bank → *"Payables pressure — AP outstanding exceeds bank balance"*
+  - Projected < 0 → *"Projected cash shortfall within forecast horizon"*
+  - Otherwise → *"Cash position appears stable"*
+
+`ExplainabilityEnvelope` treats all `treasury.*` operations as explainability ops (renders `topContributors`, `likelyCause`, drilldown hint).
+
+---
+
+## VAT variance contributors — split by DocType (GAP-031)
+
+`vat.variance.contributors` now returns:
+
+| Field | Content |
+|-------|---------|
+| `outputVatTopContributors` | Top sales invoices by AbsVat (DocType 0/1/4) |
+| `inputVatTopContributors` | Top purchase invoices by AbsVat (DocType 5) |
+| `vatByCategory` | `{ standardRated, zeroRated, totalInvoices }` |
+| `difference` / `reconciled` / `finding` | ReconcileEnvelope fields (backward compat) |
+
+`OutputContractValidator` now requires both `outputVatTopContributors` and `inputVatTopContributors`.
+
+---
+
+## Multi-turn investigation context (GAP-014)
+
+Entity codes mentioned in turn N are automatically available in turn N+1 without the user repeating them.
+
+**How it works:**
+1. When a job runs, entity codes in `parameters` (e.g. `customerCode=SMITH001`) are tagged into `ToolsUsedJson` as `entity:customerCode:SMITH001`.
+2. On the next turn, `InvestigationContext.FromPriorAssistantMessage` parses these tags to populate `CustomerCode`, `SupplierCode`, `StockCode`, `WarehouseCode`.
+3. `ApplyFollowUp` injects persisted codes into the new turn's `parameters` as fallback (current-message regex wins — explicit codes in the new message override persisted ones).
+
+**Example:**
+- Turn 1: *"Show me payment detail for supplier ACME01"* → `supplierCode=ACME01` tagged
+- Turn 2: *"How about their aged balance?"* → `supplierCode=ACME01` auto-applied, no re-prompting
+
+---
+
+## Schema probe and connector metadata (GAP-020/021)
+
+Two site-level operations expose schema and capability facts for the connected Sage database.
+
+### `site.schema.probe`
+
+Returns which of 13 core Evolution tables exist on this database and their column names.
+
+| Parameter | Effect |
+|-----------|--------|
+| `tables` (optional) | Comma-separated list overriding the default 13-table probe |
+
+Output:
+```json
+{ "tableCount", "tablesPresent", "tablesMissing",
+  "tables": [{ "tableName", "exists", "columnCount", "columns": [...] }],
+  "missingTables", "finding", "dataAsOfUtc" }
+```
+
+### `site.metadata`
+
+Returns connector version, SDK version, and high-level capability flags derived from key-table presence.
+
+Output:
+```json
+{ "connectorVersion", "sdkVersion", "companyDatabase", "handlerCount",
+  "schemaProof": { "keyTableCount", "confirmedTableCount", "allKeyTablesPresent", "tables", "error" },
+  "capabilities": { "arSupported", "apSupported", "glSupported", "invoicingSupported", "inventorySupported" },
+  "finding", "dataAsOfUtc" }
+```
+
+Use `site.schema.probe` to diagnose "Invalid object name" errors on a customer DB.
+Use `site.metadata` to confirm a site is fully operational before routing queries.
+
+---
+
 ## Future options (not built yet)
 
 - **LLM router**: send the user message to a model that returns only an operation name from the allowlist (still no raw SQL).

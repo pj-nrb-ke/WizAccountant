@@ -277,6 +277,11 @@ public sealed class ReadOnlyChatService(
             CompatibilityReason = compatibilityReason
         }, ct);
 
+        // Persist entity codes so InvestigationContext can recall them in subsequent turns (GAP-014)
+        foreach (var entityKey in new[] { "customerCode", "supplierCode", "stockCode", "warehouseCode" })
+            if (parameters.TryGetValue(entityKey, out var entityVal) && !string.IsNullOrWhiteSpace(entityVal))
+                toolsUsed.Add($"entity:{entityKey}:{entityVal}");
+
         db.ChatMessages.Add(new ChatMessageRecord
         {
             MessageId = Guid.NewGuid(),

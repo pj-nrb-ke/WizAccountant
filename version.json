@@ -1,0 +1,49 @@
+{
+  "product": "WizAccountant",
+  "version": "4.0.0",
+  "buildDate": "2026-06-09",
+  "channel": "stable",
+  "apiVersion": "v1",
+  "minConnectorVersion": "2.0.0",
+  "platforms": [
+    {
+      "name": "win-x64",
+      "arch": "x64",
+      "framework": "net8.0-windows",
+      "notes": "WizConnector.Service and WizConnector.Tray; requires Sage 200 Evolution SDK (x86)"
+    },
+    {
+      "name": "win-x86",
+      "arch": "x86",
+      "framework": "net8.0-windows",
+      "notes": "Connector only — x86 required by Sage Evolution SDK COM interop"
+    }
+  ],
+  "storeListings": {
+    "microsoft": {
+      "packageName": "WizAccountant",
+      "publisherDisplayName": "WizAg",
+      "storeId": null,
+      "msixPublisher": "CN=WizAg"
+    },
+    "direct": {
+      "downloadUrl": "https://wizaccountant.com/download",
+      "sha256Manifest": "https://wizaccountant.com/download/checksums.txt"
+    }
+  },
+  "featureFlags": {
+    "sso": true,
+    "billing": true,
+    "multiSite": true,
+    "practiceMode": true,
+    "mobileApi": true,
+    "actWorkflows": true
+  },
+  "phase": "Phase 4 — Block 4 complete",
+  "phases": {
+    "1": "Core: jobs, connector, JWT auth, Insight chat, Act proposals",
+    "2": "Advanced analytics: gl.period.close.readiness, AP payment discipline, treasury/VAT explainability",
+    "3": "RBAC v2, firm management, monitoring, multi-site, write handlers × 15",
+    "4": "SSO (Azure AD / Google), billing webhooks, POPIA/GDPR compliance, app store pipeline"
+  }
+}

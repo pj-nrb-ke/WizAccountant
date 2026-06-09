@@ -48,6 +48,19 @@ internal static class SageSdkWriteHandlers
                 "customer.save" => SaveCustomer(payloadJson),
                 "supplier.save" => SaveSupplier(payloadJson),
                 "salesorder.save" => SalesOrderSaveHandler.Save(payloadJson),
+
+                // Phase 4 Block 3 — inventory writes (Task #16)
+                "inventory.adjustment.post" => InventoryAdjustmentPostHandler.Post(payloadJson),
+                "warehouse.transfer.post" => WarehouseTransferPostHandler.Post(payloadJson),
+                "salescreditnote.post" => SalesCreditNotePostHandler.Post(payloadJson),
+                "suppliercreditnote.post" => SupplierCreditNotePostHandler.Post(payloadJson),
+
+                // Phase 4 Block 3 — order lifecycle (Task #17)
+                "salesorder.confirm" => SalesOrderLifecycleHandler.Confirm(payloadJson),
+                "salesorder.ship" => SalesOrderLifecycleHandler.Ship(payloadJson),
+                "purchaseorder.approve" => PurchaseOrderLifecycleHandler.Approve(payloadJson),
+                "purchaseorder.receive" => PurchaseOrderLifecycleHandler.Receive(payloadJson),
+
                 _ => throw new NotSupportedException($"Write operation not implemented: {operation}")
             };
             return Finish(idempotency, idemKey, result);

@@ -19,6 +19,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<WriteAuditRecord> WriteAudits => Set<WriteAuditRecord>();
     public DbSet<SiteConfigRecord> SiteConfigs => Set<SiteConfigRecord>();
     public DbSet<InsightSavedSqlQueryRecord> InsightSavedSqlQueries => Set<InsightSavedSqlQueryRecord>();
+    public DbSet<FirmRecord> Firms => Set<FirmRecord>();
+    public DbSet<ExternalIdentityRecord> ExternalIdentities => Set<ExternalIdentityRecord>();
+    public DbSet<SubscriptionRecord> Subscriptions => Set<SubscriptionRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,6 +39,9 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         modelBuilder.Entity<WriteAuditRecord>().HasKey(x => x.WriteAuditId);
         modelBuilder.Entity<SiteConfigRecord>().HasKey(x => x.SiteId);
         modelBuilder.Entity<InsightSavedSqlQueryRecord>().HasKey(x => x.QueryId);
+        modelBuilder.Entity<FirmRecord>().HasKey(x => x.FirmId);
+        modelBuilder.Entity<ExternalIdentityRecord>().HasKey(x => x.ExternalIdentityId);
+        modelBuilder.Entity<SubscriptionRecord>().HasKey(x => x.TenantId);
     }
 }
 
@@ -91,6 +97,21 @@ public sealed class TenantRecord
 {
     public string TenantId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
+    /// <summary>Firm this tenant belongs to, or null for standalone tenants.</summary>
+    public string? FirmId { get; set; }
+}
+
+/// <summary>
+/// An accounting firm that may own multiple tenants/sites.
+/// When IsPracticeMode = true, write operations are blocked across all firm tenants.
+/// </summary>
+public sealed class FirmRecord
+{
+    public string FirmId { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    /// <summary>When true, Act proposals are blocked — read-only demo/training mode.</summary>
+    public bool IsPracticeMode { get; set; }
+    public DateTimeOffset CreatedAtUtc { get; set; }
 }
 
 public sealed class UserRecord
@@ -210,5 +231,43 @@ public sealed class InsightSavedSqlQueryRecord
     public string Sql { get; set; } = "";
     public string CreatedAtUtc { get; set; } = "";
     public string UpdatedAtUtc { get; set; } = "";
+}
+
+/// <summary>
+/// Phase 4 Block 4 (Task #18) — maps an external OIDC identity (Provider + Subject)
+/// to a WizAccountant user, enabling SSO login without storing the provider's credentials.
+/// </summary>
+public sealed class ExternalIdentityRecord
+{
+    public Guid ExternalIdentityId { get; set; }
+    /// <summary>OIDC provider name: "AzureAD" or "Google".</summary>
+    public string Provider { get; set; } = string.Empty;
+    /// <summary>Stable external user identifier (JWT "sub" claim).</summary>
+    public string Subject { get; set; } = string.Empty;
+    /// <summary>The WizAccountant user this external identity maps to.</summary>
+    public Guid UserId { get; set; }
+    /// <summary>Email as returned by the provider at link time.</summary>
+    public string ProviderEmail { get; set; } = string.Empty;
+    public DateTimeOffset LinkedAtUtc { get; set; }
+    public DateTimeOffset LastLoginAtUtc { get; set; }
+}
+
+/// <summary>
+/// Phase 4 Block 4 (Task #19) — tenant subscription state.
+/// Updated by billing webhooks (Stripe/Paddle). Gating enforced in BillingService.
+/// </summary>
+public sealed class SubscriptionRecord
+{
+    /// <summary>Primary key — one subscription per tenant.</summary>
+    public string TenantId { get; set; } = string.Empty;
+    /// <summary>Plan name: "free" | "pro" | "enterprise".</summary>
+    public string Plan { get; set; } = "free";
+    /// <summary>Status: "active" | "cancelled" | "past_due" | "trialing".</summary>
+    public string Status { get; set; } = "active";
+    /// <summary>Billing provider reference (Stripe subscription ID etc.).</summary>
+    public string? BillingRef { get; set; }
+    /// <summary>When the current billing period ends (null for free/lifetime plans).</summary>
+    public DateTimeOffset? CurrentPeriodEnd { get; set; }
+    public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 

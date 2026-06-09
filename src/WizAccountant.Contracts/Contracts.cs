@@ -129,6 +129,15 @@ public sealed class LoginRequest
     public string Password { get; set; } = string.Empty;
 }
 
+/// <summary>Phase 4 Block 4 (Task #18) — SSO login via an external OIDC id_token.</summary>
+public sealed class OidcLoginRequest
+{
+    /// <summary>Provider name: "AzureAD" or "Google" (must match OidcSettings).</summary>
+    public string Provider { get; set; } = string.Empty;
+    /// <summary>The id_token returned by the OIDC provider after authentication.</summary>
+    public string IdToken { get; set; } = string.Empty;
+}
+
 public sealed class LoginResponse
 {
     public string Token { get; set; } = string.Empty;
@@ -136,6 +145,10 @@ public sealed class LoginResponse
     public Guid UserId { get; set; }
     public string DisplayName { get; set; } = string.Empty;
     public string Role { get; set; } = "Preparer";
+    /// <summary>True when the user's firm is in practice mode — writes are blocked.</summary>
+    public bool PracticeMode { get; set; }
+    /// <summary>Firm ID if user belongs to a firm, else null.</summary>
+    public string? FirmId { get; set; }
 }
 
 public sealed class TenantDto
@@ -290,6 +303,18 @@ public enum ApprovalStatus
     Rejected = 2,
     Posted = 3,
     Failed = 4
+}
+
+/// <summary>Phase 4 Block 3 — multi-site cross-company query request.</summary>
+public sealed class MultiSiteQueryRequest
+{
+    /// <summary>Fan out to all sites for this firm.</summary>
+    public string? FirmId { get; set; }
+    /// <summary>Or fan out to all sites for a single tenant.</summary>
+    public string? TenantId { get; set; }
+    public string Operation { get; set; } = string.Empty;
+    public Dictionary<string, string> Parameters { get; set; } = new();
+    public int TimeoutSeconds { get; set; } = 30;
 }
 
 public sealed class ProposeApprovalRequest

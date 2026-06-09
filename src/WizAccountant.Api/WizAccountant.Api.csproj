@@ -8,6 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="ClosedXML" Version="0.102.3" />
+    <PackageReference Include="QuestPDF" Version="2024.10.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.25" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
@@ -25,6 +31,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="WizAccountant.Insight.Intents.Tests" />
+    <InternalsVisibleTo Include="WizAccountant.Integration.Tests" />
   </ItemGroup>
 
 </Project>

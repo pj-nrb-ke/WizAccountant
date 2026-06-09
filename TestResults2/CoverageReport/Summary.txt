@@ -1,0 +1,175 @@
+Summary
+  Generated on: 6/9/2026 - 12:43:09 PM
+  Coverage date: 6/9/2026 - 12:43:04 PM
+  Parser: Cobertura
+  Assemblies: 2
+  Classes: 151
+  Files: 84
+  Line coverage: 49.9%
+  Covered lines: 4861
+  Uncovered lines: 4865
+  Coverable lines: 9726
+  Total lines: 13615
+  Branch coverage: 52.8% (3762 of 7112)
+  Covered branches: 3762
+  Total branches: 7112
+  Method coverage: 46.4% (476 of 1025)
+  Full method coverage: 33.4% (343 of 1025)
+  Covered methods: 476
+  Fully covered methods: 343
+  Total methods: 1025
+
+WizAccountant.Api                                                 49.8%
+  Program                                                            0%
+  WizAccountant.Api.Act.ActDraftService                              0%
+  WizAccountant.Api.Act.ApprovalService                              0%
+  WizAccountant.Api.Act.ProposalTypeMap                              0%
+  WizAccountant.Api.Act.SiteConfigService                            0%
+  WizAccountant.Api.Act.WorkflowTemplates                            0%
+  WizAccountant.Api.AppDbContext                                  64.5%
+  WizAccountant.Api.ApprovalProposalRecord                           0%
+  WizAccountant.Api.AuthService                                      0%
+  WizAccountant.Api.ChatConversationRecord                           0%
+  WizAccountant.Api.ChatMessageRecord                                0%
+  WizAccountant.Api.ConnectorHub                                     0%
+  WizAccountant.Api.ConnectorRegistry                                0%
+  WizAccountant.Api.DbSeed                                           0%
+  WizAccountant.Api.Insight.AggregationReplyFormat                   0%
+  WizAccountant.Api.Insight.ApPurchaseInvChatMatcher              85.2%
+  WizAccountant.Api.Insight.ArPaymentBehaviorChatMatcher           100%
+  WizAccountant.Api.Insight.ArPaymentBehaviorReplyFormat             0%
+  WizAccountant.Api.Insight.ArSalesChatMatcher                    92.5%
+  WizAccountant.Api.Insight.ArSalesReplyFormat                       0%
+  WizAccountant.Api.Insight.BusinessProcessClassifier             87.6%
+  WizAccountant.Api.Insight.BusinessProcessConfusionGuards        60.2%
+  WizAccountant.Api.Insight.BusinessProcessSemantics               100%
+  WizAccountant.Api.Insight.ChatIntentMatcher                     91.7%
+  WizAccountant.Api.Insight.ChatResultGridBuilder                    0%
+  WizAccountant.Api.Insight.ChatRoutePlanner                      59.9%
+  WizAccountant.Api.Insight.CompatibilityGate                       74%
+  WizAccountant.Api.Insight.CreditNoteChatHelper                  93.5%
+  WizAccountant.Api.Insight.CustomerCollectionsChatMatcher         100%
+  WizAccountant.Api.Insight.CustomerCollectionsHelper             92.7%
+  WizAccountant.Api.Insight.CustomerCollectionsReplyFormat           0%
+  WizAccountant.Api.Insight.CustomerPaymentBehaviorHelper         84.3%
+  WizAccountant.Api.Insight.DebitNoteChatHelper                     93%
+  WizAccountant.Api.Insight.DynamicAnalyticalQueryBuilder         91.1%
+  WizAccountant.Api.Insight.ExplainabilityEnvelope                78.8%
+  WizAccountant.Api.Insight.ExportService                            0%
+  WizAccountant.Api.Insight.FeedbackRow                              0%
+  WizAccountant.Api.Insight.GlFinanceChatMatcher                  85.7%
+  WizAccountant.Api.Insight.HandlerCapability                     68.7%
+  WizAccountant.Api.Insight.HandlerCapabilityRegistry             99.6%
+  WizAccountant.Api.Insight.HandlerEntry                          76.9%
+  WizAccountant.Api.Insight.HandlerRegistry                       95.3%
+  WizAccountant.Api.Insight.InsightChatPeriodHelper               73.9%
+  WizAccountant.Api.Insight.InsightPeriodPolicy                     95%
+  WizAccountant.Api.Insight.InsightQueryLogEntry                   100%
+  WizAccountant.Api.Insight.InsightQueryLogService                 100%
+  WizAccountant.Api.Insight.InsightReadOnlyTools                   100%
+  WizAccountant.Api.Insight.InsightSavedSqlPromptMatcher          61.2%
+  WizAccountant.Api.Insight.InsightSavedSqlQueryService           88.7%
+  WizAccountant.Api.Insight.InsightSqlQueryService                  21%
+  WizAccountant.Api.Insight.InsightTriageReport                      0%
+  WizAccountant.Api.Insight.InsightTriageService                     0%
+  WizAccountant.Api.Insight.InventoryBsNegativeLedgersFormat         0%
+  WizAccountant.Api.Insight.InventoryFixWorkflow                   8.1%
+  WizAccountant.Api.Insight.InventoryGlReconcileFormat               0%
+  WizAccountant.Api.Insight.InventoryReconcileValidator              0%
+  WizAccountant.Api.Insight.InvestigationContext                  90.5%
+  WizAccountant.Api.Insight.InvWarehouseChatMatcher               91.8%
+  WizAccountant.Api.Insight.MegaDigestCatalog                     95.7%
+  WizAccountant.Api.Insight.MegaDigestCoverageSummary                0%
+  WizAccountant.Api.Insight.MegaDigestEntry                        100%
+  WizAccountant.Api.Insight.MegaDigestFallbackMatcher             60.6%
+  WizAccountant.Api.Insight.MegaDigestMatchResult                  100%
+  WizAccountant.Api.Insight.MegaDigestOperationResolver             50%
+  WizAccountant.Api.Insight.MegaDigestRouter                      30.7%
+  WizAccountant.Api.Insight.NotificationStubService                  0%
+  WizAccountant.Api.Insight.OutputContractValidator               81.4%
+  WizAccountant.Api.Insight.ProductMonthlyOrdersReplyFormat          0%
+  WizAccountant.Api.Insight.ProductOrderAnalysisChatMatcher         90%
+  WizAccountant.Api.Insight.PurchaseProductQuarterlyChatMatcher     50%
+  WizAccountant.Api.Insight.PurchaseProductQuarterlyReplyFormat      0%
+  WizAccountant.Api.Insight.QueryAggregationMode                    55%
+  WizAccountant.Api.Insight.QueryIntentContract                   98.7%
+  WizAccountant.Api.Insight.RankingQueryPolicy                    97.2%
+  WizAccountant.Api.Insight.ReadOnlyChatService                      0%
+  WizAccountant.Api.Insight.ReconciliationChatMatcher             95.6%
+  WizAccountant.Api.Insight.ReconciliationReplyFormat                0%
+  WizAccountant.Api.Insight.SafeExecutionBoundary                  100%
+  WizAccountant.Api.Insight.SageChatDomain                        42.5%
+  WizAccountant.Api.Insight.SageDomainScorer                      95.9%
+  WizAccountant.Api.Insight.SageIntentEngine                      92.6%
+  WizAccountant.Api.Insight.SageIntentResolver                    83.1%
+  WizAccountant.Api.Insight.SageQueryIntentClassifier                0%
+  WizAccountant.Api.Insight.SupplierCreditNoteChatHelper          91.4%
+  WizAccountant.Api.Insight.TriageBucket                             0%
+  WizAccountant.Api.Insight.WarehouseTransferChatHelper           94.1%
+  WizAccountant.Api.InsightQueryLogRecord                          100%
+  WizAccountant.Api.InsightSavedSqlQueryRecord                     100%
+  WizAccountant.Api.JobAuditRecord                                   0%
+  WizAccountant.Api.JobRecord                                        0%
+  WizAccountant.Api.JobService                                       0%
+  WizAccountant.Api.LocalConnectorLauncher                           0%
+  WizAccountant.Api.Middleware.SiteRateLimitMiddleware               0%
+  WizAccountant.Api.NotificationLogRecord                            0%
+  WizAccountant.Api.PairingCodeRecord                                0%
+  WizAccountant.Api.SiteConfigRecord                                 0%
+  WizAccountant.Api.SiteRecord                                    66.6%
+  WizAccountant.Api.TenantRecord                                     0%
+  WizAccountant.Api.UserRecord                                       0%
+  WizAccountant.Api.WizTokenService                               79.1%
+  WizAccountant.Api.WriteAuditRecord                                 0%
+
+WizAccountant.Contracts                                           51.3%
+  WizAccountant.Contracts.AiDraftRequest                             0%
+  WizAccountant.Contracts.AiDraftResponse                            0%
+  WizAccountant.Contracts.ApprovalProposalDto                        0%
+  WizAccountant.Contracts.ApproveProposalRequest                     0%
+  WizAccountant.Contracts.ChatGridDto                                0%
+  WizAccountant.Contracts.ChatMessageRequest                         0%
+  WizAccountant.Contracts.ChatMessageResponse                        0%
+  WizAccountant.Contracts.ConnectorHeartbeat                         0%
+  WizAccountant.Contracts.ConnectorJobPollResponse                   0%
+  WizAccountant.Contracts.ConnectorPaths                             0%
+  WizAccountant.Contracts.ConnectorStateDto                          0%
+  WizAccountant.Contracts.ConversationDto                            0%
+  WizAccountant.Contracts.CreateJobRequest                           0%
+  WizAccountant.Contracts.CreatePairingCodeRequest                   0%
+  WizAccountant.Contracts.InsightDateRangeParser                    80%
+  WizAccountant.Contracts.InsightFeedbackRequest                     0%
+  WizAccountant.Contracts.InsightPeriodResolution                  100%
+  WizAccountant.Contracts.InsightPeriodSegment                     100%
+  WizAccountant.Contracts.InsightSavedSqlQueryDto                  100%
+  WizAccountant.Contracts.InsightSearchHit                           0%
+  WizAccountant.Contracts.InsightSearchRequest                       0%
+  WizAccountant.Contracts.InsightSearchResponse                      0%
+  WizAccountant.Contracts.InsightSqlGuard                         86.3%
+  WizAccountant.Contracts.InsightSqlQueryRequest                     0%
+  WizAccountant.Contracts.InsightSqlQueryResponse                    0%
+  WizAccountant.Contracts.InvoiceLineSqlHintResponse               100%
+  WizAccountant.Contracts.JobAuditDto                                0%
+  WizAccountant.Contracts.JobDto                                     0%
+  WizAccountant.Contracts.LoginRequest                               0%
+  WizAccountant.Contracts.LoginResponse                              0%
+  WizAccountant.Contracts.NotificationStubRequest                    0%
+  WizAccountant.Contracts.PairingCodeResponse                        0%
+  WizAccountant.Contracts.PairSiteRequest                            0%
+  WizAccountant.Contracts.PairSiteResponse                           0%
+  WizAccountant.Contracts.ProposeApprovalRequest                     0%
+  WizAccountant.Contracts.RejectProposalRequest                      0%
+  WizAccountant.Contracts.RunJobMessage                              0%
+  WizAccountant.Contracts.RunJobWaitRequest                          0%
+  WizAccountant.Contracts.SageConfigStorage                          0%
+  WizAccountant.Contracts.SageConnectorConfig                        0%
+  WizAccountant.Contracts.SiteConfigDto                              0%
+  WizAccountant.Contracts.SiteDto                                    0%
+  WizAccountant.Contracts.StartLocalProgramsResponse                 0%
+  WizAccountant.Contracts.SubmitJobResultRequest                     0%
+  WizAccountant.Contracts.TenantDto                                  0%
+  WizAccountant.Contracts.UpsertInsightSavedSqlQueryRequest        100%
+  WizAccountant.Contracts.UserDto                                    0%
+  WizAccountant.Contracts.WorkflowTemplateDto                        0%
+  WizAccountant.Contracts.WriteAuditDto                              0%
+  WizAccountant.Contracts.WriteConsentHelper                         0%

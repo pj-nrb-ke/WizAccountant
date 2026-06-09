@@ -161,6 +161,8 @@ public static class InsightReadOnlyTools
         "transactioncode.list",
         "site.health",
         "site.diagnostics",
+        "site.schema.probe",
+        "site.metadata",
         "insight.sql.query",
         "insight.sql.invoice-lines-hint",
         "insight.sql.invnum-documents-hint"

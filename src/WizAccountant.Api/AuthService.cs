@@ -24,13 +24,27 @@ public sealed class AuthService(AppDbContext db, WizTokenService tokens)
         if (!user.Password.StartsWith("$2", StringComparison.Ordinal))
             await UpgradePasswordHashAsync(user.UserId, request.Password, ct);
 
+        // Resolve practice mode and firm from tenant
+        var tenant = await db.Tenants.AsNoTracking()
+            .FirstOrDefaultAsync(t => t.TenantId == user.TenantId, ct);
+        var firmId = tenant?.FirmId;
+        var practiceMode = false;
+        if (firmId is not null)
+        {
+            var firm = await db.Firms.AsNoTracking()
+                .FirstOrDefaultAsync(f => f.FirmId == firmId, ct);
+            practiceMode = firm?.IsPracticeMode == true;
+        }
+
         return new LoginResponse
         {
             Token = tokens.GenerateToken(user.UserId, user.TenantId, user.Email, user.Role),
             TenantId = user.TenantId,
             UserId = user.UserId,
             DisplayName = user.DisplayName,
-            Role = user.Role
+            Role = user.Role,
+            PracticeMode = practiceMode,
+            FirmId = firmId
         };
     }
 

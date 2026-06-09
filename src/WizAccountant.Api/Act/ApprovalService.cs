@@ -14,11 +14,20 @@ public static class ProposalTypeMap
         "ar.allocation" => "allocation.save",
         "customer.master" => "customer.save",
         "supplier.master" => "supplier.save",
+        // Phase 4 Block 3 — inventory + credit note + order lifecycle
+        "inventory.adjustment" => "inventory.adjustment.post",
+        "warehouse.transfer" => "warehouse.transfer.post",
+        "sales.creditnote" => "salescreditnote.post",
+        "supplier.creditnote" => "suppliercreditnote.post",
+        "salesorder.confirm" => "salesorder.confirm",
+        "salesorder.ship" => "salesorder.ship",
+        "purchaseorder.approve" => "purchaseorder.approve",
+        "purchaseorder.receive" => "purchaseorder.receive",
         _ => throw new InvalidOperationException($"Unknown proposal type: {proposalType}")
     };
 }
 
-public sealed class ApprovalService(AppDbContext db, JobService jobs, ILogger<ApprovalService> logger)
+public sealed class ApprovalService(AppDbContext db, JobService jobs, WizNotificationService notifications, ILogger<ApprovalService> logger)
 {
     public async Task<ApprovalProposalDto> ProposeAsync(ProposeApprovalRequest request, CancellationToken ct)
     {
@@ -29,6 +38,19 @@ public sealed class ApprovalService(AppDbContext db, JobService jobs, ILogger<Ap
 
         if (user.Role is not ("Preparer" or "Admin"))
             throw new InvalidOperationException("Only Preparer or Admin can create proposals.");
+
+        // Practice mode guard (GAP — Phase 4 Block 2): block writes for firms in practice mode
+        var tenant = await db.Tenants.AsNoTracking()
+            .FirstOrDefaultAsync(t => t.TenantId == site.TenantId, ct);
+        if (tenant?.FirmId is not null)
+        {
+            var firm = await db.Firms.AsNoTracking()
+                .FirstOrDefaultAsync(f => f.FirmId == tenant.FirmId, ct);
+            if (firm?.IsPracticeMode == true)
+                throw new InvalidOperationException(
+                    "This firm is in practice mode — write proposals are not allowed. " +
+                    "Contact your FirmAdmin to disable practice mode.");
+        }
 
         var proposal = new ApprovalProposalRecord
         {
@@ -47,6 +69,10 @@ public sealed class ApprovalService(AppDbContext db, JobService jobs, ILogger<Ap
 
         db.ApprovalProposals.Add(proposal);
         await db.SaveChangesAsync(ct);
+
+        // B5-B: notify approvers in real-time
+        await notifications.PushApprovalRequiredAsync(site.TenantId, proposal.ProposalId, proposal.Title, ct);
+
         return await ToDtoAsync(proposal, ct);
     }
 

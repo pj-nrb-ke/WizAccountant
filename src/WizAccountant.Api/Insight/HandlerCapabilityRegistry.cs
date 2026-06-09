@@ -527,6 +527,10 @@ internal static class HandlerCapabilityRegistry
                 "site.health", [], [], shapes: ["single"], evidence: "connector"),
             ["site.diagnostics"] = Cap(
                 "site.diagnostics", [], [], shapes: ["single"], evidence: "connector"),
+            ["site.schema.probe"] = Cap(
+                "site.schema.probe", [], [], shapes: ["schema", "tabular"], evidence: "INFORMATION_SCHEMA"),
+            ["site.metadata"] = Cap(
+                "site.metadata", [], [], shapes: ["metadata", "single"], evidence: "INFORMATION_SCHEMA+connector"),
 
             // ── Write operations (registered for completeness; CompatibilityGate skips analytical checks) ──
             ["customer.save"] = Cap(
@@ -543,6 +547,23 @@ internal static class HandlerCapabilityRegistry
                 "suppliertransaction.post", [], [], shapes: ["single"], evidence: "SupplierTransaction"),
             ["gltransaction.post"] = Cap(
                 "gltransaction.post", [], [], shapes: ["single"], evidence: "PostGL"),
+            // Phase 4 Block 3 — inventory, credit notes, order lifecycle
+            ["inventory.adjustment.post"] = Cap(
+                "inventory.adjustment.post", [], [], shapes: ["single"], evidence: "StkMovement"),
+            ["warehouse.transfer.post"] = Cap(
+                "warehouse.transfer.post", [], [], shapes: ["single"], evidence: "WhseStock"),
+            ["salescreditnote.post"] = Cap(
+                "salescreditnote.post", [], [], shapes: ["single"], evidence: "InvNum"),
+            ["suppliercreditnote.post"] = Cap(
+                "suppliercreditnote.post", [], [], shapes: ["single"], evidence: "InvNum"),
+            ["salesorder.confirm"] = Cap(
+                "salesorder.confirm", [], [], shapes: ["single"], evidence: "SalesOrder"),
+            ["salesorder.ship"] = Cap(
+                "salesorder.ship", [], [], shapes: ["single"], evidence: "SalesOrder"),
+            ["purchaseorder.approve"] = Cap(
+                "purchaseorder.approve", [], [], shapes: ["single"], evidence: "PurchaseOrder"),
+            ["purchaseorder.receive"] = Cap(
+                "purchaseorder.receive", [], [], shapes: ["single"], evidence: "PurchaseOrder"),
         };
 
     private static HandlerCapability Cap(
@@ -563,6 +584,9 @@ internal static class HandlerCapabilityRegistry
             SupportsRelativePeriods: true,
             SupportsHalfYearPeriods: true,
             SupportsQuarterPeriods: true);
+
+    /// <summary>All registered capabilities — keyed by operation name (case-insensitive).</summary>
+    public static IReadOnlyDictionary<string, HandlerCapability> All => Capabilities;
 
     public static HandlerCapability? Get(string? operation)
     {

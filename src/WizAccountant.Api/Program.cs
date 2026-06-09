@@ -15,6 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
+builder.Services.AddMemoryCache(opt => opt.SizeLimit = 1024);
 
 // Auth — JWT Bearer (validates tokens issued by WizTokenService)
 builder.Services.AddSingleton<WizTokenService>();
@@ -48,10 +49,21 @@ builder.Services.AddScoped<InsightTriageService>();
 builder.Services.AddScoped<InsightSqlQueryService>();
 builder.Services.AddScoped<InsightSavedSqlQueryService>();
 builder.Services.AddScoped<NotificationStubService>();
+builder.Services.AddScoped<WizNotificationService>();
 builder.Services.AddScoped<ApprovalService>();
 builder.Services.AddSingleton<ActDraftService>();
 builder.Services.AddScoped<SiteConfigService>();
+builder.Services.AddScoped<FirmService>();
+builder.Services.AddScoped<SiteMonitorService>();
+builder.Services.AddScoped<MultiSiteQueryService>();
 builder.Services.AddSingleton<LocalConnectorLauncher>();
+// Phase 4 Block 4 — SSO + Billing + Compliance
+builder.Services.Configure<OidcSettings>(builder.Configuration.GetSection("Oidc"));
+builder.Services.AddHttpClient("OidcJwks");
+builder.Services.AddSingleton<IOidcTokenValidator, OidcTokenValidator>();
+builder.Services.AddScoped<OidcAuthService>();
+builder.Services.AddScoped<BillingService>();
+builder.Services.AddScoped<ComplianceService>();
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -73,7 +85,8 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.EnsureCreated();
+    // Apply EF Core migrations — creates/upgrades schema safely in production
+    await db.Database.MigrateAsync();
     foreach (var site in db.Sites.Where(s => s.IsOnline))
         site.IsOnline = false;
     await db.SaveChangesAsync();
@@ -90,6 +103,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<RbacMiddleware>();   // RBAC v2 — role enforcement after JWT validation
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -99,6 +113,7 @@ app.MapGet("/", () => Results.Redirect("/insight/index.html"));
 app.MapGet("/admin", () => Results.Redirect("/admin/index.html"));
 app.MapGet("/insight", () => Results.Redirect("/insight/index.html"));
 app.MapGet("/act", () => Results.Redirect("/act/index.html"));
+app.MapGet("/audit", () => Results.Redirect("/audit/index.html"));  // B5-D audit UI
 
 app.MapGet("/health", () => Results.Ok(new
 {
@@ -444,13 +459,27 @@ app.MapGet("/api/insight/triage", async (string? tenantId, int? days, InsightTri
     });
 });
 
-app.MapGet("/api/insight/export/{jobId:guid}", async (Guid jobId, AppDbContext db, CancellationToken ct) =>
+app.MapGet("/api/insight/export/{jobId:guid}", async (Guid jobId, string? format, AppDbContext db, CancellationToken ct) =>
 {
     var job = await db.Jobs.FindAsync([jobId], ct);
     if (job is null) return Results.NotFound();
-    var csv = ExportService.ToCsv(job.ResultJson);
-    if (csv is null) return Results.BadRequest("Job result is not a list export.");
-    return Results.File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", $"wiz-export-{jobId:N}.csv");
+
+    return (format?.ToLowerInvariant() ?? "csv") switch
+    {
+        "excel" or "xlsx" => ExportService.ToExcel(job.ResultJson) is { } xlsx
+            ? Results.File(xlsx,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"wiz-export-{jobId:N}.xlsx")
+            : Results.BadRequest("Job result is not exportable."),
+
+        "pdf" => ExportService.ToPdf(job.ResultJson) is { } pdf
+            ? Results.File(pdf, "application/pdf", $"wiz-export-{jobId:N}.pdf")
+            : Results.BadRequest("Job result is not exportable."),
+
+        _ => ExportService.ToCsv(job.ResultJson) is { } csv
+            ? Results.File(System.Text.Encoding.UTF8.GetBytes(csv), "text/csv", $"wiz-export-{jobId:N}.csv")
+            : Results.BadRequest("Job result is not a list export.")
+    };
 });
 
 app.MapPost("/api/insight/notifications/stub", async (NotificationStubRequest request, NotificationStubService notifications, CancellationToken ct) =>
@@ -507,5 +536,207 @@ app.MapGet("/api/act/sites/{siteId:guid}/config", async (Guid siteId, SiteConfig
     return row is null ? Results.NotFound() : Results.Ok(row);
 });
 
+// ── Firm management (Admin+) ─────────────────────────────────────────────────
+
+app.MapGet("/api/firms", async (FirmService firms, CancellationToken ct) =>
+    Results.Ok(await firms.ListAsync(ct)));
+
+app.MapPost("/api/firms", async (CreateFirmRequest request, FirmService firms, CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Name))
+        return Results.BadRequest("name is required.");
+    var firm = await firms.CreateAsync(request, ct);
+    return Results.Created($"/api/firms/{firm.FirmId}", firm);
+});
+
+app.MapGet("/api/firms/{firmId}", async (string firmId, FirmService firms, CancellationToken ct) =>
+{
+    var firm = await firms.GetAsync(firmId, ct);
+    return firm is null ? Results.NotFound() : Results.Ok(firm);
+});
+
+app.MapPut("/api/firms/{firmId}", async (string firmId, UpdateFirmRequest request, FirmService firms, CancellationToken ct) =>
+{
+    var firm = await firms.UpdateAsync(firmId, request, ct);
+    return firm is null ? Results.NotFound() : Results.Ok(firm);
+});
+
+app.MapGet("/api/firms/{firmId}/tenants", async (string firmId, FirmService firms, CancellationToken ct) =>
+    Results.Ok(await firms.ListTenantsAsync(firmId, ct)));
+
+app.MapPost("/api/firms/{firmId}/tenants/{tenantId}", async (string firmId, string tenantId, FirmService firms, CancellationToken ct) =>
+{
+    var ok = await firms.AssignTenantAsync(firmId, tenantId, ct);
+    return ok ? Results.NoContent() : Results.NotFound($"Tenant {tenantId} not found.");
+});
+
+// ── Mobile Phase 4 — practice mode + layout preferences (Reader+) ────────────
+
+app.MapGet("/api/mobile/app-config", async (string? tenantId, AppDbContext appDb, CancellationToken ct) =>
+{
+    // Returns mobile app configuration: practice mode, enabled features, layout hint
+    var practiceMode = false;
+    string? firmId = null;
+    if (!string.IsNullOrWhiteSpace(tenantId))
+    {
+        var tenant = await appDb.Tenants.AsNoTracking()
+            .FirstOrDefaultAsync(t => t.TenantId == tenantId, ct);
+        firmId = tenant?.FirmId;
+        if (firmId is not null)
+        {
+            var firm = await appDb.Firms.AsNoTracking()
+                .FirstOrDefaultAsync(f => f.FirmId == firmId, ct);
+            practiceMode = firm?.IsPracticeMode == true;
+        }
+    }
+
+    return Results.Ok(new
+    {
+        practiceMode,
+        firmId,
+        features = new
+        {
+            insightChat = true,
+            inventoryRead = true,
+            actProposals = !practiceMode,
+            tabletLayout = true
+        },
+        inventoryOperations = new[]
+        {
+            "inventory.value.top", "inventory.below.reorder", "inventory.slow.moving.top",
+            "inventory.negative.qty", "inventory.movement.top", "warehouse.value.summary"
+        }
+    });
+});
+
+// ── Multi-company cross-site query (Reader+) ─────────────────────────────────
+
+app.MapPost("/api/insight/multi-site/query", async (
+    MultiSiteQueryRequest request,
+    MultiSiteQueryService multiSite,
+    CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Operation))
+        return Results.BadRequest("operation is required.");
+    if (string.IsNullOrWhiteSpace(request.FirmId) && string.IsNullOrWhiteSpace(request.TenantId))
+        return Results.BadRequest("firmId or tenantId is required.");
+
+    var timeout = Math.Clamp(request.TimeoutSeconds, 10, 120);
+    MultiSiteQueryResult result;
+    if (!string.IsNullOrWhiteSpace(request.FirmId))
+        result = await multiSite.QueryFirmAsync(request.FirmId, request.Operation, request.Parameters, timeout, ct);
+    else
+        result = await multiSite.QueryTenantAsync(request.TenantId!, request.Operation, request.Parameters, timeout, ct);
+
+    return Results.Ok(result);
+});
+
+// ── Monitoring (Approver+) ────────────────────────────────────────────────────
+
+app.MapGet("/api/monitor/sites", async (SiteMonitorService monitor, CancellationToken ct) =>
+    Results.Ok(await monitor.GetSiteSlaAsync(ct)));
+
+app.MapGet("/api/monitor/sites/{siteId:guid}/alerts", async (Guid siteId, SiteMonitorService monitor, CancellationToken ct) =>
+    Results.Ok(await monitor.GetSiteAlertsAsync(siteId, ct)));
+
+// ── Phase 4 Block 4: SSO, Billing, Compliance ─────────────────────────────
+
+// POST /api/auth/oidc/login — exchange external id_token for WizAccountant JWT
+app.MapPost("/api/auth/oidc/login", async (OidcLoginRequest request, OidcAuthService oidc, CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Provider) || string.IsNullOrWhiteSpace(request.IdToken))
+        return Results.BadRequest(new { error = "provider and idToken are required." });
+    var response = await oidc.LoginAsync(request, ct);
+    return response is null
+        ? Results.Unauthorized()
+        : Results.Ok(response);
+});
+
+// POST /api/billing/webhook — receive Stripe/Paddle webhook events
+app.MapPost("/api/billing/webhook", async (
+    HttpRequest req,
+    IConfiguration config,
+    BillingService billing,
+    CancellationToken ct) =>
+{
+    // Read raw body first (needed for signature verification)
+    req.EnableBuffering();
+    using var reader = new System.IO.StreamReader(req.Body, leaveOpen: true);
+    var rawBody = await reader.ReadToEndAsync(ct);
+    req.Body.Position = 0;
+
+    // Stripe signature verification
+    var stripeHeader = req.Headers["Stripe-Signature"].FirstOrDefault();
+    if (!string.IsNullOrWhiteSpace(stripeHeader))
+    {
+        var stripeSecret = config["Billing:StripeWebhookSecret"];
+        if (!string.IsNullOrWhiteSpace(stripeSecret) &&
+            !BillingWebhookVerifier.VerifyStripe(rawBody, stripeHeader, stripeSecret))
+            return Results.Unauthorized();
+    }
+
+    // Paddle signature verification
+    var paddleHeader = req.Headers["Paddle-Signature"].FirstOrDefault();
+    if (!string.IsNullOrWhiteSpace(paddleHeader))
+    {
+        var paddleSecret = config["Billing:PaddleWebhookSecret"];
+        if (!string.IsNullOrWhiteSpace(paddleSecret) &&
+            !BillingWebhookVerifier.VerifyPaddle(rawBody, paddleHeader, paddleSecret))
+            return Results.Unauthorized();
+    }
+
+    string eventType;
+    System.Text.Json.JsonDocument payload;
+    try
+    {
+        payload = await System.Text.Json.JsonDocument.ParseAsync(req.Body, cancellationToken: ct);
+        eventType = payload.RootElement.TryGetProperty("type", out var t)
+            ? t.GetString() ?? "unknown"
+            : payload.RootElement.TryGetProperty("event_type", out var e2) ? e2.GetString() ?? "unknown" : "unknown";
+    }
+    catch
+    {
+        return Results.BadRequest(new { error = "Invalid JSON payload." });
+    }
+    await billing.HandleWebhookAsync(eventType, payload, ct);
+    return Results.Ok(new { received = true });
+});
+
+// GET /api/billing/subscription/{tenantId} — Admin: view subscription state
+app.MapGet("/api/billing/subscription/{tenantId}", async (string tenantId, BillingService billing, CancellationToken ct) =>
+    Results.Ok(await billing.GetSubscriptionAsync(tenantId, ct)));
+
+// GET /api/compliance/data-export?tenantId=xxx — Admin: POPIA/GDPR data export
+app.MapGet("/api/compliance/data-export", async (string tenantId, ComplianceService compliance, CancellationToken ct) =>
+{
+    try
+    {
+        var export = await compliance.ExportTenantDataAsync(tenantId, ct);
+        return Results.Ok(export);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.NotFound(new { error = ex.Message });
+    }
+});
+
+// DELETE /api/compliance/users/{userId} — FirmAdmin: right to erasure (redact PII)
+app.MapDelete("/api/compliance/users/{userId:guid}", async (Guid userId, ComplianceService compliance, CancellationToken ct) =>
+{
+    try
+    {
+        await compliance.RedactUserAsync(userId, ct);
+        return Results.Ok(new { redacted = true, userId });
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.NotFound(new { error = ex.Message });
+    }
+});
+
 app.MapHub<ConnectorHub>("/hubs/connector");
+app.MapHub<UiNotificationHub>("/hubs/ui");  // B5-B: real-time push to browser clients
 app.Run();
+
+// Expose Program to integration tests via InternalsVisibleTo
+public partial class Program { }
