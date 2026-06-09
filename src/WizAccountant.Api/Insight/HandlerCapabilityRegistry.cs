@@ -185,6 +185,342 @@ internal static class HandlerCapabilityRegistry
             ["inventory.nonmoving"] = Cap(
                 "inventory.nonmoving", ["product"], ["quantity"],
                 shapes: ["listing"], evidence: "StockTransactions"),
+
+            // ── AR analytical ─────────────────────────────────────────────────
+            ["ar.invoice.overdue.buckets"] = Cap(
+                "ar.invoice.overdue.buckets", ["customer"], ["balance"],
+                dateFilter: true, shapes: ["tabular", "aggregation"], evidence: "PostAR"),
+            ["ar.unallocated"] = Cap(
+                "ar.unallocated", ["customer"], ["balance"],
+                asOf: true, shapes: ["listing", "aggregation"], evidence: "PostAR"),
+            ["ar.variance.contributors"] = Cap(
+                "ar.variance.contributors", ["customer", "gl"], ["variance"],
+                explain: true, shapes: ["explainability"], evidence: "PostAR+GL"),
+            ["customer.aged.credit.top"] = Cap(
+                "customer.aged.credit.top", ["customer"], ["balance"],
+                topN: true, asOf: true, shapes: ["ranking"], evidence: "PostAR"),
+            ["customer.credit.balances"] = Cap(
+                "customer.credit.balances", ["customer"], ["balance"],
+                asOf: true, shapes: ["listing", "aggregation"], evidence: "PostAR"),
+            ["customer.invoice.unpaid.olderthan"] = Cap(
+                "customer.invoice.unpaid.olderthan", ["customer"], ["balance"],
+                dateFilter: true, topN: true, shapes: ["tabular"], evidence: "PostAR"),
+            ["customer.openitems"] = Cap(
+                "customer.openitems", ["customer"], ["balance"],
+                asOf: true, shapes: ["tabular"], evidence: "PostAR"),
+            ["customer.over.creditlimit"] = Cap(
+                "customer.over.creditlimit", ["customer"], ["balance"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "PostAR+Client"),
+            ["customer.payment.detail"] = Cap(
+                "customer.payment.detail", ["customer"], ["payment_discipline"],
+                dateFilter: true, shapes: ["tabular"], evidence: "InvNum+PostAR"),
+
+            // ── AP analytical ─────────────────────────────────────────────────
+            ["ap.invoice.overdue.count"] = Cap(
+                "ap.invoice.overdue.count", ["supplier"], ["balance"],
+                dateFilter: true, shapes: ["aggregation"], evidence: "PostAP"),
+            ["ap.unallocated"] = Cap(
+                "ap.unallocated", ["supplier"], ["balance"],
+                asOf: true, shapes: ["listing", "aggregation"], evidence: "PostAP"),
+            ["ap.variance.contributors"] = Cap(
+                "ap.variance.contributors", ["supplier", "gl"], ["variance"],
+                explain: true, shapes: ["explainability"], evidence: "PostAP+GL"),
+            ["supplier.credit.balances"] = Cap(
+                "supplier.credit.balances", ["supplier"], ["balance"],
+                asOf: true, shapes: ["listing", "aggregation"], evidence: "PostAP"),
+            ["supplier.invoice.unpaid.olderthan"] = Cap(
+                "supplier.invoice.unpaid.olderthan", ["supplier"], ["balance"],
+                dateFilter: true, topN: true, shapes: ["tabular"], evidence: "PostAP"),
+            ["supplier.openitems"] = Cap(
+                "supplier.openitems", ["supplier"], ["balance"],
+                asOf: true, shapes: ["tabular"], evidence: "PostAP"),
+            ["supplier.outstanding.top"] = Cap(
+                "supplier.outstanding.top", ["supplier"], ["balance"],
+                topN: true, asOf: true, shapes: ["ranking"], evidence: "PostAP"),
+            ["supplier.payments.top"] = Cap(
+                "supplier.payments.top", ["supplier"], ["value"],
+                dateFilter: true, topN: true, shapes: ["ranking"], evidence: "PostAP"),
+
+            // ── GL analytical ─────────────────────────────────────────────────
+            ["gl.balance.unusual"] = Cap(
+                "gl.balance.unusual", ["gl"], ["variance"],
+                explain: true, shapes: ["listing", "explainability"], evidence: "PostGL"),
+            ["gl.expense.variance"] = Cap(
+                "gl.expense.variance", ["gl"], ["variance"],
+                dateFilter: true, explain: true, shapes: ["explainability", "tabular"], evidence: "PostGL"),
+            ["gl.journal.duplicate"] = Cap(
+                "gl.journal.duplicate", ["gl"], ["value"],
+                dateFilter: true, shapes: ["listing", "tabular"], evidence: "PostGL"),
+            ["gl.journal.manual"] = Cap(
+                "gl.journal.manual", ["gl"], ["value"],
+                dateFilter: true, shapes: ["listing", "tabular"], evidence: "PostGL"),
+            ["gl.journal.periodend"] = Cap(
+                "gl.journal.periodend", ["gl"], ["value"],
+                shapes: ["listing", "tabular"], evidence: "PostGL"),
+            ["gl.journal.round"] = Cap(
+                "gl.journal.round", ["gl"], ["value"],
+                dateFilter: true, shapes: ["listing", "tabular"], evidence: "PostGL"),
+            ["gl.journal.users.top"] = Cap(
+                "gl.journal.users.top", ["gl", "user"], ["value"],
+                dateFilter: true, topN: true, shapes: ["ranking"], evidence: "PostGL"),
+            ["gl.ratios"] = Cap(
+                "gl.ratios", ["gl"], ["ratio"],
+                shapes: ["aggregation", "dashboard"], evidence: "PostGL"),
+            ["gl.transaction.backdated"] = Cap(
+                "gl.transaction.backdated", ["gl"], ["value"],
+                dateFilter: true, shapes: ["listing", "tabular"], evidence: "PostGL"),
+            ["gl.trialbalance.anomaly"] = Cap(
+                "gl.trialbalance.anomaly", ["gl"], ["variance"],
+                explain: true, shapes: ["listing", "explainability"], evidence: "PostGL"),
+
+            // ── Bank analytical ───────────────────────────────────────────────
+            ["bank.cheques.unpresented"] = Cap(
+                "bank.cheques.unpresented", ["bank"], ["value"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "Cashbook"),
+            ["bank.deposits.outstanding"] = Cap(
+                "bank.deposits.outstanding", ["bank"], ["value"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "Cashbook"),
+            ["bank.unmatched"] = Cap(
+                "bank.unmatched", ["bank"], ["value"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "Cashbook"),
+            ["bank.unusual"] = Cap(
+                "bank.unusual", ["bank"], ["value"],
+                dateFilter: true, explain: true, shapes: ["listing", "explainability"], evidence: "Cashbook"),
+
+            // ── VAT analytical ────────────────────────────────────────────────
+            ["vat.by.account.top"] = Cap(
+                "vat.by.account.top", ["gl", "vat"], ["vat"],
+                dateFilter: true, topN: true, shapes: ["ranking"], evidence: "PostGL+InvNum"),
+            ["vat.input"] = Cap(
+                "vat.input", ["vat"], ["vat"],
+                dateFilter: true, shapes: ["aggregation", "tabular"], evidence: "InvNum"),
+            ["vat.missing"] = Cap(
+                "vat.missing", ["vat"], ["vat"],
+                dateFilter: true, shapes: ["listing"], evidence: "InvNum"),
+            ["vat.output"] = Cap(
+                "vat.output", ["vat"], ["vat"],
+                dateFilter: true, shapes: ["aggregation", "tabular"], evidence: "InvNum"),
+            ["vat.summary"] = Cap(
+                "vat.summary", [], ["vat"],
+                dateFilter: true, shapes: ["aggregation"], evidence: "InvNum"),
+            ["vat.trend"] = Cap(
+                "vat.trend", ["vat", "month"], ["vat"],
+                dateFilter: true, monthly: true, shapes: ["tabular"], evidence: "InvNum",
+                segmented: true),
+            ["vat.variance.contributors"] = Cap(
+                "vat.variance.contributors", ["vat", "gl"], ["variance"],
+                explain: true, shapes: ["explainability", "reconciliation"], evidence: "InvNum+GL"),
+            ["vat.zero.rated"] = Cap(
+                "vat.zero.rated", ["vat"], ["vat"],
+                dateFilter: true, shapes: ["listing", "aggregation"], evidence: "InvNum"),
+
+            // ── Inventory analytical ──────────────────────────────────────────
+            ["inventory.adjustment.top"] = Cap(
+                "inventory.adjustment.top", ["product"], ["quantity", "value"],
+                dateFilter: true, topN: true, shapes: ["ranking"], evidence: "StockTransactions"),
+            ["inventory.below.reorder"] = Cap(
+                "inventory.below.reorder", ["product"], ["quantity"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "StkItem+valuation"),
+            ["inventory.item.drilldown"] = Cap(
+                "inventory.item.drilldown", ["product"], ["quantity", "value"],
+                dateFilter: true, explain: true, shapes: ["tabular", "explainability"], evidence: "StockTransactions+StkItem"),
+            ["inventory.negative.qty"] = Cap(
+                "inventory.negative.qty", ["product"], ["quantity"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "StkItem"),
+            ["inventory.negative.valuation"] = Cap(
+                "inventory.negative.valuation", ["product"], ["value"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "StkItem+valuation"),
+            ["inventory.overstocked"] = Cap(
+                "inventory.overstocked", ["product"], ["quantity", "value"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "StkItem+valuation"),
+            ["inventory.stockgroup.reconcile"] = Cap(
+                "inventory.stockgroup.reconcile", ["inventory", "gl"], ["variance"],
+                explain: true, shapes: ["reconciliation", "explainability"], evidence: "PostGL+valuation"),
+            ["inventory.value.top"] = Cap(
+                "inventory.value.top", ["product"], ["value"],
+                topN: true, asOf: true, shapes: ["ranking"], evidence: "StkItem+valuation"),
+            ["inventory.warehouse.reconcile"] = Cap(
+                "inventory.warehouse.reconcile", ["inventory", "warehouse"], ["variance"],
+                explain: true, shapes: ["reconciliation", "explainability"], evidence: "StkItem+valuation"),
+
+            // ── Warehouse analytical ──────────────────────────────────────────
+            ["warehouse.discrepancy"] = Cap(
+                "warehouse.discrepancy", ["warehouse", "product"], ["quantity"],
+                explain: true, shapes: ["listing", "explainability"], evidence: "StkItem"),
+            ["warehouse.negative.qty"] = Cap(
+                "warehouse.negative.qty", ["warehouse", "product"], ["quantity"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "StkItem"),
+            ["warehouse.nonmoving"] = Cap(
+                "warehouse.nonmoving", ["warehouse", "product"], ["quantity"],
+                shapes: ["listing"], evidence: "StockTransactions"),
+            ["warehouse.transfer.by.item"] = Cap(
+                "warehouse.transfer.by.item", ["product", "warehouse"], ["quantity", "value"],
+                dateFilter: true, topN: true, shapes: ["tabular", "ranking"], evidence: "StockTransactions"),
+            ["warehouse.transfer.by.warehouse"] = Cap(
+                "warehouse.transfer.by.warehouse", ["warehouse"], ["quantity", "value"],
+                dateFilter: true, topN: true, shapes: ["tabular", "ranking"], evidence: "StockTransactions"),
+            ["warehouse.transfer.detail"] = Cap(
+                "warehouse.transfer.detail", ["warehouse", "product"], ["quantity", "value"],
+                dateFilter: true, shapes: ["tabular"], evidence: "StockTransactions"),
+            ["warehouse.transfer.summary"] = Cap(
+                "warehouse.transfer.summary", ["warehouse"], ["quantity", "value"],
+                dateFilter: true, monthly: true, shapes: ["aggregation"], evidence: "StockTransactions"),
+            ["warehouse.transfer.top"] = Cap(
+                "warehouse.transfer.top", ["warehouse", "product"], ["quantity", "value"],
+                dateFilter: true, topN: true, shapes: ["ranking"], evidence: "StockTransactions"),
+            ["warehouse.value.summary"] = Cap(
+                "warehouse.value.summary", ["warehouse"], ["value"],
+                asOf: true, shapes: ["aggregation", "tabular"], evidence: "StkItem+valuation"),
+            ["warehouse.list"] = Cap(
+                "warehouse.list", [], [],
+                shapes: ["listing"], evidence: "Warehouse"),
+
+            // ── Fixed assets ──────────────────────────────────────────────────
+            ["fa.depreciation.reconcile"] = Cap(
+                "fa.depreciation.reconcile", ["fa", "gl"], ["variance"],
+                explain: true, shapes: ["reconciliation", "explainability"], evidence: "PostGL+FA"),
+            ["fa.variance.contributors"] = Cap(
+                "fa.variance.contributors", ["fa", "gl"], ["variance"],
+                explain: true, shapes: ["explainability"], evidence: "PostGL+FA"),
+
+            // ── Sales invoices / Purchase invoices analytical ─────────────────
+            ["purchaseinvoice.discount.count"] = Cap(
+                "purchaseinvoice.discount.count", [], ["discount"],
+                dateFilter: true, shapes: ["aggregation"], evidence: "InvNum"),
+            ["purchaseinvoice.discount.top"] = Cap(
+                "purchaseinvoice.discount.top", ["supplier"], ["discount"],
+                dateFilter: true, topN: true, shapes: ["ranking"], evidence: "InvNum"),
+            ["purchaseinvoice.duplicate"] = Cap(
+                "purchaseinvoice.duplicate", ["supplier"], ["value"],
+                dateFilter: true, shapes: ["listing", "tabular"], evidence: "InvNum"),
+            ["purchaseinvoice.partially.paid"] = Cap(
+                "purchaseinvoice.partially.paid", ["supplier"], ["balance"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "InvNum+PostAP"),
+            ["purchaseinvoice.top"] = Cap(
+                "purchaseinvoice.top", ["supplier"], ["value"],
+                dateFilter: true, topN: true, shapes: ["ranking"], evidence: "InvNum"),
+            ["salesinvoice.discount.top"] = Cap(
+                "salesinvoice.discount.top", ["customer"], ["discount"],
+                dateFilter: true, topN: true, shapes: ["ranking"], evidence: "InvNum"),
+            ["salesinvoice.partially.paid"] = Cap(
+                "salesinvoice.partially.paid", ["customer"], ["balance"],
+                asOf: true, shapes: ["listing", "tabular"], evidence: "InvNum+PostAR"),
+
+            // ── Purchase / Sales period summaries ─────────────────────────────
+            ["purchase.item.period.summary"] = Cap(
+                "purchase.item.period.summary", ["product", "month"], ["quantity", "value"],
+                dateFilter: true, monthly: true, shapes: ["tabular", "monthly_breakdown"], evidence: "InvNum",
+                segmented: true),
+
+            // ── Treasury forecasts ────────────────────────────────────────────
+            ["treasury.cash.forecast"] = Cap(
+                "treasury.cash.forecast", [], ["cashflow"],
+                dateFilter: true, monthly: true, shapes: ["tabular"], evidence: "InvNum+Bank",
+                segmented: true),
+            ["treasury.collections.forecast"] = Cap(
+                "treasury.collections.forecast", [], ["cashflow"],
+                dateFilter: true, monthly: true, shapes: ["tabular"], evidence: "InvNum+PostAR",
+                segmented: true),
+            ["treasury.netcashflow.forecast"] = Cap(
+                "treasury.netcashflow.forecast", [], ["cashflow"],
+                dateFilter: true, monthly: true, shapes: ["tabular"], evidence: "InvNum+Bank",
+                segmented: true),
+            ["treasury.payments.forecast"] = Cap(
+                "treasury.payments.forecast", [], ["cashflow"],
+                dateFilter: true, monthly: true, shapes: ["tabular"], evidence: "InvNum+PostAP",
+                segmented: true),
+
+            // ── Dashboard / summary ───────────────────────────────────────────
+            ["dashboard.summary"] = Cap(
+                "dashboard.summary", [], ["cashflow", "balance", "vat"],
+                shapes: ["dashboard"], evidence: "InvNum+PostAR+PostAP+Bank"),
+
+            // ── Lookups / reference data (minimal capabilities) ───────────────
+            ["customer.get"] = Cap(
+                "customer.get", [], [], shapes: ["single"], evidence: "Client"),
+            ["customer.list"] = Cap(
+                "customer.list", [], [], topN: true, shapes: ["tabular"], evidence: "Client"),
+            ["customer.address"] = Cap(
+                "customer.address", [], [], shapes: ["single"], evidence: "Client"),
+            ["supplier.get"] = Cap(
+                "supplier.get", [], [], shapes: ["single"], evidence: "Supplier"),
+            ["supplier.list"] = Cap(
+                "supplier.list", [], [], topN: true, shapes: ["tabular"], evidence: "Supplier"),
+            ["glaccount.get"] = Cap(
+                "glaccount.get", [], [], shapes: ["single"], evidence: "GLAccount"),
+            ["glaccount.list"] = Cap(
+                "glaccount.list", [], [], topN: true, shapes: ["tabular"], evidence: "GLAccount"),
+            ["gltransaction.list"] = Cap(
+                "gltransaction.list", ["gl"], ["value"], dateFilter: true, topN: true,
+                shapes: ["tabular"], evidence: "PostGL"),
+            ["inventoryitem.get"] = Cap(
+                "inventoryitem.get", [], [], shapes: ["single"], evidence: "StkItem"),
+            ["inventoryitem.list"] = Cap(
+                "inventoryitem.list", [], [], topN: true, shapes: ["tabular"], evidence: "StkItem"),
+            ["inventoryitem.salestax"] = Cap(
+                "inventoryitem.salestax", [], [], shapes: ["single"], evidence: "StkItem"),
+            ["inventoryitem.sellingprice"] = Cap(
+                "inventoryitem.sellingprice", [], [], shapes: ["single"], evidence: "StkItem"),
+            ["inventoryitem.stock.qty"] = Cap(
+                "inventoryitem.stock.qty", [], [], shapes: ["single"], evidence: "StkItem"),
+            ["inventoryitem.units"] = Cap(
+                "inventoryitem.units", [], [], shapes: ["single"], evidence: "StkItem"),
+            ["customertransaction.get"] = Cap(
+                "customertransaction.get", [], [], shapes: ["single"], evidence: "CustomerTransaction"),
+            ["customertransaction.list"] = Cap(
+                "customertransaction.list", ["customer"], ["value"], dateFilter: true, topN: true,
+                shapes: ["tabular"], evidence: "CustomerTransaction"),
+            ["suppliertransaction.list"] = Cap(
+                "suppliertransaction.list", ["supplier"], ["value"], dateFilter: true, topN: true,
+                shapes: ["tabular"], evidence: "SupplierTransaction"),
+            ["purchaseorder.list"] = Cap(
+                "purchaseorder.list", ["supplier"], ["value"], dateFilter: true, topN: true,
+                shapes: ["tabular"], evidence: "PurchaseOrder"),
+            ["salesorder.list"] = Cap(
+                "salesorder.list", ["customer"], ["value"], dateFilter: true, topN: true,
+                shapes: ["tabular"], evidence: "SalesOrder"),
+            ["salesorder.nextnumber"] = Cap(
+                "salesorder.nextnumber", [], [], shapes: ["single"], evidence: "SalesOrder"),
+            ["currency.list"] = Cap(
+                "currency.list", [], [], shapes: ["listing"], evidence: "Currency"),
+            ["orderstatus.list"] = Cap(
+                "orderstatus.list", [], [], shapes: ["listing"], evidence: "OrderStatus"),
+            ["priority.list"] = Cap(
+                "priority.list", [], [], shapes: ["listing"], evidence: "Priority"),
+            ["project.list"] = Cap(
+                "project.list", [], [], topN: true, shapes: ["tabular"], evidence: "Project"),
+            ["salesrepresentative.list"] = Cap(
+                "salesrepresentative.list", [], [], shapes: ["listing"], evidence: "SalesRep"),
+            ["settlementterms.list"] = Cap(
+                "settlementterms.list", [], [], shapes: ["listing"], evidence: "SettlementTerms"),
+            ["taxrate.list"] = Cap(
+                "taxrate.list", [], [], shapes: ["listing"], evidence: "TaxRate"),
+            ["transactioncode.list"] = Cap(
+                "transactioncode.list", [], [], shapes: ["listing"], evidence: "TrCode"),
+            ["search.global"] = Cap(
+                "search.global", [], [], shapes: ["tabular"], evidence: "multi-table"),
+            ["insight.sql.query"] = Cap(
+                "insight.sql.query", [], [], shapes: ["tabular"], evidence: "dynamic"),
+            ["site.health"] = Cap(
+                "site.health", [], [], shapes: ["single"], evidence: "connector"),
+            ["site.diagnostics"] = Cap(
+                "site.diagnostics", [], [], shapes: ["single"], evidence: "connector"),
+
+            // ── Write operations (registered for completeness; CompatibilityGate skips analytical checks) ──
+            ["customer.save"] = Cap(
+                "customer.save", [], [], shapes: ["single"], evidence: "Client"),
+            ["supplier.save"] = Cap(
+                "supplier.save", [], [], shapes: ["single"], evidence: "Supplier"),
+            ["salesorder.save"] = Cap(
+                "salesorder.save", [], [], shapes: ["single"], evidence: "SalesOrder"),
+            ["allocation.save"] = Cap(
+                "allocation.save", [], [], shapes: ["single"], evidence: "PostAR"),
+            ["customertransaction.post"] = Cap(
+                "customertransaction.post", [], [], shapes: ["single"], evidence: "CustomerTransaction"),
+            ["suppliertransaction.post"] = Cap(
+                "suppliertransaction.post", [], [], shapes: ["single"], evidence: "SupplierTransaction"),
+            ["gltransaction.post"] = Cap(
+                "gltransaction.post", [], [], shapes: ["single"], evidence: "PostGL"),
         };
 
     private static HandlerCapability Cap(
