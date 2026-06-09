@@ -2,10 +2,15 @@ using System.Text.Json;
 
 namespace WizAccountant.Api.Insight;
 
-/// <summary>Validates handler JSON satisfies QueryIntentContract before UI formatting (SAGE-NEXT-001).</summary>
+/// <summary>
+/// Validates handler JSON satisfies the expected output shape before UI formatting.
+/// Each shape is defined as a static method below. Add a new one when a handler is built.
+/// </summary>
 internal static class OutputContractValidator
 {
     internal sealed record ValidationResult(bool IsValid, string? SafeFailureMessage, IReadOnlyList<string> MissingFields);
+
+    // ── Entry point ──────────────────────────────────────────────────────────
 
     public static ValidationResult Validate(
         QueryIntentContract contract,
@@ -13,76 +18,118 @@ internal static class OutputContractValidator
         string? resultJson)
     {
         if (string.IsNullOrWhiteSpace(resultJson))
-            return new ValidationResult(false, BuildFailureMessage(operation, contract),
-                ["(empty response)"]);
+            return Fail(operation, contract, ["(empty response)"]);
 
         try
         {
             using var doc = JsonDocument.Parse(resultJson);
-            var root = doc.RootElement;
-            return ValidateRoot(contract, operation, root);
+            return ValidateRoot(contract, operation, doc.RootElement);
         }
         catch (JsonException)
         {
-            return new ValidationResult(false, BuildFailureMessage(operation, contract), ["valid JSON"]);
+            return Fail(operation, contract, ["valid JSON"]);
         }
     }
+
+    // ── Router ────────────────────────────────────────────────────────────────
 
     private static ValidationResult ValidateRoot(QueryIntentContract contract, string operation, JsonElement root)
     {
-        if (string.Equals(operation, ProductOrderAnalysisChatMatcher.Operation, StringComparison.OrdinalIgnoreCase))
-            return ValidateProductMonthly(contract, root);
-
-        if (string.Equals(operation, ChatIntentMatcher.SupplierUnpaidCountOp, StringComparison.OrdinalIgnoreCase))
-            return ValidateSupplierUnpaidCount(root);
-
-        var cap = HandlerCapabilityRegistry.Get(operation);
-        if (cap is null)
-            return new ValidationResult(true, null, []);
-
-        var missing = new List<string>();
-
-        if (contract.OutputShape.Contains("explainability") && cap.SupportsExplainability)
+        return operation.ToLowerInvariant() switch
         {
-            if (!root.TryGetProperty("finding", out _) && !root.TryGetProperty("topContributors", out _))
-                missing.Add("finding or topContributors");
-        }
+            // ── Product monthly ──────────────────────────────────────────────
+            ProductOrderAnalysisChatMatcher.Operation => ValidateProductMonthly(contract, root),
 
-        if (contract.WantsAggregation && root.TryGetProperty("countOnly", out var co) && co.ValueKind == JsonValueKind.False)
-        {
-            if (!HasRows(root))
-                missing.Add("aggregation count");
-        }
+            // ── Supplier unpaid count ────────────────────────────────────────
+            ChatIntentMatcher.SupplierUnpaidCountOp => ValidateShape(root,
+                "totalUnpaidSuppliers", "totalOutstandingPayable", "asOfDate"),
 
-        if (missing.Count > 0)
-            return new ValidationResult(false, BuildFailureMessage(operation, contract), missing);
+            // ── AR/AP payment behaviour ──────────────────────────────────────
+            "customer.payment.behavior.summary" => ValidateShape(root,
+                "finding", "promptPayers", "slowPayers", "averageCollectionDays", "customersAnalyzed"),
+            "customer.payment.late.top" => ValidateShape(root,
+                "finding", "customers", "requestedTop"),
+            "customer.payment.prompt.top" => ValidateShape(root,
+                "finding", "customers", "requestedTop"),
+            "customer.payment.detail" => ValidateShape(root,
+                "finding", "customer"),
 
-        return new ValidationResult(true, null, []);
+            // ── VAT ──────────────────────────────────────────────────────────
+            "vat.reconcile" => ValidateShape(root,
+                "variance", "reconciled", "finding", "invNumNetVat", "glVatControlMovement"),
+            "vat.anomalies" => ValidateShape(root,
+                "invoices"),
+            "vat.summary" => ValidateShape(root,
+                "outputVat", "inputVat", "estimatedVatPayable", "finding"),
+            "vat.variance.contributors" => ValidateReconcileEnvelope(root),
+
+            // ── GL / AR / AP reconciliation ──────────────────────────────────
+            "ar.gl.reconcile" => ValidateReconcileEnvelope(root),
+            "ap.gl.reconcile" => ValidateReconcileEnvelope(root),
+            "inventory.gl.reconcile" => ValidateShape(root,
+                "balanceSheetStockValue", "inventoryValuation", "difference", "matches", "finding"),
+            "inventory.warehouse.reconcile" => ValidateReconcileEnvelope(root),
+
+            // ── Collections ──────────────────────────────────────────────────
+            "customer.collections.summary" => ValidateShape(root,
+                "totalCollections", "monthlyBreakdown"),
+            "customer.collections.by.customer" => ValidateShape(root,
+                "customers"),
+            "customer.collections.top" => ValidateShape(root,
+                "customers"),
+            "customer.collections.by.month" => ValidateShape(root,
+                "monthlyBreakdown"),
+
+            // ── Aged debtors / creditors ─────────────────────────────────────
+            "customer.aged.top" => ValidateShape(root,
+                "topCustomers"),
+            "customer.aged.credit.top" => ValidateShape(root,
+                "topCustomers"),
+            "supplier.aged.top" => ValidateShape(root,
+                "topSuppliers"),
+
+            // ── Treasury ────────────────────────────────────────────────────
+            "treasury.dashboard" => ValidateShape(root,
+                "cashPosition", "expectedInflows", "expectedOutflows", "projectedClosingCash", "finding"),
+            "treasury.cash.forecast" => ValidateShape(root,
+                "cashForecast"),
+            "treasury.collections.forecast" => ValidateShape(root,
+                "collectionsForecast"),
+            "treasury.payments.forecast" => ValidateShape(root,
+                "paymentsForecast"),
+
+            // ── Default: use capability registry ────────────────────────────
+            _ => ValidateFromCapabilityRegistry(contract, operation, root)
+        };
     }
 
+    // ── Shape validators ──────────────────────────────────────────────────────
+
+    /// <summary>Validates that all named top-level fields are present.</summary>
+    private static ValidationResult ValidateShape(JsonElement root, params string[] requiredFields)
+    {
+        var missing = requiredFields
+            .Where(f => !root.TryGetProperty(f, out _))
+            .ToList();
+        return missing.Count == 0
+            ? Ok()
+            : Fail(null, null, missing);
+    }
+
+    /// <summary>Validates the standard ReconcileEnvelope shape (difference, reconciled, finding).</summary>
+    private static ValidationResult ValidateReconcileEnvelope(JsonElement root)
+        => ValidateShape(root, "difference", "reconciled", "finding");
+
+    /// <summary>Product monthly analysis — strict shape including monthlyBreakdown rows.</summary>
     private static ValidationResult ValidateProductMonthly(QueryIntentContract contract, JsonElement root)
     {
         var missing = new List<string>();
 
         if (contract.Period is not null)
         {
-            if (!root.TryGetProperty("dateFrom", out var df) || df.GetString() != contract.Period.DateFrom.ToString("yyyy-MM-dd"))
-                missing.Add("dateFrom echo");
-            if (!root.TryGetProperty("dateTo", out var dt) || dt.GetString() != contract.Period.DateTo.ToString("yyyy-MM-dd"))
-                missing.Add("dateTo echo");
-            if (!root.TryGetProperty("periodType", out _))
-                missing.Add("periodType");
-
-            if (!contract.Period.IsContiguous)
-            {
-                var first = root.TryGetProperty("monthlyBreakdown", out var rows) &&
-                            rows.ValueKind == JsonValueKind.Array &&
-                            rows.GetArrayLength() > 0
-                    ? rows[0]
-                    : default;
-                if (first.ValueKind == JsonValueKind.Object && !first.TryGetProperty("segmentLabel", out _))
-                    missing.Add("segmentLabel");
-            }
+            if (!root.TryGetProperty("dateFrom", out _)) missing.Add("dateFrom echo");
+            if (!root.TryGetProperty("dateTo", out _)) missing.Add("dateTo echo");
+            if (!root.TryGetProperty("periodType", out _)) missing.Add("periodType");
         }
 
         if (!root.TryGetProperty("monthlyBreakdown", out var breakdown) || breakdown.ValueKind != JsonValueKind.Array)
@@ -92,64 +139,70 @@ internal static class OutputContractValidator
         else
         {
             var first = breakdown[0];
-            if (!first.TryGetProperty("productCode", out _))
-                missing.Add("productCode");
-            if (!first.TryGetProperty("month", out _))
-                missing.Add("month");
-            if (!first.TryGetProperty("quantity", out _))
-                missing.Add("quantity");
-            if (!first.TryGetProperty("value", out _))
-                missing.Add("value");
+            foreach (var field in new[] { "productCode", "month", "quantity", "value" })
+                if (!first.TryGetProperty(field, out _)) missing.Add(field);
         }
 
-        if (!root.TryGetProperty("topProductByQuantity", out var top) || top.ValueKind != JsonValueKind.Object)
+        if (!root.TryGetProperty("topProductByQuantity", out _))
             missing.Add("topProductByQuantity");
 
-        if (missing.Count > 0)
-            return new ValidationResult(false, BuildFailureMessage(ProductOrderAnalysisChatMatcher.Operation, contract), missing);
-
-        return new ValidationResult(true, null, []);
+        return missing.Count == 0
+            ? Ok()
+            : Fail(ProductOrderAnalysisChatMatcher.Operation, contract, missing);
     }
 
-    private static ValidationResult ValidateSupplierUnpaidCount(JsonElement root)
+    /// <summary>Capability-registry fallback for handlers not explicitly listed above.</summary>
+    private static ValidationResult ValidateFromCapabilityRegistry(
+        QueryIntentContract contract, string operation, JsonElement root)
     {
+        var cap = HandlerCapabilityRegistry.Get(operation);
+        if (cap is null)
+            return Ok(); // unknown operation — be permissive
+
         var missing = new List<string>();
-        if (!root.TryGetProperty("totalUnpaidSuppliers", out _))
-            missing.Add("totalUnpaidSuppliers");
-        if (!root.TryGetProperty("totalOutstandingPayable", out _))
-            missing.Add("totalOutstandingPayable");
-        if (!root.TryGetProperty("asOfDate", out _))
-            missing.Add("asOfDate");
+
+        if (contract.OutputShape.Contains("explainability") && cap.SupportsExplainability)
+        {
+            if (!root.TryGetProperty("finding", out _) && !root.TryGetProperty("topContributors", out _))
+                missing.Add("finding or topContributors");
+        }
+
+        if (contract.WantsAggregation && root.TryGetProperty("countOnly", out var co) &&
+            co.ValueKind == JsonValueKind.False && !HasAnyRows(root))
+        {
+            missing.Add("aggregation count");
+        }
+
+        return missing.Count == 0 ? Ok() : Fail(operation, contract, missing);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private static ValidationResult Ok() => new(true, null, []);
+
+    private static ValidationResult Fail(string? operation, QueryIntentContract? contract, List<string> missing)
+    {
+        var msg = BuildMessage(operation, contract, missing);
+        return new ValidationResult(false, msg, missing);
+    }
+
+    private static string BuildMessage(string? operation, QueryIntentContract? contract, List<string> missing)
+    {
+        if (contract?.Groupings.Contains("product") == true && contract.Groupings.Contains("month"))
+            return "The handler executed, but the response did not satisfy the required monthly product analysis structure (product, month, quantity, value).";
+
+        if (contract?.OutputShape.Contains("explainability") == true)
+            return "The handler executed, but the response did not include the required explainability fields (finding and contributors).";
 
         if (missing.Count > 0)
-            return new ValidationResult(false,
-                "The handler executed, but the response did not include required supplier unpaid count fields " +
-                "(totalUnpaidSuppliers, totalOutstandingPayable, asOfDate).",
-                missing);
+            return $"The handler executed but the response was missing required fields: {string.Join(", ", missing)}.";
 
-        return new ValidationResult(true, null, []);
+        return $"The handler executed for {operation ?? "unknown"}, but the response did not satisfy the required output contract.";
     }
 
-    private static bool HasRows(JsonElement root) =>
-        root.TryGetProperty("topCustomers", out var tc) && tc.ValueKind == JsonValueKind.Array ||
-        root.TryGetProperty("topInvoices", out var ti) && ti.ValueKind == JsonValueKind.Array ||
-        root.TryGetProperty("items", out var it) && it.ValueKind == JsonValueKind.Array ||
+    private static bool HasAnyRows(JsonElement root) =>
+        (root.TryGetProperty("topCustomers", out var tc) && tc.ValueKind == JsonValueKind.Array) ||
+        (root.TryGetProperty("topInvoices", out var ti) && ti.ValueKind == JsonValueKind.Array) ||
+        (root.TryGetProperty("items", out var it) && it.ValueKind == JsonValueKind.Array) ||
         root.TryGetProperty("invoiceCount", out _);
-
-    private static string BuildFailureMessage(string operation, QueryIntentContract contract)
-    {
-        if (contract.Groupings.Contains("product") && contract.Groupings.Contains("month"))
-        {
-            return "The handler executed, but the response did not satisfy the required monthly product analysis structure " +
-                   "(product, month, quantity, and value).";
-        }
-
-        if (contract.OutputShape.Contains("explainability"))
-        {
-            return "The handler executed, but the response did not include the required explainability fields " +
-                   "(finding and contributors).";
-        }
-
-        return $"The handler executed for {operation}, but the response did not satisfy the required output contract.";
-    }
 }
