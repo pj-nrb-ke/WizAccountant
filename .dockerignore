@@ -1,0 +1,14 @@
+**/bin/
+**/obj/
+**/TestResults/
+**/.vs/
+**/.git/
+tools/
+tests/
+mobile/
+scripts/
+infra/
+docs/
+*.md
+.gitignore
+.dockerignore

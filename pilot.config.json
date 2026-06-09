@@ -1,0 +1,4 @@
+{
+  "ApiBaseUrl": "http://localhost:8088",
+  "ProductionUrl": "https://app.ascendbooks.biz"
+}

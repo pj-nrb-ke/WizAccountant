@@ -52,3 +52,7 @@ qa/e2e-report/
 tools/k6/
 TestResults/
 TestResults2/
+/data/
+*.db
+*.db-shm
+*.db-wal

@@ -8,10 +8,11 @@ services:
     ports:
       - "127.0.0.1:8088:8080"
     volumes:
-      - wizaccountant-data:/data
+      # Bind-mount to a real folder on disk — DB survives container restarts/rebuilds
+      - C:/Users/pj/WizAccountant/data:/data
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: Data Source=/data/wizaccountant.db
-
-volumes:
-  wizaccountant-data:
+      Jwt__Secret: WizAccountant_LocalReview_Secret_Key_2026!
+      Jwt__Issuer: WizAccountant
+      Jwt__ExpiryHours: "12"

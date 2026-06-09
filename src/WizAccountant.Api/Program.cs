@@ -157,7 +157,7 @@ app.MapPost("/api/pairing-codes", async (CreatePairingCodeRequest request, AppDb
         return Results.BadRequest("tenantId and siteName are required.");
 
     var code = $"WZ{Random.Shared.Next(100000, 999999)}";
-    var expires = DateTimeOffset.UtcNow.AddMinutes(Math.Clamp(request.ExpiresInMinutes, 5, 60));
+    var expires = DateTimeOffset.UtcNow.AddMinutes(Math.Clamp(request.ExpiresInMinutes, 5, 10080)); // max 7 days
     db.PairingCodes.Add(new PairingCodeRecord
     {
         PairingCodeId = Guid.NewGuid(),

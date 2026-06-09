@@ -11,13 +11,13 @@ internal sealed class PilotLauncherForm : Form
 
     public PilotLauncherForm()
     {
-        _settings = LauncherSettings.Load();
         var repo = PilotProcessLauncher.FindRepoRoot();
+        _settings = LauncherSettings.Load(repo);          // repo config auto-applied
         _launcher = repo is not null ? new PilotProcessLauncher(repo) : null;
 
         Text = "WizAccountant Pilot";
         Width = 560;
-        Height = 620;
+        Height = 640;
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
@@ -38,6 +38,21 @@ internal sealed class PilotLauncherForm : Form
             MaximumSize = new Size(520, 0)
         };
         root.Controls.Add(_repoLabel);
+
+        // Config source indicator
+        var configPath = repo is not null ? Path.Combine(repo, "pilot.config.json") : null;
+        var configExists = configPath is not null && File.Exists(configPath);
+        var configLabel = new Label
+        {
+            AutoSize = true,
+            MaximumSize = new Size(520, 0),
+            ForeColor = configExists ? Color.DarkGreen : Color.Gray,
+            Text = configExists
+                ? $"✓ Config loaded from pilot.config.json  (AI keeps this up to date)"
+                : "pilot.config.json not found — using saved/default values",
+            Margin = new Padding(0, 0, 0, 4)
+        };
+        root.Controls.Add(configLabel);
 
         var urlPanel = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.TopDown, WrapContents = false, Width = 520 };
         urlPanel.Controls.Add(Label("Connector API URL (cloud or local):"));
