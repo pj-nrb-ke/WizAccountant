@@ -34,6 +34,7 @@ else
     builder.Services.AddSingleton<IJobExecutor, MockJobExecutor>();
 }
 
+builder.Services.AddSingleton<ConnectorUpdateService>();
 builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();

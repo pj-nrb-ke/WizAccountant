@@ -22,9 +22,15 @@ public sealed class SageSdkJobExecutor(
         Dictionary<string, string> parameters,
         CancellationToken ct)
     {
+        // MC1: site.companies does not require a Sage connection
+        if (operation.Equals("site.companies", StringComparison.OrdinalIgnoreCase))
+            return (SiteMetadataHandler.ExecuteCompanyList(_sage), null);
+
         try
         {
-            var payload = await session.RunAsync(() => ExecuteCore(operation, parameters), ct);
+            // MC1: pass optional "company" parameter to select the right company DB
+            parameters.TryGetValue("company", out var companyAlias);
+            var payload = await session.RunAsync(() => ExecuteCore(operation, parameters), companyAlias, ct);
             return (payload, null);
         }
         catch (Exception ex)

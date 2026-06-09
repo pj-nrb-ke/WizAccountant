@@ -104,6 +104,61 @@ document.querySelectorAll(".tab").forEach((tab) => {
   });
 });
 
+// MC3: chart instances (destroy before re-render)
+const _charts = {};
+function renderDashboardCharts(resultJson) {
+  try {
+    const data = JSON.parse(resultJson);
+    const chartSection = document.getElementById("dashboard-charts");
+    chartSection.classList.remove("hidden");
+
+    const COLORS = ["#4f8ef7","#f97316","#22c55e","#a855f7","#ec4899","#14b8a6","#eab308","#64748b","#ef4444","#06b6d4"];
+
+    function makeBar(id, labels, values, label) {
+      if (_charts[id]) _charts[id].destroy();
+      const ctx = document.getElementById(id);
+      if (!ctx) return;
+      _charts[id] = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels,
+          datasets: [{ label, data: values, backgroundColor: COLORS.slice(0, labels.length) }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, ticks: { callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+"M" : v >= 1e3 ? (v/1e3).toFixed(0)+"k" : v } } }
+        }
+      });
+    }
+
+    // topCustomers
+    if (Array.isArray(data.topCustomers) && data.topCustomers.length) {
+      makeBar("chart-customers",
+        data.topCustomers.map(c => c.name || c.code || c.account || "?"),
+        data.topCustomers.map(c => Math.abs(c.balance ?? c.outstanding ?? 0)),
+        "Balance");
+    }
+
+    // topSuppliers
+    if (Array.isArray(data.topSuppliers) && data.topSuppliers.length) {
+      makeBar("chart-suppliers",
+        data.topSuppliers.map(s => s.name || s.code || s.account || "?"),
+        data.topSuppliers.map(s => Math.abs(s.balance ?? s.outstanding ?? 0)),
+        "Balance");
+    }
+
+    // glAccounts (snapshot of key GL balances)
+    const glItems = data.glAccounts || data.glSnapshot || data.glBalances || [];
+    if (Array.isArray(glItems) && glItems.length) {
+      makeBar("chart-gl",
+        glItems.map(g => g.description || g.account || g.code || "?"),
+        glItems.map(g => Math.abs(g.balance ?? g.amount ?? 0)),
+        "Balance");
+    }
+  } catch { /* chart render failure is non-fatal */ }
+}
+
 document.getElementById("btn-dashboard").addEventListener("click", async () => {
   const out = document.getElementById("dashboard-out");
   out.textContent = "Loading…";
@@ -111,6 +166,8 @@ document.getElementById("btn-dashboard").addEventListener("click", async () => {
     const job = await json(`${api}/api/insight/dashboard/${siteId()}`);
     lastJobId = job.jobId;
     showJobResult(out, job);
+    // MC3: render charts if result contains chart-friendly arrays
+    if (job.resultJson) renderDashboardCharts(job.resultJson);
   } catch (e) { out.textContent = e.message; }
 });
 

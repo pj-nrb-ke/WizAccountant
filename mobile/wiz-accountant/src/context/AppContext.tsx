@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { registerPushToken } from "../lib/pushNotifications";
 import { router } from "expo-router";
 import type { Session, Site } from "../types";
 import { api, health, login } from "../lib/api";
@@ -59,6 +60,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
     await persist(s);
     router.replace("/(main)/sites");
+    // M4: register Expo push token in background
+    registerPushToken(s).catch(() => {});
   }, []);
 
   const signOut = useCallback(async () => {

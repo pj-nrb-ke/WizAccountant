@@ -11,7 +11,8 @@ public class Worker(
     IHttpClientFactory httpClientFactory,
     IOptions<ConnectorSettings> options,
     IStateStore stateStore,
-    IJobExecutor jobExecutor) : BackgroundService
+    IJobExecutor jobExecutor,
+    ConnectorUpdateService updateService) : BackgroundService
 {
     private readonly ConnectorSettings _settings = options.Value;
     private HubConnection? _hub;
@@ -25,6 +26,9 @@ public class Worker(
             logger.LogError("Connector is not paired. Set Connector:PairingCode and restart.");
             return;
         }
+
+        // MC4: check for connector updates (non-fatal, fire-and-forget)
+        _ = updateService.CheckForUpdateAsync(stoppingToken);
 
         var hubUrl = $"{_settings.ApiBaseUrl.TrimEnd('/')}/hubs/connector";
         _hub = new HubConnectionBuilder()

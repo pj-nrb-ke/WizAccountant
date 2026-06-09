@@ -403,3 +403,12 @@ public sealed class SiteConfigDto
     public string ConfigJson { get; set; } = "{}";
     public DateTimeOffset SyncedAtUtc { get; set; }
 }
+
+public sealed class RegisterPushTokenRequest
+{
+    public Guid UserId { get; set; }
+    /// <summary>Expo push token string.</summary>
+    public string Token { get; set; } = string.Empty;
+    /// <summary>"ios" | "android"</summary>
+    public string Platform { get; set; } = string.Empty;
+}

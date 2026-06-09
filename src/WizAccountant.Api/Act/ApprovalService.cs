@@ -27,7 +27,7 @@ public static class ProposalTypeMap
     };
 }
 
-public sealed class ApprovalService(AppDbContext db, JobService jobs, WizNotificationService notifications, ILogger<ApprovalService> logger)
+public sealed class ApprovalService(AppDbContext db, JobService jobs, WizNotificationService notifications, SmtpEmailService email, ILogger<ApprovalService> logger)
 {
     public async Task<ApprovalProposalDto> ProposeAsync(ProposeApprovalRequest request, CancellationToken ct)
     {
@@ -70,8 +70,17 @@ public sealed class ApprovalService(AppDbContext db, JobService jobs, WizNotific
         db.ApprovalProposals.Add(proposal);
         await db.SaveChangesAsync(ct);
 
-        // B5-B: notify approvers in real-time
+        // B5-B: notify approvers in real-time (SignalR + Expo push)
         await notifications.PushApprovalRequiredAsync(site.TenantId, proposal.ProposalId, proposal.Title, ct);
+
+        // MC2: email approvers
+        var approvers = await db.Users
+            .Where(u => u.TenantId == site.TenantId && (u.Role == "Approver" || u.Role == "Admin"))
+            .ToListAsync(ct);
+        foreach (var approver in approvers)
+            await email.SendApprovalRequiredAsync(
+                approver.Email, proposal.Title,
+                $"{site.TenantId}/act", ct);
 
         return await ToDtoAsync(proposal, ct);
     }

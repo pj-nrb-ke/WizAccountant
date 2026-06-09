@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using QuestPDF.Infrastructure;
 using WizAccountant.Api;
 using WizAccountant.Api.Act;
 using WizAccountant.Api.Insight;
@@ -11,6 +12,12 @@ using WizAccountant.Api.Middleware;
 using WizAccountant.Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// G5: QuestPDF license — set to Professional in production via env var QUESTPDF_LICENSE=Professional
+QuestPDF.Settings.License = (Environment.GetEnvironmentVariable("QUESTPDF_LICENSE") ?? "Community")
+    .Equals("Professional", StringComparison.OrdinalIgnoreCase)
+    ? QuestPDF.Infrastructure.LicenseType.Professional
+    : QuestPDF.Infrastructure.LicenseType.Community;
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -50,6 +57,7 @@ builder.Services.AddScoped<InsightSqlQueryService>();
 builder.Services.AddScoped<InsightSavedSqlQueryService>();
 builder.Services.AddScoped<NotificationStubService>();
 builder.Services.AddScoped<WizNotificationService>();
+builder.Services.AddSingleton<SmtpEmailService>();  // MC2
 builder.Services.AddScoped<ApprovalService>();
 builder.Services.AddSingleton<ActDraftService>();
 builder.Services.AddScoped<SiteConfigService>();
@@ -60,6 +68,7 @@ builder.Services.AddSingleton<LocalConnectorLauncher>();
 // Phase 4 Block 4 — SSO + Billing + Compliance
 builder.Services.Configure<OidcSettings>(builder.Configuration.GetSection("Oidc"));
 builder.Services.AddHttpClient("OidcJwks");
+builder.Services.AddHttpClient("ExpoPush");  // M4: Expo push notification client
 builder.Services.AddSingleton<IOidcTokenValidator, OidcTokenValidator>();
 builder.Services.AddScoped<OidcAuthService>();
 builder.Services.AddScoped<BillingService>();
@@ -121,6 +130,26 @@ app.MapGet("/health", () => Results.Ok(new
     service = "WizAccountant.Api",
     insightChatVersion = InsightChatInfo.Version
 }));
+
+// MC4 — Connector version manifest: connectors poll this to check for updates
+app.MapGet("/api/connector/version", () =>
+{
+    var apiVersion = typeof(Program).Assembly.GetName().Version?.ToString() ?? "1.0.0.0";
+    // Current minimum compatible connector version — bump when breaking API changes land
+    const string minimumConnectorVersion = "1.0.0.0";
+    const string latestConnectorVersion  = "1.0.0.0";
+    const string downloadUrl = "https://github.com/your-org/wizaccountant/releases/latest/download/WizConnectorSetup.ps1";
+    const string releaseNotes = "https://github.com/your-org/wizaccountant/releases/latest";
+    return Results.Ok(new
+    {
+        latestConnectorVersion,
+        minimumConnectorVersion,
+        downloadUrl,
+        releaseNotes,
+        apiVersion,
+        publishedAtUtc = DateTimeOffset.UtcNow
+    });
+});
 
 app.MapPost("/api/pairing-codes", async (CreatePairingCodeRequest request, AppDbContext db) =>
 {
@@ -650,6 +679,40 @@ app.MapPost("/api/auth/oidc/login", async (OidcLoginRequest request, OidcAuthSer
     return response is null
         ? Results.Unauthorized()
         : Results.Ok(response);
+});
+
+// POST /api/push-tokens — M4: mobile app registers Expo push token
+app.MapPost("/api/push-tokens", async (
+    RegisterPushTokenRequest request,
+    AppDbContext db,
+    Microsoft.AspNetCore.Http.HttpContext ctx,
+    CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.Platform))
+        return Results.BadRequest("token and platform are required.");
+
+    // Upsert — one record per (userId, token)
+    var existing = await db.PushTokens.FirstOrDefaultAsync(
+        p => p.UserId == request.UserId && p.Token == request.Token, ct);
+
+    if (existing is not null)
+    {
+        existing.LastSeenAtUtc = DateTimeOffset.UtcNow;
+    }
+    else
+    {
+        db.PushTokens.Add(new PushTokenRecord
+        {
+            PushTokenId = Guid.NewGuid(),
+            UserId = request.UserId,
+            Token = request.Token.Trim(),
+            Platform = request.Platform.Trim(),
+            RegisteredAtUtc = DateTimeOffset.UtcNow,
+            LastSeenAtUtc = DateTimeOffset.UtcNow
+        });
+    }
+    await db.SaveChangesAsync(ct);
+    return Results.Ok(new { registered = true });
 });
 
 // POST /api/billing/webhook — receive Stripe/Paddle webhook events

@@ -483,3 +483,28 @@ button:hover { filter: brightness(1.08); }
 }
 
 footer { text-align: center; padding: 1rem; }
+
+/* MC3 — Dashboard charts */
+.dashboard-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.chart-card {
+  background: var(--card);
+  border: 1px solid var(--border, #334155);
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+}
+.chart-card-wide {
+  grid-column: 1 / -1;
+}
+.chart-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}

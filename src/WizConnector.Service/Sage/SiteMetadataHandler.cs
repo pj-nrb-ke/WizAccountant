@@ -17,6 +17,18 @@ internal static class SiteMetadataHandler
         "InvNum", "Accounts", "StkItem"
     ];
 
+    /// <summary>MC1 — return list of configured company aliases.</summary>
+    public static string ExecuteCompanyList(SageSettings settings)
+    {
+        var companies = new List<object>();
+        if (!string.IsNullOrWhiteSpace(settings.CompanyConnectionString))
+            companies.Add(new { alias = "(default)", database = ParseConnectionCatalog(settings.CompanyConnectionString) });
+        foreach (var (alias, cs) in settings.Companies)
+            companies.Add(new { alias, database = ParseConnectionCatalog(cs) });
+
+        return System.Text.Json.JsonSerializer.Serialize(new { companies });
+    }
+
     public static string Execute(string connectionString, Dictionary<string, string> parameters)
     {
         // Batch-check key table presence via INFORMATION_SCHEMA.TABLES

@@ -64,6 +64,21 @@
         <h2>Dashboard</h2>
         <button type="button" id="btn-dashboard" class="primary">Refresh KPIs</button>
       </div>
+      <!-- MC3: Chart row -->
+      <div id="dashboard-charts" class="dashboard-charts hidden">
+        <div class="chart-card">
+          <h3 class="chart-title">Top Customers by Balance</h3>
+          <canvas id="chart-customers" height="220"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3 class="chart-title">Top Suppliers by Balance</h3>
+          <canvas id="chart-suppliers" height="220"></canvas>
+        </div>
+        <div class="chart-card chart-card-wide">
+          <h3 class="chart-title">GL Account Balances</h3>
+          <canvas id="chart-gl" height="180"></canvas>
+        </div>
+      </div>
       <pre id="dashboard-out" class="output muted">Select an online site and refresh.</pre>
     </section>
 
@@ -225,6 +240,8 @@
   </footer>
     </div>
   </div>
+  <!-- MC3: Chart.js for dashboard charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <script src="shell.js"></script>
   <script src="insight.js"></script>
   <!-- Real-time notifications (L1) -->

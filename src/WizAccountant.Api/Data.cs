@@ -22,6 +22,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<FirmRecord> Firms => Set<FirmRecord>();
     public DbSet<ExternalIdentityRecord> ExternalIdentities => Set<ExternalIdentityRecord>();
     public DbSet<SubscriptionRecord> Subscriptions => Set<SubscriptionRecord>();
+    public DbSet<PushTokenRecord> PushTokens => Set<PushTokenRecord>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,6 +43,7 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
         modelBuilder.Entity<FirmRecord>().HasKey(x => x.FirmId);
         modelBuilder.Entity<ExternalIdentityRecord>().HasKey(x => x.ExternalIdentityId);
         modelBuilder.Entity<SubscriptionRecord>().HasKey(x => x.TenantId);
+        modelBuilder.Entity<PushTokenRecord>().HasKey(x => x.PushTokenId);
     }
 }
 
@@ -271,3 +273,15 @@ public sealed class SubscriptionRecord
     public DateTimeOffset UpdatedAtUtc { get; set; }
 }
 
+/// <summary>M4 — Expo push token registered by mobile app clients.</summary>
+public sealed class PushTokenRecord
+{
+    public Guid PushTokenId { get; set; }
+    public Guid UserId { get; set; }
+    /// <summary>Expo push token string: ExponentPushToken[xxx] or ea:xxx</summary>
+    public string Token { get; set; } = string.Empty;
+    /// <summary>"ios" | "android"</summary>
+    public string Platform { get; set; } = string.Empty;
+    public DateTimeOffset RegisteredAtUtc { get; set; }
+    public DateTimeOffset LastSeenAtUtc { get; set; }
+}

@@ -111,9 +111,7 @@ public static class ExportService
 
         var headers = rows[0].EnumerateObject().Select(p => p.Name).ToList();
 
-        // Use Community licence (free for non-commercial; production set to Professional via env var)
-        QuestPDF.Settings.License = LicenseType.Community;
-
+        // License is set at startup via QUESTPDF_LICENSE env var (G5)
         var pdf = Document.Create(container =>
         {
             container.Page(page =>

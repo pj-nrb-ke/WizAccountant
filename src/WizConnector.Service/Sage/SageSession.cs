@@ -16,7 +16,11 @@ public sealed class SageSession
         _settings = settings.Value;
     }
 
-    public async Task<T> RunAsync<T>(Func<T> action, CancellationToken ct)
+    public Task<T> RunAsync<T>(Func<T> action, CancellationToken ct)
+        => RunAsync(action, companyAlias: null, ct);
+
+    /// <summary>MC1 — run action against a specific company (null = default).</summary>
+    public async Task<T> RunAsync<T>(Func<T> action, string? companyAlias, CancellationToken ct)
     {
         await _gate.WaitAsync(ct);
         try
@@ -25,12 +29,12 @@ public sealed class SageSession
             {
                 try
                 {
-                    Connect();
+                    Connect(_settings.ResolveCompanyConnectionString(companyAlias));
                     return action();
                 }
                 catch (Exception ex) when (attempt == 0 && IsConnectionError(ex))
                 {
-                    // Evolution SQL connection can drop between jobs — retry once with a fresh connect.
+                    // Evolution SQL connection can drop between jobs — retry once.
                 }
             }
 
@@ -42,14 +46,24 @@ public sealed class SageSession
         }
     }
 
-    /// <summary>Same sequence as WizConnector.Setup “Test Sage connection”.</summary>
-    private void Connect()
+    /// <summary>MC1 — list all configured company aliases.</summary>
+    public IReadOnlyList<string> GetCompanyAliases()
+    {
+        var result = new List<string>();
+        if (!string.IsNullOrWhiteSpace(_settings.CompanyConnectionString))
+            result.Add("(default)");
+        result.AddRange(_settings.Companies.Keys);
+        return result;
+    }
+
+    /// <summary>Same sequence as WizConnector.Setup "Test Sage connection".</summary>
+    private void Connect(string companyConnectionString)
     {
         if (string.IsNullOrWhiteSpace(_settings.CommonConnectionString))
             throw new InvalidOperationException(
                 "Sage common database is not configured. In WizPilot click Open Sage setup, select the common database (e.g. SageCommon11), Test Sage connection, then Save.");
 
-        if (string.IsNullOrWhiteSpace(_settings.CompanyConnectionString))
+        if (string.IsNullOrWhiteSpace(companyConnectionString))
             throw new InvalidOperationException(
                 "Sage company database is not configured. Open Sage setup and save your company database.");
 
@@ -59,7 +73,7 @@ public sealed class SageSession
 
         DatabaseContext.CreateCommonDBConnection(_settings.CommonConnectionString);
         DatabaseContext.SetLicense(_settings.LicenseSerial, _settings.LicenseKey);
-        DatabaseContext.CreateConnection(_settings.CompanyConnectionString);
+        DatabaseContext.CreateConnection(companyConnectionString);
 
         if (_settings.BranchId > 0)
             DatabaseContext.SetBranchContext(_settings.BranchId);

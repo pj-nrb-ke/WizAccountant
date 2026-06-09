@@ -15,6 +15,8 @@ public sealed class ConnectorSettings
     /// <summary>P3: allow write handlers (default false — enable only after pilot sign-off).</summary>
     public bool WritesEnabled { get; set; }
     public bool WriteConsentRequired { get; set; } = true;
+    /// <summary>MC4: check /api/connector/version on startup and warn when a newer version is available.</summary>
+    public bool AutoUpdateCheck { get; set; } = true;
 }
 
 public sealed class ConnectorState
