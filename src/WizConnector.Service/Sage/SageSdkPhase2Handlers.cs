@@ -161,6 +161,14 @@ internal static class SageSdkPhase2Handlers
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
             "gl.period.close.readiness" => GlPeriodCloseReadinessHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "supplier.payment.prompt.top" => SupplierPaymentPromptTopHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "supplier.payment.late.top" => SupplierPaymentLateTopHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "supplier.payment.behavior.summary" => SupplierPaymentBehaviorSummaryHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
+            "supplier.payment.detail" => SupplierPaymentDetailHandler.Execute(
+                _sageSettings?.CompanyConnectionString ?? "", parameters),
             "inventory.adjustment.top" => InventoryAdjustmentTopHandler.Execute(
                 _sageSettings?.CompanyConnectionString ?? "", parameters),
             "vat.summary" => VatSummaryHandler.Execute(

@@ -98,6 +98,16 @@ internal static class OutputContractValidator
             "treasury.payments.forecast" => ValidateShape(root,
                 "paymentsForecast"),
 
+            // ── AP supplier payment behaviour ────────────────────────────────
+            "supplier.payment.behavior.summary" => ValidateShape(root,
+                "finding", "promptPayers", "slowPayers", "averageDaysOverdue", "suppliersAnalyzed"),
+            "supplier.payment.prompt.top" => ValidateShape(root,
+                "finding", "suppliers", "requestedTop"),
+            "supplier.payment.late.top" => ValidateShape(root,
+                "finding", "suppliers", "requestedTop"),
+            "supplier.payment.detail" => ValidateShape(root,
+                "finding", "supplier"),
+
             // ── GL period-close readiness ────────────────────────────────────
             "gl.period.close.readiness" => ValidateShape(root,
                 "readyToClose", "finding", "checks", "periodLabel"),

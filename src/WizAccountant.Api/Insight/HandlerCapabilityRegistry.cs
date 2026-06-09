@@ -215,6 +215,20 @@ internal static class HandlerCapabilityRegistry
                 "customer.payment.detail", ["customer"], ["payment_discipline"],
                 dateFilter: true, shapes: ["tabular"], evidence: "InvNum+PostAR"),
 
+            // ── AP supplier payment behaviour ─────────────────────────────────
+            ["supplier.payment.prompt.top"] = Cap(
+                "supplier.payment.prompt.top", ["supplier"], ["payment_discipline"],
+                dateFilter: true, topN: true, shapes: ["ranking"], evidence: "InvNum+Vendor"),
+            ["supplier.payment.late.top"] = Cap(
+                "supplier.payment.late.top", ["supplier"], ["payment_discipline"],
+                dateFilter: true, topN: true, shapes: ["ranking"], evidence: "InvNum+Vendor"),
+            ["supplier.payment.behavior.summary"] = Cap(
+                "supplier.payment.behavior.summary", [], ["payment_discipline"],
+                dateFilter: true, shapes: ["aggregation"], evidence: "InvNum+Vendor"),
+            ["supplier.payment.detail"] = Cap(
+                "supplier.payment.detail", ["supplier"], ["payment_discipline"],
+                dateFilter: true, shapes: ["tabular"], evidence: "InvNum+Vendor"),
+
             // ── AP analytical ─────────────────────────────────────────────────
             ["ap.invoice.overdue.count"] = Cap(
                 "ap.invoice.overdue.count", ["supplier"], ["balance"],
