@@ -12,7 +12,7 @@
   { "id": "con-recon-01", "query": "does AR match GL", "operation": "ar.gl.reconcile" },
   { "id": "con-recon-02", "query": "inventory valuation vs GL", "preferredOperation": "inventory.gl.reconcile" },
   { "id": "con-disc-01", "query": "why is GP declining", "preferredOperation": "salesinvoice.discount.top", "mustNotRoute": ["customer.sales.top"] },
-  { "id": "con-close-01", "query": "is month-end ready to close", "preferredOperation": "gl.journal.periodend", "mustNotRoute": ["gltransaction.list"] },
+  { "id": "con-close-01", "query": "is month-end ready to close", "preferredOperation": "gl.period.close.readiness", "mustNotRoute": ["gltransaction.list", "gl.journal.periodend"] },
   { "id": "con-bp-01", "query": "which customers pay promptly despite outstanding balances", "operation": "customer.payment.prompt.top", "mustNotRoute": ["customer.unpaid.summary"] },
   { "id": "con-guard-01", "query": "top customers by outstanding balance", "operation": "customer.outstanding.debit.top", "mustNotRoute": ["customer.payment.prompt.top"] },
   { "id": "con-inv-expl-01", "query": "why is inventory not matching GL", "operation": "inventory.gl.explain" },

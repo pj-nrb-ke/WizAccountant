@@ -241,6 +241,14 @@ internal static class HandlerCapabilityRegistry
                 "supplier.payments.top", ["supplier"], ["value"],
                 dateFilter: true, topN: true, shapes: ["ranking"], evidence: "PostAP"),
 
+            // ── GL period-close readiness ─────────────────────────────────────
+            ["gl.period.close.readiness"] = Cap(
+                "gl.period.close.readiness",
+                ["gl"], ["readiness"],
+                dateFilter: true, explain: true,
+                shapes: ["dashboard", "explainability", "checklist"],
+                evidence: "PostGL+Bank"),
+
             // ── GL analytical ─────────────────────────────────────────────────
             ["gl.balance.unusual"] = Cap(
                 "gl.balance.unusual", ["gl"], ["variance"],

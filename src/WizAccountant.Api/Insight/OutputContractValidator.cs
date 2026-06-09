@@ -98,6 +98,10 @@ internal static class OutputContractValidator
             "treasury.payments.forecast" => ValidateShape(root,
                 "paymentsForecast"),
 
+            // ── GL period-close readiness ────────────────────────────────────
+            "gl.period.close.readiness" => ValidateShape(root,
+                "readyToClose", "finding", "checks", "periodLabel"),
+
             // ── Default: use capability registry ────────────────────────────
             _ => ValidateFromCapabilityRegistry(contract, operation, root)
         };

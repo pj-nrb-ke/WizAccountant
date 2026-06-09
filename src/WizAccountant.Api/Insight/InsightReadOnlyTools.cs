@@ -85,6 +85,7 @@ public static class InsightReadOnlyTools
         "gl.balance.unusual",
         "gl.journal.round",
         "gl.journal.periodend",
+        "gl.period.close.readiness",
         "gl.journal.duplicate",
         "gl.ratios",
         "gl.trialbalance.anomaly",

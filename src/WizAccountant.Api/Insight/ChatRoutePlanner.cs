@@ -275,7 +275,8 @@ internal static class ChatRoutePlanner
                 BusinessProcessType.CashflowIntelligence,
             _ when operation.StartsWith("inventory.", StringComparison.Ordinal) => BusinessProcessType.InventoryLifecycle,
             _ when operation.Contains("discount", StringComparison.Ordinal) => BusinessProcessType.DiscountGovernance,
-            _ when operation.Contains("journal.periodend", StringComparison.Ordinal) => BusinessProcessType.MonthEndClose,
+            _ when operation.Contains("journal.periodend", StringComparison.Ordinal) ||
+                   operation == "gl.period.close.readiness" => BusinessProcessType.MonthEndClose,
             _ => BusinessProcessType.Unknown
         };
 
