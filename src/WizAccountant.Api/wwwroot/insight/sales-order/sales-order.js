@@ -95,20 +95,25 @@
     const el = document.getElementById("so-order-no");
     if (!el) return;
     el.value = "";
+    el.readOnly = true;
     el.placeholder = "Allocating…";
     try {
       const job = await WizShell.runWait("salesorder.nextnumber", { module: "0" });
-      if (!isJobOk(job)) throw new Error(job.error || "Order number allocation failed");
-      const data = JSON.parse(job.resultJson);
+      if (!isJobOk(job)) throw new Error(job.error || job.resultJson || "Order number allocation failed");
+      const data = JSON.parse(job.resultJson || "{}");
       if (data.error) throw new Error(data.message || data.error);
       const orderNo =
         data.orderNumber ||
         `${data.orderPrefix ?? ""}${data.nextNumber ?? ""}`;
+      if (!orderNo.trim()) throw new Error("Connector returned no order number (rebuild WizConnector.Service).");
       el.value = orderNo;
       el.placeholder = "";
+      el.readOnly = true;
       state.orderNumber = orderNo;
+      setLoadStatus(`Order number ${orderNo} allocated.`, "ok");
     } catch (e) {
-      el.placeholder = "(failed)";
+      el.placeholder = "(failed — enter manually or retry)";
+      el.readOnly = false;
       console.warn("salesorder.nextnumber failed:", e.message);
       setLoadStatus(`Order number: ${e.message}`, "error");
     }
@@ -202,6 +207,7 @@
     const validationError = validateFormForSave(documentType);
     if (validationError) {
       setLoadStatus(validationError, "error");
+      window.alert(validationError);
       return;
     }
 
@@ -249,6 +255,7 @@
     } catch (e) {
       console.warn("salesorder.save failed:", e.message);
       setLoadStatus(`Save failed: ${e.message}`, "error");
+      window.alert(`Save failed: ${e.message}`);
       setSaveButtonsEnabled(true);
     } finally {
       state.isSaving = false;

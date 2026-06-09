@@ -1,0 +1,8683 @@
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Table of Contents
+Introduction ....................................................................................................................................................... 2
+Authentication.................................................................................................................................................... 2
+Customers.......................................................................................................................................................... 2
+Suppliers ............................................................................................................................................................ 7
+Inventory Items................................................................................................................................................ 11
+Inventory Item Price Lists................................................................................................................................. 14
+Inventory Item Selling Prices............................................................................................................................ 16
+Aging Terms...................................................................................................................................................... 17
+Areas ................................................................................................................................................................ 21
+Customer Groups.............................................................................................................................................. 22
+Person .............................................................................................................................................................. 24
+Supplier Groups................................................................................................................................................ 26
+Sales Representatives....................................................................................................................................... 28
+Settlement Terms............................................................................................................................................. 30
+Customer Transactions..................................................................................................................................... 31
+Supplier Transactions........................................................................................................................................................ 33
+Inventory Transactions..................................................................................................................................... 34
+Create Sales Order Quotation.......................................................................................................................... 37
+Create Sales Order............................................................................................................................................ 37
+Create Sales Order Invoice............................................................................................................................... 38
+Open Sales Order & Process Invoice................................................................................................................ 39
+Initial Installation & Service Configuration....................................................................................................... 40
+Step 1 - Installation.......................................................................................................................................... 40
+Step 2 - Configuration...................................................................................................................................... 44
+Step 3 - Validating............................................................................................................................................ 45
+Step 4 - Available REST Services...................................................................................................................... 46
+Initialization & Code Samples........................................................................................................................... 48
+Adding a Service Reference................................................................................................................. 48
+Create a Simple RESTful Client............................................................................................................ 48
+Code Sample : Master Records......................................................................................................................... 49
+Code Sample : Sales Order Documents............................................................................................................ 49
+Place a new sales order....................................................................................................................... 50
+Process a new sales order invoice....................................................................................................... 50
+Edit an existing sales order.................................................................................................................. 50
+1 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+  
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Sage Evolution Freedom Web Service API Guidelines
+Introduction
+The Sage Evolution Freedom extension service API is a set of public functions and procedures that allow developers to
+have access to the Sage Evolution system. The Freedom extension service API is a set of generic Accounting functions
+that is designed to cater for a wide-ranging of functions. Not all the functions, information and fields are related to Sage
+Evolution or required by the developer.
+The Sage Evolution Freedom extension service API is a REST API. A RESTful API is an application program interface (API)
+that uses HTTP requests to GET, and POST data. Representational state transfer (REST), which is used by browsers, can
+be thought of as the language of the Internet. The Sage Evolution Freedom Service must be installed on the computer
+where the API is consumed. The installation will register the site (HTTP) and port for the interface (service).
+Authentication
+The site uses basic access authentication. HTTP Basic authentication (BA) is a method for a HTTP user agent to provide a
+user name and password when making a request. HTTP Basic authentication uses standard fields in the HTTP header.
+For the Sage Evolution Freedom extension service API, the user name is the actual Sage Evolution Agent Name and the
+password is the Agent Password stored within the Sage Evolution company database.
+Customers
+Customer Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/CustomerFind{CODE}
+Path Parameters
+CODE: Customer code [Required]
+Methods Supported
+GET
+Description
+Returns an instance of an existing customer
+The following elements are returned in the CustomerFind response
+Field
+Type
+Description
+ID
+Integer
+The customer's unique identifier
+Code
+String
+The customer's code
+Description
+String
+The customer's description
+Active
+Boolean
+Is the customer account active?
+AccountBalance
+Double
+The customer's current account balance
+ForeignAccountBalance
+Double
+The customer's foreign account balance
+ChargeTax
+Boolean
+Should the customer be charged tax?
+Currency
+Object
+The customer's currency. Null value indicates home currency
+CurrencylD
+Integer
+The currency identifier
+IsForeignCurrencyAccount
+Boolean
+Is the customer a foreign currency account?
+Title
+String
+The customer's title
+IDNumber
+String
+The customer's identification number
+Initials
+String
+The customer's initials
+2 | P a g e
+Freedom API Guidelines VI. 04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+ContactPerson
+String
+The customer's specific contact person
+IsOnHold
+Boolean
+Is the customer account currently on hold?
+TaxNumber
+String
+The customer's tax number
+DefaultSettlementTerm
+Object
+The customer's default settlement term
+CustomerGroup
+Object
+The group the customer belongs to
+PhysicalAddress
+Object
+The customer's physical address
+PostalAddress
+Object
+The customer's postal address
+DeliverTo
+String
+The person whom should be delivered to
+Telephone
+String
+Telephone number 1
+Telephone?
+String
+Telephone number 2
+Faxl
+String
+Fax number 1
+Fax2
+String
+Fax number 2
+AccountTerms
+Integer
+The accounting term's unique identifier
+DefaultTaxRate
+Object
+The customer's default tax type
+Registration
+String
+The customer's registration number
+CreditLimit
+Double
+The maximum credit amount allowed for the customer
+InterestRate
+Double
+The customer's current interest rate charge
+EmailAddress
+String
+The customer's email address
+BankID
+Integer
+The customer's bank unique identifier
+BankBranchCode
+String
+The customer's bank branch code
+BankAccountNo
+String
+The customer's bank account number
+AutomaticDiscount
+Double
+The customer's automatic discount
+CheckTerms
+Boolean
+Should the system validate for the customer's terms?
+UseEmail
+Boolean
+Should email functionality be enabled for the customer?
+AccountDescription
+String
+The full customer account description
+Webpage
+String
+The customer's web address
+AreasID
+Integer
+The customer's area unique identifier
+BankReferenceNo
+String
+The customer's bank reference number
+PrintRemittance
+Boolean
+Print the customer's remittance advice?
+EmailRemittance
+Boolean
+Email the customer's remittance advice?
+StatementZipPassword
+String
+Encrypted password to unzip the statement
+Customer Exists
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/CustomerExists{CODE}
+Path Parameters
+CODE: Customer code [Required]
+Methods Supported
+GET
+Description
+Returns true or false. Depending on whether the customer exists or not.
+The following elements are returned in the CustomerExists response
+Field
+Type
+Description
+Return type
+Boolean
+Specifies whether the customer exists within the database.
+Customer List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/CustomerList{ORDERBY}, {PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all customers present within the system.
+3 | P a g e
+Freedom API Guidelines VI. 04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+The following elements are returned in the CustomerList response
+Field
+Type
+Description
+ID
+Integer
+The customer's unique identifier
+Code
+String
+The customer's code
+Description
+String
+The customer's description
+Active
+Boolean
+Is the customer account active?
+AccountBalance
+Double
+The customer's current account balance
+ForeignAccountBalance
+Double
+The customer's foreign account balance
+ChargeTax
+Boolean
+Should the customer be charged tax?
+Currency
+Object
+The customer's currency. Null value indicates home currency
+CurrencylD
+Integer
+The currency identifier
+IsForeignCurrencyAccount
+Boolean
+Is the customer a foreign currency account?
+Title
+String
+The customer's title
+IDNumber
+String
+The customer's identification number
+Initials
+String
+The customer's initials
+ContactPerson
+String
+The customer's specific contact person
+IsOnHold
+Boolean
+Is the customer account currently on hold?
+TaxNumber
+String
+The customer's tax number
+DefaultSettlementTerm
+Object
+The customer's default settlement term
+CustomerGroup
+Object
+The group the customer belongs to
+PhysicalAddress
+Object
+The customer's physical address
+PostalAddress
+Object
+The customer's postal address
+DeliverTo
+String
+The person whom should be delivered to
+Telephone
+String
+Telephone number 1
+Telephone?
+String
+Telephone number 2
+Faxl
+String
+Fax number 1
+Fax2
+String
+Fax number 2
+AccountTerms
+Integer
+The accounting term's unique identifier
+DefaultTaxRate
+Object
+The customer's default tax type
+Registration
+String
+The customer's registration number
+CreditLimit
+Double
+The maximum credit amount allowed for the customer
+InterestRate
+Double
+The customer's current interest rate charge
+EmailAddress
+String
+The customer's email address
+BankID
+Integer
+The customer's bank unique identifier
+BankBranchCode
+String
+The customer's bank branch code
+BankAccountNo
+String
+The customer's bank account number
+AutomaticDiscount
+Double
+The customer's automatic discount
+CheckTerms
+Boolean
+Should the system validate for the customer's terms?
+UseEmail
+Boolean
+Should email functionality be enabled for the customer?
+AccountDescription
+String
+The full customer account description
+Webpage
+String
+The customer's web address
+AreasID
+Integer
+The customer's area unique identifier
+BankReferenceNo
+String
+The customer's bank reference number
+PrintRemittance
+Boolean
+Print the customer's remittance advice?
+EmailRemittance
+Boolean
+Email the customer's remittance advice?
+StatementZipPassword
+String
+Encrypted password to unzip the statement
+Customer Add
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/Customerlnsert{CUSTOMER}
+Path Parameters
+CUSTOMER: Instance of a customer object
+Methods Supported
+POST
+Description
+Create a new customer
+4 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+✘
+✘
+✘
+✘
+✘
+ 
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+ 
+ 
+ 
+sage
+The following elements are required or optional with regards to creating a new customer.
+Field
+Type
+Description
+Required
+Code
+String
+The customer's code
+✓
+Description
+String
+The customer's description
+✓
+Active
+Boolean
+Is the customer account active?
+AccountBalance
+Double
+The customer's current account balance
+ForeignAccountBalance
+Double
+The customer's foreign account balance
+ChargeTax
+Boolean
+Should the customer be charged tax?
+Currency
+Object
+The customer's currency.
+CurrencylD
+Integer
+The currency identifier
+IsForeignCurrencyAccount
+Boolean
+Is the customer a foreign currency account?
+Title
+String
+The customer's title
+IDNumber
+String
+The customer's identification number
+Initials
+String
+The customer's initials
+ContactPerson
+String
+The customer's specific contact person
+IsOnHold
+Boolean
+Is the customer account currently on hold?
+TaxNumber
+String
+The customer's tax number
+DefaultSettlementTerm
+Object
+The customer's default settlement term
+CustomerGroup
+Object
+The group the customer belongs to
+PhysicalAddress
+Object
+The customer's physical address
+PostalAddress
+Object
+The customer's postal address
+DeliverTo
+String
+The person whom should be delivered to
+Telephone
+String
+Telephone number 1
+Telephone?
+String
+Telephone number 2
+Faxl
+String
+Fax number 1
+Fax2
+String
+Fax number 2
+AccountTerms
+Integer
+The accounting term's unique identifier
+DefaultTaxRate
+Object
+The customer's default tax type
+Registration
+String
+The customer's registration number
+CreditLimit
+Double
+The maximum credit amount allowed for the customer
+InterestRate
+Double
+The customer's current interest rate charge
+EmailAddress
+String
+The customer's email address
+BankID
+Integer
+The customer's bank unique identifier
+BankBranchCode
+String
+The customer's bank branch code
+BankAccountNo
+String
+The customer's bank account number
+AutomaticDiscount
+Double
+The customer's automatic discount
+CheckTerms
+Boolean
+Should the system validate for the customer's terms?
+UseEmail
+Boolean
+Should email functionality be enabled for the customer?
+AccountDescription
+String
+The full customer account description
+Webpage
+String
+The customer's web address
+AreasID
+Integer
+The customer's area unique identifier
+BankReferenceNo
+String
+The customer's bank reference number
+PrintRemittance
+Boolean
+Print the customer's remittance advice?
+EmailRemittance
+Boolean
+Email the customer's remittance advice?
+StatementZipPassword
+String
+Encrypted password to unzip the statement
+Customer Update
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/CustomerUpdate{CUSTOIVIER}
+Path Parameters
+CUSTOMER: Instance of a customer object
+Methods Supported
+POST
+Description
+Update an existing customer
+5 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘
+ 
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+✘
+✘
+✘
+✘
+✘
+ 
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+ 
+ 
+ 
+ 
+ 
+The following elements are required or optional with regards to updating an existing customer.
+Field
+Type
+Description
+Required
+Code
+String
+The customer's code
+✓
+Description
+String
+The customer's description
+Active
+Boolean
+Is the customer account active?
+AccountBalance
+Double
+The customer's current account balance
+ForeignAccountBalance
+Double
+The customer's foreign account balance
+ChargeTax
+Boolean
+Should the customer be charged tax?
+Currency
+Object
+The customer's currency.
+CurrencylD
+Integer
+The currency identifier
+IsForeignCurrencyAccount
+Boolean
+Is the customer a foreign currency account?
+Title
+String
+The customer's title
+IDNumber
+String
+The customer's identification number
+Initials
+String
+The customer's initials
+ContactPerson
+String
+The customer's specific contact person
+IsOnHold
+Boolean
+Is the customer account currently on hold?
+TaxNumber
+String
+The customer's tax number
+DefaultSettlementTerm
+Object
+The customer's default settlement term
+CustomerGroup
+Object
+The group the customer belongs to
+PhysicalAddress
+Object
+The customer's physical address
+PostalAddress
+Object
+The customer's postal address
+DeliverTo
+String
+The person whom should be delivered to
+Telephone
+String
+Telephone number 1
+Telephone?
+String
+Telephone number 2
+Faxl
+String
+Fax number 1
+Fax2
+String
+Fax number 2
+AccountTerms
+Integer
+The accounting term's unique identifier
+DefaultTaxRate
+Object
+The customer's default tax type
+Registration
+String
+The customer's registration number
+CreditLimit
+Double
+The maximum credit amount allowed for the customer
+InterestRate
+Double
+The customer's current interest rate charge
+EmailAddress
+String
+The customer's email address
+BankID
+Integer
+The customer's bank unique identifier
+BankBranchCode
+String
+The customer's bank branch code
+BankAccountNo
+String
+The customer's bank account number
+AutomaticDiscount
+Double
+The customer's automatic discount
+CheckTerms
+Boolean
+Should the system validate for the customer's terms?
+UseEmail
+Boolean
+Should email functionality be enabled for the customer?
+AccountDescription
+String
+The full customer account description
+Webpage
+String
+The customer's web address
+AreasID
+Integer
+The customer's area unique identifier
+BankReferenceNo
+String
+The customer's bank reference number
+PrintRemittance
+Boolean
+Print the customer's remittance advice?
+EmailRemittance
+Boolean
+Email the customer's remittance advice?
+StatementZipPassword
+String
+Encrypted password to unzip the statement
+6 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Suppliers
+Supplier Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SupplierFind{CODE}
+Path Parameters
+CODE: Supplier code [Required]
+Methods Supported
+GET
+Description
+Returns an instance of an existing supplier
+The following elements are returned in the SupplierFind response
+Field
+Type
+Description
+ID
+Integer
+The supplier's unique identifier
+Code
+String
+The supplier's code
+Description
+String
+The supplier's description
+Active
+Boolean
+Is the supplier account active?
+AccountBalance
+Double
+The supplier's current account balance
+ForeignAccountBalance
+Double
+The supplier's foreign account balance
+ChargeTax
+Boolean
+Should the supplier be charged tax?
+Currency
+Object
+The supplier's currency. Null value indicates home currency
+CurrencylD
+Integer
+The currency identifier
+IsForeignCurrencyAccount
+Boolean
+Is the supplier a foreign currency account?
+Title
+String
+The supplier's title
+IDNumber
+String
+The supplier's identification number
+Initials
+String
+The supplier's initials
+ContactPerson
+String
+The supplier's specific contact person
+IsOnHold
+Boolean
+Is the supplier account currently on hold?
+TaxNumber
+String
+The supplier's tax number
+DefaultSettlementTerm
+Object
+The supplier's default settlement term
+SupplierGroup
+Object
+The group the supplier belongs to
+PhysicalAddress
+Object
+The supplier's physical address
+PostalAddress
+Object
+The supplier's postal address
+DeliverTo
+String
+The person whom should be delivered to
+Telephone
+String
+Telephone number 1
+Telephone?
+String
+Telephone number 2
+Faxl
+String
+Fax number 1
+Fax2
+String
+Fax number 2
+AccountTerms
+Integer
+The accounting term's unique identifier
+DefaultTaxRate
+Object
+The supplier's default tax type
+Registration
+String
+The supplier's registration number
+CreditLimit
+Double
+The maximum credit amount allowed for the supplier
+InterestRate
+Double
+The supplier's current interest rate charge
+SettlementDiscountPercent
+Double
+The supplier's settlement discount percentage
+BalanceBroughtForward
+Integer
+Specifies whether the supplier is balance brought forward or open item
+EmailAddress
+String
+The supplier's email address
+BankID
+Integer
+The supplier's bank unique identifier
+BankBranchCode
+String
+The supplier's bank branch code
+BankAccountNo
+String
+The supplier's bank account number
+AutomaticDiscount
+Double
+The supplier's automatic discount
+CheckTerms
+Boolean
+Should the system validate for the supplier's terms?
+UseEmail
+Boolean
+Should email functionality be enabled for the supplier?
+AccountDescription
+String
+The full supplier account description
+Webpage
+String
+The supplier's web address
+AreasID
+Integer
+The supplier's area unique identifier
+BankReferenceNo
+String
+The supplier's bank reference number
+PrintRemittance
+Boolean
+Print the supplier's remittance advice?
+7 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+EmailRemittance
+Boolean
+Email the supplier's remittance advice?
+StatementZipPassword
+String
+Encrypted password to unzip the statement
+Supplier Exists
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SupplierExists{CODE}
+Path Parameters
+CODE: Supplier code [Required]
+Methods Supported
+GET
+Description
+Returns true or false. Depending on whether the supplier exists or not.
+The following elements are returned in the SupplierExists response
+Field
+Type
+Description
+Return type
+Boolean
+Specifies whether the supplier exists within the database.
+Supplier List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SupplierList{ORDERBY}, {PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all suppliers' present within the system.
+The following elements are returned in the SupplierList response
+Field
+Type
+Description
+ID
+Integer
+The supplier's unique identifier
+Code
+String
+The supplier's code
+Description
+String
+The supplier's description
+Active
+Boolean
+Is the supplier account active?
+AccountBalance
+Double
+The supplier's current account balance
+ForeignAccountBalance
+Double
+The supplier's foreign account balance
+ChargeTax
+Boolean
+Should the supplier be charged tax?
+Currency
+Object
+The supplier's currency. Null value indicates home currency
+CurrencylD
+Integer
+The currency identifier
+IsForeignCurrencyAccount
+Boolean
+Is the supplier a foreign currency account?
+Title
+String
+The supplier's title
+IDNumber
+String
+The supplier's identification number
+Initials
+String
+The supplier's initials
+ContactPerson
+String
+The supplier's specific contact person
+IsOnHold
+Boolean
+Is the supplier account currently on hold?
+TaxNumber
+String
+The supplier's tax number
+DefaultSettlementTerm
+Object
+The supplier's default settlement term
+SupplierGroup
+Object
+The group the supplier belongs to
+PhysicalAddress
+Object
+The supplier's physical address
+PostalAddress
+Object
+The supplier's postal address
+DeliverTo
+String
+The person whom should be delivered to
+Telephone
+String
+Telephone number 1
+Telephone?
+String
+Telephone number 2
+Faxl
+String
+Fax number 1
+Fax2
+String
+Fax number 2
+AccountTerms
+Integer
+The accounting term's unique identifier
+DefaultTaxRate
+Object
+The supplier's default tax type
+8 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+sage
+Field
+Type
+Description
+Registration
+String
+The supplier's registration number
+CreditLimit
+Double
+The maximum  credit amount allowed for the supplier
+InterestRate
+Double
+The supplier's current interest rate charge
+SettlementDiscountPercent
+Double
+The supplier's settlement discount percentage
+BalanceBroughtForward
+Integer
+Specifies whether  the supplier is balance brought forward or open item
+EmailAddress
+String
+The supplier's email address
+BankID
+Integer
+The supplier's bank unique identifier
+BankBranchCode
+String
+The supplier's bank branch code
+BankAccountNo
+String
+The supplier's bank account number
+AutomaticDiscount
+Double
+The supplier's automatic discount
+CheckTerms
+Boolean
+Should the system validate for the supplier's terms?
+UseEmail
+Boolean
+Should email functionality be enabled for the supplier?
+AccountDescription
+String
+The full supplier account description
+Webpage
+String
+The supplier's web address
+AreasID
+Integer
+The supplier's area unique identifier
+BankReferenceNo
+String
+The supplier's bank reference number
+PrintRemittance
+Boolean
+Print the supplier's remittance advice?
+EmailRemittance
+Boolean
+Email the supplier's remittance advice?
+StatementZipPassword
+String
+Encrypted password to unzip the statement
+Supplier Add
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/Supplierlnsert{SUPPLIER}
+Path Parameters
+SUPPLIER: Instance of a supplier object
+Methods Supported
+POST
+Description
+Create a lew supplier
+The following elements are requirec or optional with regards to creating a new supplier.
+Field
+Type
+Description
+Required
+Code
+String
+The supplier's code
+✓
+Description
+String
+The supplier's description
+✓
+Active
+Boolean
+Is the supplier account active?
+AccountBalance
+Double
+The supplier's current account balance
+ForeignAccountBalance
+Double
+The supplier's foreign account balance
+ChargeTax
+Boolean
+Should the supplier be charged tax?
+Currency
+Object
+The supplier's currency.
+CurrencylD
+Integer
+The currency identifier
+IsForeignCurrencyAccount
+Boolean
+Is the supplier a foreign currency account?
+Title
+String
+The supplier's title
+IDNumber
+String
+The supplier's identification number
+Initials
+String
+The supplier's initials
+ContactPerson
+String
+The supplier's specific contact person
+IsOnHold
+Boolean
+Is the supplier account currently on hold?
+TaxNumber
+String
+The supplier's tax number
+DefaultSettlementTerm
+Object
+The supplier's default settlement term
+CustomerGroup
+Object
+The group the supplier belongs to
+PhysicalAddress
+Object
+The supplier's physical address
+PostalAddress
+Object
+The supplier's postal address
+DeliverTo
+String
+The person whom should be delivered to
+Telephone
+String
+Telephone number 1
+Telephone?
+String
+Telephone number 2
+Faxl
+String
+Fax number 1
+Fax2
+String
+Fax number 2
+9 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘
+ 
+ 
+✘
+✘
+ 
+ 
+✘
+✘
+✘ 
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+✘
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+sage
+Field
+Type
+Description
+Required
+AccountTerms
+Integer
+The accounting term's unique identifier
+DefaultTaxRate
+Object
+The supplier's default tax type
+Registration
+String
+The supplier's registration number
+CreditLimit
+Double
+The maximum credit amount allowed for the supplier
+InterestRate
+Double
+The supplier's current interest rate charge
+SettlementDiscountPercent
+Double
+The supplier's settlement discount percentage
+BalanceBroughtForward
+Integer
+Is balance brought forward or open item
+BankID
+Integer
+The supplier's bank unique identifier
+BankBranchCode
+String
+The supplier's bank branch code
+BankAccountNo
+String
+The supplier's bank account number
+AutomaticDiscount
+Double
+The supplier's automatic discount
+CheckTerms
+Boolean
+Should the system validate for the supplier's terms?
+UseEmail
+Boolean
+Should email functionality be enabled for the supplier?
+AccountDescription
+String
+The full supplier account description
+Webpage
+String
+The supplier's web address
+AreasID
+Integer
+The supplier's area unique identifier
+BankReferenceNo
+String
+The supplier's bank reference number
+PrintRemittance
+Boolean
+Print the supplier's remittance advice?
+EmailRemittance
+Boolean
+Email the supplier's remittance advice?
+StatementZipPassword
+String
+Encrypted password to unzip the statement
+X
+Supplier Update
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SupplierUpdate{SUPPLIER}
+Path Parameters
+SUPPLIER: Instance of a supplier object
+Methods Supported
+POST
+Description
+Update an existing supplier
+The following elements are required or optional with regards to updating an existing customer.
+Field
+Type
+Description
+Required
+Code
+String
+The customer's code
+✓
+Description
+String
+The customer's description
+Active
+Boolean
+Is the supplier account active?
+AccountBalance
+Double
+The supplier's current account balance
+ForeignAccountBalance
+Double
+The supplier's foreign account balance
+ChargeTax
+Boolean
+Should the supplier be charged tax?
+Currency
+Object
+The supplier's currency.
+CurrencylD
+Integer
+The currency identifier
+IsForeignCurrencyAccount
+Boolean
+Is the supplier a foreign currency account?
+Title
+String
+The supplier's title
+IDNumber
+String
+The supplier's identification number
+Initials
+String
+The supplier's initials
+ContactPerson
+String
+The supplier's specific contact person
+IsOnHold
+Boolean
+Is the supplier account currently on hold?
+TaxNumber
+String
+The supplier's tax number
+DefaultSettlementTerm
+Object
+The supplier's default settlement term
+CustomerGroup
+Object
+The group the supplier belongs to
+PhysicalAddress
+Object
+The supplier's physical address
+PostalAddress
+Object
+The supplier's postal address
+DeliverTo
+String
+The person whom should be delivered to
+Telephone
+String
+Telephone number 1
+Telephone?
+String
+Telephone number 2
+10 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘
+✘
+✘
+ 
+ 
+✘
+✘
+✘
+✘
+✘ 
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+✘
+ 
+ 
+✘
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+Required
+Faxl
+String
+Fax number 1
+Fax2
+String
+Fax number 2
+AccountTerms
+Integer
+The accounting term's unique identifier
+DefaultTaxRate
+Object
+The supplier's default tax type
+Registration
+String
+The supplier's registration number
+CreditLimit
+Double
+The maximum credit amount allowed for the supplier
+InterestRate
+Double
+The supplier's current interest rate charge
+SettlementDiscountPercent
+Double
+The supplier's settlement discount percentage
+BalanceBroughtForward
+Integer
+Is balance brought forward or open item
+BankID
+Integer
+The supplier's bank unique identifier
+BankBranchCode
+String
+The supplier's bank branch code
+BankAccountNo
+String
+The supplier's bank account number
+AutomaticDiscount
+Double
+The supplier's automatic discount
+CheckTerms
+Boolean
+Should the system validate for the supplier's terms?
+UseEmail
+Boolean
+Should email functionality be enabled for the supplier?
+AccountDescription
+String
+The full supplier account description
+Webpage
+String
+The supplier's web address
+AreasID
+Integer
+The supplier's area unique identifier
+BankReferenceNo
+String
+The supplier's bank reference number
+PrintRemittance
+Boolean
+Print the supplier's remittance advice?
+EmailRemittance
+Boolean
+Email the supplier's remittance advice?
+StatementZipPassword
+String
+Encrypted password to unzip the statement
+Inventory Items
+Inventory Item Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/lnventoryltemFind{CODE}
+Path Parameters
+CODE: Inventory item code [Required]
+Methods Supported
+GET
+Description
+Returns an instance of an existing inventory item
+The following elements are returned in the InventoryltemFind response
+Field
+Type
+Description
+ID
+Integer
+The inventory item's unique identifier
+Code
+String
+The inventory item's code
+Description
+String
+The inventory item's description
+Description_2
+String
+The inventory item's second description
+Description_3
+String
+The inventory item's third description
+Active
+Boolean
+Is the inventory item active or in-active?
+IsWarehouseTracked
+Boolean
+Is the inventory item a warehouse type item?
+IsServiceltem
+Boolean
+Is the inventory item a service item?
+IsAttribute
+Boolean
+Is the inventory item an attribute item?
+LastGrvCost
+Double
+The item's last goods received voucher cost value
+IsCommisionable
+Boolean
+Should commission be calculated for the inventory item?
+QtyOnHand
+Double
+The inventory item's current quantity on hand
+QtyOnSalesOrder
+Double
+The inventory item's current quantity on sales order
+QtyOnPurchaseOrder
+Double
+The inventory item's current quantity on purchase order
+QtyReserved
+Double
+The inventory item's current quantity reserved
+QtyFree
+Double
+The inventory item's current quantity available
+QtyWip
+Double
+The inventory item's current quantity work in progress
+IsLotTracked
+Boolean
+Is the inventory item a lot tracking item?
+11 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+IsSerialTracked
+Boolean
+Is the inventory item a serial number item?
+AllowDuplicateSerialNumber
+Boolean
+Is the inventory item allowing for duplicate serial numbers?
+IsStrictSerialTracked
+Boolean
+Is the inventory item allowing for strict serial number tracking?
+CostingMethod
+Object
+The type of costing method used for the inventory item
+AverageUnitCost
+Double
+The inventory item's average unit cost value
+LatestUnitCost
+Double
+The inventory item's latest unit cost value
+StandardllnitCost
+Double
+The inventory item's manual unit cost value
+LowestUnitCost
+Double
+The inventory item's lowest unit cost value
+HighestUnitCost
+Double
+The inventory item's highest unit cost value
+Group
+Object
+The inventory item group linked to the inventory item
+DefaultlnvoicingTaxType
+Object
+The inventory item's default tax type when processing an invoice
+DefaultCreditNoteTaxType
+Object
+The inventory item's default tax type when processing a credit note
+DefaultGoodsReceivedTaxType
+Object
+The inventory item's default tax type when processing a Grv
+DefaultReturnToSupplierTaxType
+Object
+The inventory item's default tax type when processing a Rts
+StockingUnit
+Object
+The inventory item's stocking unit
+StockingUnitID
+Integer
+The inventory item's stocking unit unique identifier
+DefaultSellingUnit
+Object
+The inventory item's default selling unit
+Defa uItSellingUnitl D
+Integer
+The inventory item's default selling unit unique identifier
+Default Purchased nit
+Object
+The inventory item's default purchasing unit
+DefaultPurchaseUnitID
+Integer
+The inventory item's default purchasing unit unique identifier
+IsUnitOfMeasure
+Boolean
+Is the inventory item a unit of measure item?
+LotsExpire
+Boolean
+Does the lot item expire?
+1nitia 1LotStatusID
+Integer
+Initial lot status ID
+Inventory Item List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/lnventoryltemList{ORDERBY}, {PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all inventory items' present within the system.
+The following elements are returned in the InventoryList response
+Field
+Type
+Description
+ID
+Integer
+The inventory item's unique identifier
+Code
+String
+The inventory item's code
+Description
+String
+The inventory item's description
+Description_2
+String
+The inventory item's second description
+Description_3
+String
+The inventory item's third description
+Active
+Boolean
+Is the inventory item active or in-active?
+IsWarehouseTracked
+Boolean
+Is the inventory item a warehouse type item?
+IsServiceltem
+Boolean
+Is the inventory item a service item?
+IsAttribute
+Boolean
+Is the inventory item an attribute item?
+LastGrvCost
+Double
+The item's last goods received voucher cost value
+IsCommisionable
+Boolean
+Should commission be calculated for the inventory item?
+QtyOnHand
+Double
+The inventory item's current quantity on hand
+QtyOnSalesOrder
+Double
+The inventory item's current quantity on sales order
+QtyOnPurchaseOrder
+Double
+The inventory item's current quantity on purchase order
+QtyReserved
+Double
+The inventory item's current quantity reserved
+QtyFree
+Double
+The inventory item's current quantity available
+QtyWip
+Double
+The inventory item's current quantity work in progress
+IsLotTracked
+Boolean
+Is the inventory item a lot tracking item?
+IsSerialTracked
+Boolean
+Is the inventory item a serial number item?
+AllowDuplicateSerialNumber
+Boolean
+Is the inventory item allowing for duplicate serial numbers?
+IsStrictSerialTracked
+Boolean
+Is the inventory item allowing for strict serial number tracking?
+12 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+: 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+✘ 
+sage
+Field
+Type
+Description
+CostingMethod
+Object
+The type of costing method used for the inventory item
+AverageUnitCost
+Double
+The inventory item's average unit cost value
+LatestUnitCost
+Double
+The inventory item's latest unit cost value
+StandardllnitCost
+Double
+The inventory item's manual unit cost value
+LowestUnitCost
+Double
+The inventory item's lowest unit cost value
+HighestUnitCost
+Double
+The inventory item's highest unit cost value
+Group
+Object
+The inventory item group linked to the inventory item
+DefaultlnvoicingTaxType
+Object
+The inventory item's default tax type when processing an invoice
+DefaultCreditNoteTaxType
+Object
+The inventory item's default tax type when processing a credit note
+DefaultGoodsReceivedTaxType
+Object
+The inventory item's default tax type when processing a Grv
+DefaultReturnToSupplierTaxType
+Object
+The inventory item's default tax type when processing a Rts
+StockingUnit
+Object
+The inventory item's stocking unit
+StockingUnitID
+Integer
+The inventory item's stocking unit unique identifier
+DefaultSellingUnit
+Object
+The inventory item's default selling unit
+Defa uItSellingUnitl D
+Integer
+The inventory item's default selling unit unique identifier
+Default Purchased nit
+Object
+The inventory item's default purchasing unit
+DefaultPurchaseUnitID
+Integer
+The inventory item's default purchasing unit unique identifier
+IsUnitOfMeasure
+Boolean
+Is the inventory item a unit of measure item?
+LotsExpire
+Boolean
+Does the lot item expire?
+1nitialLotStatusID
+Integer
+Initial lot status ID
+Inventory Item Add
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/lnventoryltemlnsert{ITEM}
+Path Parameters
+ITEM Instance of an inventory item object
+Methods Supported
+POST
+Description
+Create a new inventory item
+The following elements are required or optional with regards to creating a new inventory item.
+Field
+Type
+Description
+Required
+Code
+String
+The inventory item's code
+✓
+Description
+String
+The inventory item's description
+Description_2
+String
+The inventory item's second description
+Description_3
+String
+The inventory item's third description
+Active
+Boolean
+Is the inventory item active or in-active?
+IsWarehouseTracked
+Boolean
+Is the inventory item a warehouse type item?
+IsServiceltem
+Boolean
+Is the inventory item a service item?
+IsCommisionable
+Boolean
+Should commission be calculated for the inventory item?
+IsLotTracked
+Boolean
+Is the inventory item a lot tracking item?
+IsSerialTracked
+Boolean
+Is the inventory item a serial number item?
+AllowDuplicateSerialNumber
+Boolean
+Is the inventory item allowing for duplicate serial numbers?
+IsStrictSerialTracked
+Boolean
+Is the inventory item allowing for strict serial number tracking?
+CostingMethod
+Object
+The type of costing method used for the inventory item
+Group
+Object
+The inventory item group linked to the inventory item
+DefaultlnvoicingTaxType
+Object
+The inventory item's default tax type when processing an invoice
+DefaultCreditNoteTaxType
+Object
+The inventory item's default tax type when processing a credit note
+DefaultGoodsReceivedTaxType
+Object
+The inventory item's default tax type when processing a Grv
+DefaultReturnToSupplierTaxType
+Object
+The inventory item's default tax type when processing a Rts
+StockingUnit
+Object
+The inventory item's stocking unit
+StockingUnitID
+Integer
+The inventory item's stocking unit unique identifier
+DefaultSellingUnit
+Object
+The inventory item's default selling unit
+13 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+sage
+Field
+Type
+Description
+Required
+Defa uItSellingUnitl D
+Integer
+The inventory item's default selling unit unique identifier
+DetailIt Purchased nit
+Object
+The inventory item's default purchasing unit
+DefaultPurchaseUnitID
+Integer
+The inventory item's default purchasing unit unique identifier
+IsUnitOfMeasure
+Boolean
+Is the inventory item a unit of measure item?
+LotsExpire
+Boolean
+Does the lot item expire?
+1nitialLotStatusID
+Integer
+Initial lot status ID
+Inventory Item Update
+Overview
+URL
+/Freedom.Core/Freedom Data base/SDK/lnventoryItemUpdate{ITEM}
+Path Parameters
+ITEM: Instance of an inventory item object
+Methods Supported
+POST
+Description
+Update an existing inventory item
+The following elements are required or optional with regards to updating an existing inventory item.
+Field
+Type
+Description
+Required
+Code
+String
+The inventory item's code
+✓
+Description
+String
+The inventory item's description
+Description_2
+String
+The inventory item's second description
+Description_3
+String
+The inventory item's third description
+Active
+Boolean
+Is the inventory item active or in-active?
+IsWarehouseTracked
+Boolean
+Is the inventory item a warehouse type item?
+IsServiceltem
+Boolean
+Is the inventory item a service item?
+IsCommisionable
+Boolean
+Should commission be calculated for the inventory item?
+IsLotTracked
+Boolean
+Is the inventory item a lot tracking item?
+IsSerialTracked
+Boolean
+Is the inventory item a serial number item?
+AllowDuplicateSerialNumber
+Boolean
+Is the inventory item allowing for duplicate serial numbers?
+IsStrictSerialTracked
+Boolean
+Is the inventory item allowing for strict serial number tracking?
+CostingMethod
+Object
+The type of costing method used for the inventory item
+DefaultlnvoicingTaxType
+Object
+The inventory item's default tax type when processing an invoice
+DefaultCreditNoteTaxType
+Object
+The inventory item's default tax type when processing a credit note
+DefaultGoodsReceivedTaxType
+Object
+The inventory item's default tax type when processing a Grv
+DefaultReturnToSupplierTaxType
+Object
+The inventory item's default tax type when processing a Rts
+StockingUnit
+Object
+The inventory item's stocking unit
+StockingUnitID
+Integer
+The inventory item's stocking unit unique identifier
+DefaultSellingUnit
+Object
+The inventory item's default selling unit
+Defa uItSellingUnitl D
+Integer
+The inventory item's default selling unit unique identifier
+Default Purchased nit
+Object
+The inventory item's default purchasing unit
+DefaultPurchaseUnitID
+Integer
+The inventory item's default purchasing unit unique identifier
+IsUnitOfMeasure
+Boolean
+Is the inventory item a unit of measure item?
+LotsExpire
+Boolean
+Does the lot item expire?
+1nitialLotStatusID
+Integer
+Initial lot status ID
+Inventory Item Price Lists
+14 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+sage
+Price Lists Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/PriceListFind{NAME}
+Path Parameters
+NAME: Name of the price list [Required]
+Methods Supported
+GET
+Description
+Returns an instance of an existing price list
+The following elements are returned in the PricelistFind response
+Field
+Type
+Description
+ID
+Integer
+The price list's unique identifier
+Name
+String
+The price list's name
+Description
+String
+The price list's description
+Price Lists List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/PriceListList{ORDERBY}, {PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all price lists present within the system.
+The following elements are returned in the Pricelist List response
+Field
+Type
+Description
+ID
+Integer
+The price list's unique identifier
+Name
+String
+The price list's name
+Description
+String
+The price list's description
+Price List Add
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/PriceListlnsert{PRICELIST}
+Path Parameters
+PRICELIST: Instance of a price list object
+Methods Supported
+POST
+Description
+Create a new price list
+The following elements are required or optional with regards to creating a new price list
+Field
+Type
+Description
+Required
+Name
+String
+The price list's name
+✓
+Description
+String
+The price list's description
+15 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Price List Update
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/PriceListUpdate{PRICELIST}
+Path Parameters
+PRICELIST: Instance of a price list object
+Methods Supported
+POST
+Description
+Update an existing pricelist
+The following elements are required or optional with regards to updating an existing inventory item.
+Field
+Type
+Description
+Required
+Name
+String
+The price list's name
+✓
+Description
+String
+The price list's description
+Inventory Item Selling Prices
+Item Selling Prices List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/ltemSellingPricesList {ORDERBY}, {PAGENUMBER},
+{PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, ’AGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of selling prices setup per inventory item
+The following elements are returned in the ItemSellingPricesList response
+Field
+Type
+Description
+ID
+Integer
+The selling price's unique identifier
+ItemCode
+String
+The inventory item code
+PriceListName
+String
+The price list name
+PriceExclusive
+Double
+The inventory item's exclusive price
+Pricelnclusive
+Double
+The inventory item's inclusive price
+MarkupPercentage
+Double
+The inventory item's mark-up percentage calculated via the costing method
+Item Selling Prices Update
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/ltemSellingPricelnsertOrUpdate {PRICES}
+Path Parameters
+PRICES: Instance of a list of item selling prices
+Methods Supported
+POST
+Description
+Update an existing inventory item selling prices
+16 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+The following elements are required or optional with regards to updating an existing inventory item.
+Field
+Type
+Description
+Required
+SellingPrices
+Array
+A List of item selling prices [see item selling prices object above]
+✓
+Aging Terms
+Aging Term Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/ AgingTermFind {MODULE}, {CODE}
+Path Parameters
+MODULE: The module context, CODE: Aging term code
+Methods Supported
+GET
+Description
+Returns an instance of an aging term
+The following elements are returned in the AgingTermFind response
+Field
+Type
+Description
+ID
+Integer
+The aging term's unique identifier
+Code
+String
+The aging term's code
+Description
+String
+The aging term's description
+Module
+Integer
+The aging term's context module. [AR = 0, AP = 1]
+TermDescriptionl
+String
+The 1st aging term's description
+TermDescription?
+String
+The 2nd aging term's description
+TermDescription3
+String
+The 3rd aging term's description
+TermDescription4
+String
+The 4th aging term's description
+TermDescription5
+String
+The 5th aging term's description
+TermDescription6
+String
+The 6th aging term's description
+TermDescription7
+String
+The 7th aging term's description
+IntervalDaysl
+Integer
+Amount of interval days for the 1st term
+lntervalDays2
+Integer
+Amount of interval days for the 2nd term
+lntervalDays3
+Integer
+Amount of interval days for the 3rd term
+lntervalDays4
+Integer
+Amount of interval days for the 4th term
+IntervalDaysS
+Integer
+Amount of interval days for the 5th term
+lntervalDays6
+Integer
+Amount of interval days for the 6th term
+lntervalDays7
+Integer
+Amount of interval days for the 7th term
+StatementClosingDatel
+Date
+The 1st aging term's closing date
+StatementClosingDate2
+Date
+The 2nd aging term's closing date
+StatementClosingDate3
+Date
+The 3rd aging term's closing date
+StatementClosingDate4
+Date
+The 4th aging term's closing date
+StatementClosingDate5
+Date
+The 5th aging term's closing date
+StatementClosingDate6
+Date
+The 6th aging term's closing date
+StatementClosingDate7
+Date
+The 7th aging term's closing date
+AgelMessagel
+String
+The 1st aging term's message 1
+AgelMessage2
+String
+The 1st aging term's message 2
+Age2Messagel
+String
+The 2nd aging term's message 1
+Age2Message2
+String
+The 2nd aging term's message 2
+Age3Messagel
+String
+The 3rd aging term's message 1
+Age3Message2
+String
+The 3rd aging term's message 2
+Age4Messagel
+String
+The 4th aging term's message 1
+Age4Message2
+String
+The 4th aging term's message 2
+Age5Messagel
+String
+The 5th aging term's message 1
+Age5Message2
+String
+The 5th aging term's message 2
+17 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+Age6Messagel
+String
+The 6th aging term's message 1
+Age6Message2
+String
+The 6th aging term's message 2
+Age7Messagel
+String
+The 7th aging term's message 1
+Age7Message2
+String
+The 7th aging term's message 2
+Aging Term List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/AgingTermList{ORDERBY}, {PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all aging terms present within the system.
+The following elements are returned in the AgingTermList response
+Field
+Type
+Description
+AgingTerms
+Array
+An object array of aging terms
+• 
+ID
+Integer
+The aging term's unique identifier
+• 
+Code
+String
+The aging term's code
+• 
+Description
+String
+The aging term's description
+• 
+Module
+Integer
+The aging term's context module. [AR = 0, AP = 1]
+• 
+TermDescriptionl
+String
+The 1st aging term's description
+• 
+TermDescriptionZ
+String
+The 2nd aging term's description
+• 
+TermDescription3
+String
+The 3rd aging term's description
+• 
+TermDescription4
+String
+The 4th aging term's description
+• 
+TermDescriptionS
+String
+The 5th aging term's description
+• 
+TermDescription6
+String
+The 6th aging term's description
+• 
+TermDescription7
+String
+The 7th aging term's description
+• 
+IntervalDaysl
+Integer
+Amount of interval days for the 1st term
+• 
+IntervalDaysZ
+Integer
+Amount of interval days for the 2nd term
+• 
+lntervalDays3
+Integer
+Amount of interval days for the 3rd term
+• 
+lntervalDays4
+Integer
+Amount of interval days for the 4th term
+• 
+IntervalDaysS
+Integer
+Amount of interval days for the 5th term
+• 
+lntervalDays6
+Integer
+Amount of interval days for the 6th term
+• 
+lntervalDays7
+Integer
+Amount of interval days for the 7th term
+• 
+StatementClosingDatel
+Date
+The 1st aging term's closing date
+• 
+StatementClosingDateZ
+Date
+The 2nd aging term's closing date
+• 
+StatementClosingDate3
+Date
+The 3rd aging term's closing date
+• 
+StatementClosingDate4
+Date
+The 4th aging term's closing date
+• 
+StatementClosingDate5
+Date
+The 5th aging term's closing date
+• 
+StatementClosingDate6
+Date
+The 6th aging term's closing date
+• 
+StatementClosingDate7
+Date
+The 7th aging term's closing date
+• 
+AgelMessagel
+String
+The 1st aging term's message 1
+• 
+AgelMessageZ
+String
+The 1st aging term's message 2
+• 
+AgeZMessagel
+String
+The 2nd aging term's message 1
+• 
+Age2Message2
+String
+The 2nd aging term's message 2
+• 
+Age3Messagel
+String
+The 3rd aging term's message 1
+• 
+Age3Message2
+String
+The 3rd aging term's message 2
+• 
+Age4Messagel
+String
+The 4th aging term's message 1
+• 
+Age4Message2
+String
+The 4th aging term's message 2
+• 
+AgeSMessagel
+String
+The 5th aging term's message 1
+18 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+✘ 
+sage
+Field
+Type
+Description
+AgingTerms
+Array
+An object array of aging terms
+• 
+Age5Message2
+String
+The 5th aging term's message 2
+• 
+Age6Messagel
+String
+The 6th aging term's message 1
+• 
+Age6Message2
+String
+The 6th aging term's message 2
+• 
+Age7Messagel
+String
+The 7th aging term's message 1
+• 
+Age7Message2
+String
+The 7th aging term's message 2
+Aging Term Add
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/AgingTermlnsert{AGINGTERM}
+Path Parameters
+AGINGTERM: Instance of an aging term object
+Methods Supported
+POST
+Description
+Create a new aging term
+The following elements are required or optional with regards to creating a new aging term
+Field
+Type
+Description
+Required
+Code
+String
+The aging term's code
+✓
+Description
+String
+The aging term's description
+✓
+Module
+Integer
+The aging term's context module. [AR = 0, AP = 1]
+✓
+TermDescriptionl
+String
+The 1st aging term's description
+✓
+TermDescription2
+String
+The 2nd aging term's description
+✓
+TermDescription3
+String
+The 3rd aging term's description
+✓
+TermDescription4
+String
+The 4th aging term's description
+✓
+TermDescriptionS
+String
+The 5th aging term's description
+✓
+TermDescription6
+String
+The 6th aging term's description
+✓
+TermDescription7
+String
+The 7th aging term's description
+✓
+IntervalDaysl
+Integer
+Amount of interval days for the 1st term
+✓
+lntervalDays2
+Integer
+Amount of interval days for the 2nd term
+✓
+lntervalDays3
+Integer
+Amount of interval days for the 3rd term
+✓
+lntervalDays4
+Integer
+Amount of interval days for the 4th term
+✓
+IntervalDaysS
+Integer
+Amount of interval days for the 5th term
+✓
+lntervalDays6
+Integer
+Amount of interval days for the 6th term
+✓
+lntervalDays7
+Integer
+Amount of interval days for the 7th term
+✓
+StatementClosingDatel
+Date
+The 1st aging term's closing date
+✓
+StatementClosingDate2
+Date
+The 2nd aging term's closing date
+✓
+StatementClosingDate3
+Date
+The 3rd aging term's closing date
+✓
+StatementClosingDate4
+Date
+The 4th aging term's closing date
+✓
+StatementClosingDateS
+Date
+The 5th aging term's closing date
+✓
+StatementClosingDate6
+Date
+The 6th aging term's closing date
+✓
+StatementClosingDate7
+Date
+The 7th aging term's closing date
+✓
+AgelMessagel
+String
+The 1st aging term's message 1
+AgelMessage2
+String
+The 1st aging term's message 2
+Age2Messagel
+String
+The 2nd aging term's message 1
+Age2Message2
+String
+The 2nd aging term's message 2
+Age3Messagel
+String
+The 3rd aging term's message 1
+Age3Message2
+String
+The 3rd aging term's message 2
+Age4Messagel
+String
+The 4th aging term's message 1
+Age4Message2
+String
+The 4th aging term's message 2
+AgeSMessagel
+String
+The 5th aging term's message 1
+19 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+✘ 
+sage
+Field
+Type
+Description
+Required
+Age5Message2
+String
+The 5th aging term's message 2
+Age6Messagel
+String
+The 6th aging term's message 1
+Age6Message2
+String
+The 6th aging term's message 2
+Age7Messagel
+String
+The 7th aging term's message 1
+Age7Message2
+String
+The 7th aging term's message 2
+Aging Term Update
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/AgingTermUpdate{AGINGTERM}
+Path Parameters
+AGINGTERM: Instance of an aging term object
+Methods Supported
+POST
+Description
+Update an existing aging term
+The following elements are required or optional with regards to updating an existing aging term
+Field
+Type
+Description
+Required
+Code
+String
+The aging term's code
+✓
+Description
+String
+The aging term's description
+✓
+Module
+Integer
+The aging term's context module. [AR = 0, AP = 1]
+✓
+TermDescriptionl
+String
+The 1st aging term's description
+✓
+TermDescription2
+String
+The 2nd aging term's description
+✓
+TermDescription3
+String
+The 3rd aging term's description
+✓
+TermDescription4
+String
+The 4th aging term's description
+✓
+TermDescriptionS
+String
+The 5th aging term's description
+✓
+TermDescription6
+String
+The 6th aging term's description
+✓
+TermDescription7
+String
+The 7th aging term's description
+✓
+IntervalDaysl
+Integer
+Amount of interval days for the 1st term
+✓
+lntervalDays2
+Integer
+Amount of interval days for the 2nd term
+✓
+lntervalDays3
+Integer
+Amount of interval days for the 3rd term
+✓
+lntervalDays4
+Integer
+Amount of interval days for the 4th term
+✓
+IntervalDaysS
+Integer
+Amount of interval days for the 5th term
+✓
+lntervalDays6
+Integer
+Amount of interval days for the 6th term
+✓
+lntervalDays7
+Integer
+Amount of interval days for the 7th term
+✓
+StatementClosingDatel
+Date
+The 1st aging term's closing date
+✓
+StatementClosingDate2
+Date
+The 2nd aging term's closing date
+✓
+StatementClosingDate3
+Date
+The 3rd aging term's closing date
+✓
+StatementClosingDate4
+Date
+The 4th aging term's closing date
+✓
+StatementClosingDateS
+Date
+The 5th aging term's closing date
+✓
+StatementClosingDate6
+Date
+The 6th aging term's closing date
+✓
+StatementClosingDate7
+Date
+The 7th aging term's closing date
+✓
+AgelMessagel
+String
+The 1st aging term's message 1
+AgelMessage2
+String
+The 1st aging term's message 2
+Age2Messagel
+String
+The 2nd aging term's message 1
+Age2Message2
+String
+The 2nd aging term's message 2
+Age3Messagel
+String
+The 3rd aging term's message 1
+Age3Message2
+String
+The 3rd aging term's message 2
+Age4Messagel
+String
+The 4th aging term's message 1
+Age4Message2
+String
+The 4th aging term's message 2
+AgeSMessagel
+String
+The 5th aging term's message 1
+20 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+Required
+Age5Message2
+String
+The 5th aging term's message 2
+Age6Messagel
+String
+The 6th aging term's message 1
+Age6Message2
+String
+The 6th aging term's message 2
+Age7Messagel
+String
+The 7th aging term's message 1
+Age7Message2
+String
+The 7th aging term's message 2
+Areas
+Area Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/AreaFind{CODE}
+Path Parameters
+CODE: Area code
+Methods Supported
+GET
+Description
+Returns an instance of an area
+The following elements are returned in the AreaFind response
+Field
+Type
+Description
+ID
+Integer
+The area's unique identifier
+Code
+String
+The area's code
+Description
+String
+The area's description
+Area List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/AreaList{ORDERBY}, {PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all areas present within the system.
+The following elements are returned in the AreaList response
+Field
+Type
+Description
+Areas
+Array
+An object array of areas
+• 
+ID
+Integer
+The area's unique identifier
+• 
+Code
+String
+The area's code
+• 
+Description
+String
+The area's description
+Area Add
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/Arealnsert{AREA}
+Path Parameters
+AREA: Instance of an area object
+Methods Supported
+POST
+Description
+Create a new area
+21 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+The following elements are required or optional with regards to creating a new area
+Field
+Type
+Description
+Required
+Code
+String
+The area's code
+✓
+Description
+String
+The area's description
+✓
+Area Update
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/AreaUpdate{AREA}
+Path Parameters
+AREA: Instance of an area object
+Methods Supported
+POST
+Description
+Update an existing area
+The following elements are required or optional with regards to updating an existing area
+Field
+Type
+Description
+Required
+Code
+String
+The area's code
+✓
+Description
+String
+The area's description
+✓
+Customer Groups
+Customer Group Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/CustomerGroupFind {CODE}
+Path Parameters
+CODE: Customer group code
+Methods Supported
+GET
+Description
+Returns an instance of a customer group
+The following elements are returned in the CustomerGroupFind response
+Field
+Type
+Description
+ID
+Integer
+The customer's group unique identifier
+Code
+String
+The customer's group code
+Description
+String
+The customer's group description
+Control Account
+Array
+A general ledger control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+Tax Control Account
+Array
+A general ledger tax control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+22 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+sage
+Customer Group List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/CustomerGroupList{ORDERBY}, {PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all customer groups present within the system.
+The following elements are returned in the CustomerGroupList response
+Field
+Type
+Description
+Customer Groups
+Array
+An object array of customer groups
+• 
+ID
+Integer
+The customer's group unique identifier
+• 
+Code
+String
+The customer's group code
+• 
+Description
+String
+The customer's group description
+• 
+Control Account
+Array
+A general ledger control account object
+■ 
+ID
+Integer
+The account's unique identifier
+■ 
+Code
+String
+The account's code
+■ 
+Description
+String
+The account's description
+• 
+Tax Control Account
+Array
+A general ledger tax control account object
+■ 
+ID
+Integer
+The account's unique identifier
+■ 
+Code
+String
+The account's code
+■ 
+Description
+String
+The account's description
+Customer Group Add
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/CustomerGrouplnsert{CUSTOMERGROUP}
+Path Parameters
+CUSTOMERGROUP: Instance of a customer group object
+Methods Supported
+POST
+Description
+Create a new customer group
+The following elements are required or optional with regards to creating a new customer group
+Field
+Type
+Description
+Required
+Code
+String
+The customer's group code
+✓
+Description
+String
+The customer's group description
+✓
+Control Account
+Array
+A general ledger control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+Tax Control Account
+Array
+A general ledger tax control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+23 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Customer Group Update
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/CustomerGroupUpdate{CUSTOMERGROUP}
+Path Parameters
+CUSTOMERGROUP: Instance of a customer group object
+Methods Supported
+POST
+Description
+Update an existing customer group
+The following elements are required or optional with regards to updating an existing customer group
+Field
+Type
+Description
+Required
+Code
+String
+The customer's group code
+✓
+Description
+String
+The customer's group description
+✓
+Control Account
+Array
+A general ledger control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+Tax Control Account
+Array
+A general ledger tax control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+Person
+Person Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/PersonFind{DISPLAYNAME}
+Path Parameters
+DISPLAYNAME: Person's display name
+Methods Supported
+GET
+Description
+Returns an instance of a person
+The following elements are returned in the PersonFind response
+Field
+Type
+Description
+ID
+Integer
+The person's unique identifier
+Code
+String
+The person's display name
+Description
+String
+The person's description
+Initials
+String
+The person's initials
+Fax
+String
+The person's fax number
+TelHome
+String
+The person's home telephone number
+TelMobile
+String
+The person's mobile telephone number
+TelWork
+String
+The person's work telephone number
+Person List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/PersonList{ORDERBY}, {PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all the people present within the system.
+24 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+sage
+The following elements are returned in the PersonList response
+Field
+Type
+Description
+People
+Array
+An object array of persons
+• 
+ID
+Integer
+The person's unique identifier
+• 
+Code
+String
+The person's display name
+• 
+Description
+String
+The person's description
+• 
+Initials
+String
+The person's initials
+• 
+Fax
+String
+The person's fax number
+• 
+TelHome
+String
+The person's home telephone number
+• 
+TelMobile
+String
+The person's mobile telephone number
+• 
+TelWork
+String
+The person's work telephone number
+Person Add
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/Personlnsert{PEOPLE}
+Path Parameters
+PEOPLE: Instance of a person object
+Methods Supported
+POST
+Description
+Create a new person
+The following elements are required or optional with regards to creating a new person
+Field
+Type
+Description
+Required
+Code
+String
+The person's display name
+✓
+Description
+String
+The person's description
+Initials
+String
+The person's initials
+Fax
+String
+The person's fax number
+TelHome
+String
+The person's home telephone number
+TelMobile
+String
+The person's mobile telephone number
+TelWork
+String
+The person's work telephone number
+Person Update
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/PersonUpdate{PEOPLE}
+Path Parameters
+PEOPLE: Instance of a person object
+Methods Supported
+POST
+Description
+Update an existing person
+The following elements are required or optional with regards to updating an existing person
+Field
+Type
+Description
+Required
+Code
+String
+The person's display name
+✓
+Description
+String
+The person's description
+Initials
+String
+The person's initials
+Fax
+String
+The person's fax number
+TelHome
+String
+The person's home telephone number
+TelMobile
+String
+The person's mobile telephone number
+25 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+Required
+TelWork
+String
+The person's work telephone number
+Supplier Groups
+Supplier Group Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SupplierGroupFind {CODE}
+Path Parameters
+CODE: Supplier group code
+Methods Supported
+GET
+Description
+Returns an instance of a supplier group
+The following elements are returned in the SupplierGroupFind response
+Field
+Type
+Description
+ID
+Integer
+The supplier's group unique identifier
+Code
+String
+The supplier's group code
+Description
+String
+The supplier's group description
+Control Account
+Array
+A general ledger control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+Tax Control Account
+Array
+A general ledger tax control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+Supplier Group List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SupplierGroupList{ORDERBY}, {PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all supplier groups present within the system.
+The following elements are returned in the SupplierGroupList response
+Field
+Type
+Description
+Supplier Groups
+Array
+An object array of supplier groups
+• 
+ID
+Integer
+The supplier's group unique identifier
+• 
+Code
+String
+The supplier's group code
+• 
+Description
+String
+The supplier's group description
+• 
+Control Account
+Array
+A general ledger control account object
+■ 
+ID
+Integer
+The account's unique identifier
+■ 
+Code
+String
+The account's code
+■ 
+Description
+String
+The account's description
+• 
+Tax Control Account
+Array
+A general ledger tax control account object
+■ 
+ID
+Integer
+The account's unique identifier
+■ 
+Code
+String
+The account's code
+■ 
+Description
+String
+The account's description
+26 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+✘ 
+✘ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+sage
+Supplier Group Add
+Overview
+URL
+/Freedom.Core/Freedom Data base/SDK/SuppIierGrouplnsert{SUPPLIERGROUP}
+Path Parameters
+SUPPLIERGROUP: Instance of a supplier group object
+Methods Supported
+POST
+Description
+Create a new supplier group
+The following elements are required or optional with regards to creating a new supplier group
+Field
+Type
+Description
+Required
+Code
+String
+The supplier's group code
+✓
+Description
+String
+The supplier's group description
+✓
+Control Account
+Array
+A general ledger control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+Tax Control Account
+Array
+A general ledger tax control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+Supplier Group Update
+Overview
+URL
+/Freedom.Core/Freedom Data base/SDK/SupplierGroupUpdate{SUPPLIERGROUP}
+Path Parameters
+SUPPLIERGROUP: Instance of a supplier group object
+Methods Supported
+POST
+Description
+Update an existing supplier group
+The following elements are required or optional with regards to updating an existing supplier group
+Field
+Type
+Description
+Required
+Code
+String
+The supplier's group code
+✓
+Description
+String
+The supplier's group description
+✓
+Control Account
+Array
+A general ledger control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+Tax Control Account
+Array
+A general ledger tax control account object
+• 
+ID
+Integer
+The account's unique identifier
+• 
+Code
+String
+The account's code
+• 
+Description
+String
+The account's description
+27 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+4
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Sales Representative List 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Sales Representatives
+Sales Representative Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SalesRepresentativeFind{CODE}
+Path Parameters
+CODE: Sales representative code
+Methods Supported
+GET
+Description
+Returns an instance of a sales representative
+The following elements are returned in the SalesRepresentativeFind response
+Field
+Type
+Description
+ID
+Integer
+The sales representative's unique identifier
+Code
+String
+The sales representative's code
+Description
+String
+The sales representative's description
+Addressl
+String
+The sales representative's 1st address line
+Address?
+String
+The sales representative's 2nd address line
+Address3
+String
+The sales representative's 3rd address line
+Address
+String
+The sales representative's 4th address line
+Bank
+String
+The sales representative's bank
+Commentl
+String
+Comment line 1
+Comment2
+String
+Comment line 2
+OnHold
+Boolean
+Is the sales representative currently on hold?
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SalesRepresentativeList{ORDERBY}, {PAGENUMBER},
+{PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all sales representatives present within the system.
+The following elements are returned in the SalesRepresentativeList response
+Field
+Type
+Description
+SalesRepresentatives
+Array
+An object array of sales representatives
+• 
+ID
+Integer
+The sales representative's unique identifier
+• 
+Code
+String
+The sales representative's code
+• 
+Description
+String
+The sales representative's description
+• 
+Addressl
+String
+The sales representative's 1st address line
+• 
+AddressZ
+String
+The sales representative's 2nd address line
+• 
+Address3
+String
+The sales representative's 3rd address line
+• 
+Address4
+String
+The sales representative's 4th address line
+• 
+Bank
+String
+The sales representative's bank
+28 | P a g e
+Freedom API Guidelines VI. 04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+✘ 
+ 
+ 
+✘ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+✘ 
+ 
+ 
+✘ 
+ 
+✘ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+sage
+Sales Representative Add
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SalesRepresentativelnsert{SALESREP}
+Path Parameters
+SALESREP: Instance of a sales representative object
+Methods Supported
+POST
+Description
+Create a new sales representative
+The following elements are required or optional with regards to creating a new sales representative
+Field
+Type
+Description
+Required
+Code
+String
+The person's display name
+✓
+Description
+String
+The person's description
+Addressl
+String
+The sales representative's 1st address line
+Address?
+String
+The sales representative's 2nd address line
+Address3
+String
+The sales representative's 3rd address line
+Address4
+String
+The sales representative's 4th address line
+Bank
+String
+The sales representative's bank
+Commentl
+String
+Comment line 1
+Comment2
+String
+Comment line 2
+OnHold
+Boolean
+Is the sales representative currently on hold?
+Sales Representative Update
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SalesRepresentativeUpdate{SALESREP}
+Path Parameters
+SALESREP: Instance of a sales representative object
+Methods Supported
+POST
+Description
+Update an existing sales representative
+The following elements are required or optional with regards to updating an existing sales representative
+Field
+Type
+Description
+Required
+Code
+String
+The person's display name
+✓
+Description
+String
+The person's description
+Addressl
+String
+The sales representative's 1st address line
+Address2
+String
+The sales representative's 2nd address line
+Address3
+String
+The sales representative's 3rd address line
+Address4
+String
+The sales representative's 4th address line
+Bank
+String
+The sales representative's bank
+Commentl
+String
+Comment line 1
+Comment2
+String
+Comment line 2
+OnHold
+Boolean
+Is the sales representative currently on hold?
+29 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Settlement Terms
+Settlement Term Find
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SettlementTermFind{CODE}
+Path Parameters
+CODE: Settlement term code
+Methods Supported
+GET
+Description
+Returns an instance of a settlement term
+The following elements are returned in the SettlementTermFind response
+Field
+Type
+Description
+ID
+Integer
+The settlement term's unique identifier
+Code
+String
+The settlement term's code
+Description
+String
+The settlement term's description
+PaymentMethod
+Integer
+The settlement term's payment method [Invoice Date = 0, Settlement Date = 1]
+Days
+Integer
+The settlement term's days
+Discountpercentage
+Double
+The settlement term's discount percentage
+InvoiceMessage
+String
+The settlement term's message on the invoice
+Settlement Term List
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SettlementTermList{ORDERBY}, {PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list of all settlement terms present within the system.
+The following elements are returned in the SettlementTermList response
+Field
+Type
+Description
+SettlementTerms
+Array
+An object array of settlement terms
+• 
+ID
+Integer
+The settlement term's unique identifier
+• 
+Code
+String
+The settlement term's code
+• 
+Description
+String
+The settlement term's description
+• 
+PaymentMethod
+Integer
+The settlement term's payment method [Invoice Date = 0, Settlement Date = 1]
+• 
+Days
+Integer
+The settlement term's days
+• 
+Discountpercentage
+Double
+The settlement term's discount percentage
+• 
+InvoiceMessage
+String
+The settlement term's message on the invoice
+Settlement Term Add
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SettlementTermlnsert{TERM}
+Path Parameters
+TERM: Instance of a settlement term object
+Methods Supported
+POST
+Description
+Create a new settlement term
+30 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+The following elements are required or optional with regards to creating a new settlement term
+Field
+Type
+Description
+Required
+Code
+String
+The settlement term's code
+✓
+Description
+String
+The settlement term's description
+✓
+PaymentMethod
+Integer
+The settlement term's payment method [Invoice Date = 0, Settlement Date = 1]
+✓
+Days
+Integer
+The settlement term's days
+✓
+Discountpercentage
+Double
+The settlement term's discount percentage
+InvoiceMessage
+String
+The settlement term's message on the invoice
+Settlement Term Update
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SettlementTermUpdate{TERM}
+Path Parameters
+TERM: Instance of a settlement term object
+Methods Supported
+POST
+Description
+Update an existing settlement term
+The following elements are required or optional with regards to updating an existing settlement term
+Field
+Type
+Description
+Required
+Code
+String
+The settlement term's code
+✓
+Description
+String
+The settlement term's description
+✓
+PaymentMethod
+Integer
+The settlement term's payment method [Invoice Date = 0, Settlement Date = 1]
+✓
+Days
+Integer
+The settlement term's days
+✓
+Discountpercentage
+Double
+The settlement term's discount percentage
+InvoiceMessage
+String
+The settlement term's message on the invoice
+Customer Transactions
+Customer Transaction List By Account Code
+Overview
+URL
+/Freedom.Core/Freedom Data base/SDK/CustomerTra nsactionList ByAccountCode {ORDERBY},
+{PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list for of customer transactions for a specific customer by specifying a customer code
+The following elements are returned in the CustomerTransactionListByAccountCode response
+Field
+Type
+Description
+Customer Transactions
+Array
+An object array of customer transactions
+• 
+AutoIndex
+Long
+The transaction's unique identifier
+• 
+Date
+Date
+The transaction date
+• 
+Id
+String
+The transaction id
+• 
+AccountLink
+Integer
+The transaction's customer id
+• 
+TransactionCodeld
+Integer
+The transaction code id
+• 
+Debit
+Double
+The transaction debit amount
+• 
+Credit
+Double
+The transaction credit amount
+• 
+Currencyld
+Integer
+The transaction's foreign currency id
+31 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+Customer Transactions
+Array
+An object array of customer transactions
+• 
+ExchangeRate
+Double
+The transaction exchange rate
+• 
+ForeignDebit
+Double
+The transaction foreign debit amount
+• 
+ForeignCredit
+Double
+The transaction foreign credit amount
+• 
+Description
+String
+The transaction description
+• 
+TaxTypeld
+Integer
+The transaction tax type id
+• 
+Reference
+String
+The transaction reference
+• 
+OrderNum
+String
+The transaction order number
+• 
+AuditNumber
+String
+The unique audit number posted for the transaction
+• 
+TaxAmount
+Double
+The transaction tax amount
+• 
+ForeignTax
+Double
+The transaction foreign tax amount
+• 
+Projectld
+Integer
+The transaction project id
+• 
+DateTimeStamp
+Date
+The transaction date and time stamp signature
+• 
+UserName
+String
+The system agent whom processed or allocated the transaction
+• 
+Reference?
+String
+The transaction's additional reference
+• 
+TransactionBranchld
+Integer
+The transaction branch id
+• 
+Branchld
+Integer
+The branch id
+• 
+GLTaxAccountID
+Integer
+The general ledger tax account id
+Customer Transaction List By Account ID
+Overview
+URL
+/Freedom.Core/Freedom Data base/SDK/CustomerTra nsactionList ByAccount ID {ORDERBY},
+{PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list for of customer transactions for a specific customer by specifying a customer ID
+The following elements are returned in the CustomerTransactionListByAccountID response
+Field
+Type
+Description
+Customer Transactions
+Array
+An object array of customer transactions
+• 
+AutoIndex
+Long
+The transaction's unique identifier
+• 
+Date
+Date
+The transaction date
+• 
+Id
+String
+The transaction id
+• 
+AccountLink
+Integer
+The transaction's customer id
+• 
+TransactionCodeld
+Integer
+The transaction code id
+• 
+Debit
+Double
+The transaction debit amount
+• 
+Credit
+Double
+The transaction credit amount
+• 
+Currencyld
+Integer
+The transaction's foreign currency id
+• 
+ExchangeRate
+Double
+The transaction exchange rate
+• 
+ForeignDebit
+Double
+The transaction foreign debit amount
+• 
+ForeignCredit
+Double
+The transaction foreign credit amount
+• 
+Description
+String
+The transaction description
+• 
+TaxTypeld
+Integer
+The transaction tax type id
+• 
+Reference
+String
+The transaction reference
+• 
+OrderNum
+String
+The transaction order number
+• 
+AuditNumber
+String
+The unique audit number posted for the transaction
+• 
+TaxAmount
+Double
+The transaction tax amount
+• 
+ForeignTax
+Double
+The transaction foreign tax amount
+• 
+Projectld
+Integer
+The transaction project id
+32 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+Customer Transactions
+Array
+An object array of customer transactions
+• 
+DateTimeStamp
+Date
+The transaction date and time stamp signature
+• 
+UserName
+String
+The system agent whom processed or allocated the transaction
+• 
+Reference?
+String
+The transaction's additional reference
+• 
+TransactionBranchld
+Integer
+The transaction branch id
+• 
+Branchld
+Integer
+The branch id
+• 
+GLTaxAccountID
+Integer
+The general ledger tax account id
+Supplier Transactions
+Supplier Transaction List By Account Code
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SupplierTransactionListByAccountCode {ORDERBY},
+{PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list for of supplier transactions for a specific vendor by specifying a supplier code
+The following elements are returned in the SupplierTransactionListByAccountCode response
+Field
+Type
+Description
+Supplier Transactions
+Array
+An object array of supplier transactions
+• 
+AutoIndex
+Long
+The transaction's unique identifier
+• 
+Date
+Date
+The transaction date
+• 
+Id
+String
+The transaction id
+• 
+AccountLink
+Integer
+The transaction's customer id
+• 
+TransactionCodeld
+Integer
+The transaction code id
+• 
+Debit
+Double
+The transaction debit amount
+• 
+Credit
+Double
+The transaction credit amount
+• 
+Currencyld
+Integer
+The transaction's foreign currency id
+• 
+ExchangeRate
+Double
+The transaction exchange rate
+• 
+ForeignDebit
+Double
+The transaction foreign debit amount
+• 
+ForeignCredit
+Double
+The transaction foreign credit amount
+• 
+Description
+String
+The transaction description
+• 
+TaxTypeld
+Integer
+The transaction tax type id
+• 
+Reference
+String
+The transaction reference
+• 
+OrderNum
+String
+The transaction order number
+• 
+AuditNumber
+String
+The unique audit number posted for the transaction
+• 
+TaxAmount
+Double
+The transaction tax amount
+• 
+ForeignTax
+Double
+The transaction foreign tax amount
+• 
+Projectld
+Integer
+The transaction project id
+• 
+DateTimeStamp
+Date
+The transaction date and time stamp signature
+• 
+UserName
+String
+The system agent whom processed or allocated the transaction
+• 
+Reference?
+String
+The transaction's additional reference
+• 
+TransactionBranchld
+Integer
+The transaction branch id
+• 
+Branchld
+Integer
+The branch id
+• 
+GLTaxAccountID
+Integer
+The general ledger tax account id
+33 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+sage
+Supplier Transaction List By Account ID
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SupplierTransactionListByAccountID {ORDERBY},
+{PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list for of supplier transactions for a specific vendor by specifying a supplier ID
+The following elements are returned in the SupplierTransactionListByAccountID response
+Field
+Type
+Description
+Supplier Transactions
+Array
+An object array of supplier transactions
+• 
+AutoIndex
+Long
+The transaction's unique identifier
+• 
+Date
+Date
+The transaction date
+• 
+Id
+String
+The transaction id
+• 
+AccountLink
+Integer
+The transaction's customer id
+• 
+TransactionCodeld
+Integer
+The transaction code id
+• 
+Debit
+Double
+The transaction debit amount
+• 
+Credit
+Double
+The transaction credit amount
+• 
+Currencyld
+Integer
+The transaction's foreign currency id
+• 
+ExchangeRate
+Double
+The transaction exchange rate
+• 
+ForeignDebit
+Double
+The transaction foreign debit amount
+• 
+ForeignCredit
+Double
+The transaction foreign credit amount
+• 
+Description
+String
+The transaction description
+• 
+TaxTypeld
+Integer
+The transaction tax type id
+• 
+Reference
+String
+The transaction reference
+• 
+OrderNum
+String
+The transaction order number
+• 
+AuditNumber
+String
+The unique audit number posted for the transaction
+• 
+TaxAmount
+Double
+The transaction tax amount
+• 
+ForeignTax
+Double
+The transaction foreign tax amount
+• 
+Projectld
+Integer
+The transaction project id
+• 
+DateTimeStamp
+Date
+The transaction date and time stamp signature
+• 
+UserName
+String
+The system agent whom processed or allocated the transaction
+• 
+Reference?
+String
+The transaction's additional reference
+• 
+TransactionBranchld
+Integer
+The transaction branch id
+• 
+Branchld
+Integer
+The branch id
+• 
+GLTaxAccountID
+Integer
+The general ledger tax account id
+Inventory Transactions
+Inventory Transaction List By Item Code
+Overview
+URL
+/Freedom.Core/Freedom Data base/SDK/lnventoryTransactionList ByItemCode {ORDERBY},
+{PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list for of inventory transactions for a specific item by specifying an item code
+34 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+The following elements are returned in the InventoryTransactionListByltemCode response
+Field
+Type
+Description
+Inventory Transactions
+Array
+An object array of inventory transactions
+• 
+AutoIndex
+Long
+The transaction's unique identifier
+• 
+Date
+Date
+The transaction date
+• 
+Id
+String
+The transaction id
+• 
+AccountLink
+Integer
+The transaction's customer id
+• 
+TransactionCodeld
+Integer
+The transaction code id
+• 
+Debit
+Double
+The transaction debit amount
+• 
+Credit
+Double
+The transaction credit amount
+• 
+Currencyld
+Integer
+The transaction's foreign currency id
+• 
+ExchangeRate
+Double
+The transaction exchange rate
+• 
+ForeignDebit
+Double
+The transaction foreign debit amount
+• 
+ForeignCredit
+Double
+The transaction foreign credit amount
+• 
+Description
+String
+The transaction description
+• 
+TaxTypeld
+Integer
+The transaction tax type id
+• 
+Reference
+String
+The transaction reference
+• 
+OrderNum
+String
+The transaction order number
+• 
+ExtOrderNum
+String
+The transaction external order number
+• 
+AuditNumber
+String
+The unique audit number posted for the transaction
+• 
+TaxAmount
+Double
+The transaction tax amount
+• 
+ForeignTax
+Double
+The transaction foreign tax amount
+• 
+Projectld
+Integer
+The transaction project id
+• 
+Quantity
+Double
+The transaction quantity
+• 
+Cost
+Double
+The transaction cost amount
+• 
+WarehouselD
+Integer
+The transaction warehouse id
+• 
+JobCardID
+Long
+The transaction job card id
+• 
+JobLinelD
+Long
+The transaction job card line id
+• 
+TilllD
+Integer
+The transaction till id
+• 
+DebitCreditAccount
+Integer
+The debit credit account
+• 
+DateTimeStamp
+Date
+The transaction date and time stamp signature
+• 
+UserName
+String
+The system agent whom processed or allocated the transaction
+• 
+TaxPeriodID
+Integer
+The transaction tax period id
+• 
+InvNumID
+Long
+The invoice header id
+• 
+RepID
+Integer
+The transaction representative id
+• 
+ChargeCom
+Boolean
+Charge commission
+• 
+ManufProcessID
+Integer
+The transaction manufacturing process id
+• 
+ManufLinelD
+Long
+The transaction manufacturing process line id
+• 
+LotID
+Long
+The transaction lot id
+• 
+AdditionalCost
+Double
+The transaction's additional cost amount
+• 
+Reference?
+String
+The transaction's additional reference
+• 
+TransactionBranchld
+Integer
+The transaction branch id
+• 
+Branchld
+Integer
+The branch id
+• 
+GLAccountID
+Integer
+The general ledger account id
+• 
+Quantityinvoiced
+Double
+The transaction quantity invoiced
+• 
+BinLocationlD
+Integer
+The transaction bin location id
+• 
+Attribute
+String
+The transactional attribute values
+35 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Inventory Transaction List By Item ID
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/lnventoryTransactionListByltemID {ORDERBY},
+{PAGENUMBER}, {PAGESIZE}
+Path Parameters
+ORDERBY: Field to order by, PAGENUMBER: Page number, PAGESIZE: Size of each page
+Methods Supported
+GET
+Description
+Returns a list for of inventory transactions for a specific item by specifying an item ID
+The following elements are returned in the InventoryTransactionListByltemID response
+Field
+Type
+Description
+Inventory Transactions
+Array
+An object array of inventory transactions
+• 
+AutoIndex
+Long
+The transaction's unique identifier
+• 
+Date
+Date
+The transaction date
+• 
+Id
+String
+The transaction id
+• 
+AccountLink
+Integer
+The transaction's customer id
+• 
+TransactionCodeld
+Integer
+The transaction code id
+• 
+Debit
+Double
+The transaction debit amount
+• 
+Credit
+Double
+The transaction credit amount
+• 
+Currencyld
+Integer
+The transaction's foreign currency id
+• 
+ExchangeRate
+Double
+The transaction exchange rate
+• 
+ForeignDebit
+Double
+The transaction foreign debit amount
+• 
+ForeignCredit
+Double
+The transaction foreign credit amount
+• 
+Description
+String
+The transaction description
+• 
+TaxTypeld
+Integer
+The transaction tax type id
+• 
+Reference
+String
+The transaction reference
+• 
+OrderNum
+String
+The transaction order number
+• 
+ExtOrderNum
+String
+The transaction external order number
+• 
+AuditNumber
+String
+The unique audit number posted for the transaction
+• 
+TaxAmount
+Double
+The transaction tax amount
+• 
+ForeignTax
+Double
+The transaction foreign tax amount
+• 
+Projectld
+Integer
+The transaction project id
+• 
+Quantity
+Double
+The transaction quantity
+• 
+Cost
+Double
+The transaction cost amount
+• 
+WarehouselD
+Integer
+The transaction warehouse id
+• 
+JobCardID
+Long
+The transaction job card id
+• 
+JobLinelD
+Long
+The transaction job card line id
+• 
+TilllD
+Integer
+The transaction till id
+• 
+DebitCreditAccount
+Integer
+The debit credit account
+• 
+DateTimeStamp
+Date
+The transaction date and time stamp signature
+• 
+UserName
+String
+The system agent whom processed or allocated the transaction
+• 
+TaxPeriodID
+Integer
+The transaction tax period id
+• 
+InvNumID
+Long
+The invoice header id
+• 
+RepID
+Integer
+The transaction representative id
+• 
+ChargeCom
+Boolean
+Charge commission
+• 
+ManufProcessID
+Integer
+The transaction manufacturing process id
+• 
+ManufLinelD
+Long
+The transaction manufacturing process line id
+• 
+LotID
+Long
+The transaction lot id
+• 
+AdditionalCost
+Double
+The transaction's additional cost amount
+• 
+Reference?
+String
+The transaction's additional reference
+• 
+TransactionBranchld
+Integer
+The transaction branch id
+• 
+Branchld
+Integer
+The branch id
+36 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+Inventory Transactions
+Array
+An object array of inventory transactions
+• 
+GLAccountID
+Integer
+The general ledger account id
+• 
+Quantityinvoiced
+Double
+The transaction quantity invoiced
+• 
+BinLocationlD
+Integer
+The transaction bin location id
+• 
+Attribute
+String
+The transactional attribute values
+Sales Order Documents
+Create New Sales Order Quotation
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/QuotationPlaceOrder {SALESORDERQUOTATION}
+Path Parameters
+SALESORDERQUOTATION: Instance of a sales order quotation object
+Methods Supported
+POST
+Description
+Create a new sales order quotation within the system
+The following elements are required or optional with regards to creating a new sales order quotation
+Field
+Type
+Description
+Required
+SalesOrderQuotation
+Object
+Single data object containing all the various quotation variables
+• 
+CustomerAccountCode
+String
+The customer's account code
+✓
+• 
+OrderDate
+Date
+The date for when the quotation should be placed
+✓
+• 
+InvoiceDate
+Date
+The document's invoice date
+• 
+DocumentLines
+Array
+An object array of inventory type document lines
+■ 
+StockCode
+String
+The inventory item code
+✓
+■ 
+WarehouseCode
+String
+The warehouse code needs to be specified when warehouse item
+■ 
+BarCode
+String
+The default barcode specified on the inventory item
+■ 
+SerialNumber
+String
+A concatenated string array which contains the serial numbers
+■ 
+TaxCode
+String
+Tax code to be used for the line item
+■ 
+Quantity
+Double
+The default order or quotation line quantity
+✓
+■ 
+ToProcess
+Double
+The order line quantity to be processed
+■ 
+UnitPrice
+Double
+The item unit selling price
+✓
+• 
+DocumentFinancialLines
+Array
+An object array of general ledger type document lines
+■ 
+AccountCode
+String
+The general ledger account code
+✓
+■ 
+TaxCode
+String
+Tax code to be used for the financial line item
+■ 
+Quantity
+Double
+The default order or quotation line quantity
+✓
+■ 
+ToProcess
+Double
+The order line quantity to be processed
+■ 
+UnitPrice
+Double
+The general ledger unit selling price
+✓
+Create New Sales Order
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SalesOrderPlaceOrder {SALESORDER}
+Path Parameters
+SALESORDER: Instance of a sales order object
+Methods Supported
+POST
+Description
+Create and place a new sales order invoice within the system
+37 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+The following elements are required or optional with regards to create and placing a new sales order document
+Field
+Type
+Description
+Required
+SalesOrder
+Object
+Single data object containing all the various sales order variables
+• 
+CustomerAccountCode
+String
+The customer's account code
+✓
+• 
+OrderDate
+Date
+The date for when the quotation should be placed
+✓
+• 
+InvoiceDate
+Date
+The document's invoice date
+• 
+DocumentLines
+Array
+An object array of inventory type document lines
+■ 
+StockCode
+String
+The inventory item code
+✓
+■ 
+WarehouseCode
+String
+The warehouse code needs to be specified when warehouse item
+■ 
+BarCode
+String
+The default barcode specified on the inventory item
+■ 
+SerialNumber
+String
+A concatenated string array which contains the serial numbers
+■ 
+TaxCode
+String
+Tax code to be used for the line item
+■ 
+Quantity
+Double
+The default order or quotation line quantity
+✓
+■ 
+ToProcess
+Double
+The order line quantity to be processed
+■ 
+UnitPrice
+Double
+The item unit selling price
+✓
+• 
+DocumentFinancialLines
+Array
+An object array of general ledger type document lines
+■ 
+AccountCode
+String
+The general ledger account code
+✓
+■ 
+TaxCode
+String
+Tax code to be used for the financial line item
+■ 
+Quantity
+Double
+The default order or quotation line quantity
+✓
+■ 
+ToProcess
+Double
+The order line quantity to be processed
+■ 
+UnitPrice
+Double
+The general ledger unit selling price
+✓
+Create New Sales Order Invoice
+Overview
+URL
+/Freedom.Core/Freedom Database/SDK/SalesOrderProcessInvoice {SALESORDER}
+Path Parameters
+SALESORDER: Instance of a sales order object
+Methods Supported
+POST
+Description
+Create and process a new sales order invoice within the system
+The following elements are required or optional with regards to create and processing a new sales order invoice
+Field
+Type
+Description
+Required
+SalesOrder
+Object
+Single data object containing all the various invoice variables
+• 
+CustomerAccountCode
+String
+The customer's account code
+✓
+• 
+OrderDate
+Date
+The date for when the invoice should be placed
+✓
+• 
+InvoiceDate
+Date
+The document's invoice date
+✓
+• 
+DocumentLines
+Array
+An object array of inventory type document lines
+■ 
+StockCode
+String
+The inventory item code
+✓
+■ 
+WarehouseCode
+String
+The warehouse code needs to be specified when warehouse item
+■ 
+BarCode
+String
+The default barcode specified on the inventory item
+■ 
+SerialNumber
+String
+A concatenated string array which contains the serial numbers
+■ 
+TaxCode
+String
+Tax code to be used for the line item
+■ 
+Quantity
+Double
+The default order line quantity
+✓
+■ 
+ToProcess
+Double
+The order line quantity to be processed
+✓
+■ 
+UnitPrice
+Double
+The item unit selling price
+✓
+• 
+DocumentFinancialLines
+Array
+An object array of general ledger type document lines
+■ 
+AccountCode
+String
+The general ledger account code
+✓
+■ 
+TaxCode
+String
+Tax code to be used for the financial line item
+■ 
+Quantity
+Double
+The default order line quantity
+✓
+■ 
+ToProcess
+Double
+The order line quantity to be processed
+✓
+38 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+Required
+■ 
+UnitPrice
+Double
+The general ledger unit selling price
+✓
+Open Existing Sales Order & Process Invoice
+Overview
+1. 
+Validate whether the sales order exists.
+2. 
+If the document exists, load the sales order object and edit variables need be.
+3. 
+Process the sales order object as a new invoice object within the system.
+1. Validation: Sales Order Exists
+URL
+/Freedom.Core/Freedom Database/SDK/SalesOrderExists {ORDERING}
+Path Parameters
+ORDERNO: Sales order number
+Methods Supported
+GET
+Description
+Validate whether a certain sales order exists
+The following elements are required when validating whether a sales order exists within the system.
+Field
+Type
+Description
+Return Value
+Boolean
+Returns true or false
+2. Load Existing Sales Order
+URL
+/Freedom.Core/Freedom Database/SDK/SalesOrderLoadByOrderNo {ORDERNO}
+Path Parameters
+ORDERNO: Sales order number
+Methods Supported
+GET
+Description
+Returns an instance of an existing sales order object
+The following elements are required when validating whether a sales order exists within the system.
+Field
+Type
+Description
+SalesOrder
+Object
+Single data object containing all the various sales order variables
+• 
+CustomerAccountCode
+String
+The customer's account code
+• 
+OrderDate
+Date
+The date for when the order should be placed
+• 
+InvoiceDate
+Date
+The document's invoice date
+• 
+DocumentLines
+Array
+An object array of inventory type document lines
+■ 
+StockCode
+String
+The inventory item code
+■ 
+WarehouseCode
+String
+The warehouse code needs to be specified when warehouse item
+■ 
+BarCode
+String
+The default barcode specified on the inventory item
+■ 
+SerialNumber
+String
+A concatenated string array which contains the serial numbers
+■ 
+TaxCode
+String
+Tax code to be used for the line item
+■ 
+Quantity
+Double
+The default order line quantity
+■ 
+ToProcess
+Double
+The order line quantity to be processed
+■ 
+UnitPrice
+Double
+The item unit selling price
+• 
+DocumentFinancialLines
+Array
+An object array of general ledger type document lines
+■ 
+AccountCode
+String
+The general ledger account code
+■ 
+TaxCode
+String
+Tax code to be used for the financial line item
+■ 
+Quantity
+Double
+The default order line quantity
+■ 
+ToProcess
+Double
+The order line quantity to be processed
+39 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✔ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+✘ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Field
+Type
+Description
+■ 
+UnitPrice
+Double
+The general ledger unit selling price
+3. Process Sale Order Invoice
+URL
+/Freedom.Core/Freedom Database/SDK/SalesOrderProcessInvoice {SALESORDER}
+Path Parameters
+SALESORDER: Instance of a sales order object
+Methods Supported
+POST
+Description
+Create and process a new sales order invoice within the system
+The following elements are required or optional with regards to processing an existing sales order as a sales invoice
+Field
+Type
+Description
+Required
+SalesOrder
+Object
+Single data object containing all the various invoice variables
+• 
+CustomerAccountCode
+String
+The customer's account code
+✓
+• 
+OrderDate
+Date
+The date for when the invoice should be placed
+✓
+• 
+InvoiceDate
+Date
+The document's invoice date
+• 
+DocumentLines
+Array
+An object array of inventory type document lines
+■ 
+StockCode
+String
+The inventory item code
+✓
+■ 
+WarehouseCode
+String
+The warehouse code needs to be specified when warehouse item
+■ 
+BarCode
+String
+The default barcode specified on the inventory item
+■ 
+SerialNumber
+String
+A concatenated string array which contains the serial numbers
+■ 
+TaxCode
+String
+Tax code to be used for the line item
+■ 
+Quantity
+Double
+The default order line quantity
+✓
+■ 
+ToProcess
+Double
+The order line quantity to be processed
+✓
+■ 
+UnitPrice
+Double
+The item unit selling price
+✓
+• 
+DocumentFinancialLines
+Array
+An object array of general ledger type document lines
+■ 
+AccountCode
+String
+The general ledger account code
+✓
+■ 
+TaxCode
+String
+Tax code to be used for the financial line item
+■ 
+Quantity
+Double
+The default order line quantity
+✓
+■ 
+ToProcess
+Double
+The order line quantity to be processed
+✓
+■ 
+UnitPrice
+Double
+The general ledger unit selling price
+✓
+Initial Installation & Service Configuration
+Step 1 - Installation
+Follow the steps below to successfully install the Freedom service host.
+Locate the Setup.exe file on the Evolution installation DVD. Double click on this file to start the installation process. The
+screen displays as follows:
+40 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Welcome to Sage Evolution Setup
+This wizard will guide you through the installation of Sage Evolution.
+Before you begin, we recommend that you:
+■ Exit all Windows programs
+■ Turn off your anti-virus software during the installation of Sage Evolution
+• Install on the server first if you plan to run Sage Evolution on a network
+To continue, dick Next.
+< Back 
+Ij 
+Next > 
+1 
+Cancel
+Sage Evolution Version: 9.00.00.235
+Click on the Next button. The screen displays as follows:
+sage
+Customer Information
+User Name
+[Windows User
+Organisation
+Unknown
+Destination
+Destination Folder:
+|C:\Program Files (x86)\Sage Evolution
+□ Always check this location for newer versions of Sage Evolution
+C: (Applications volution Applications volution.9.00.0.235.Internal.Full \
+Shortcut
+0 Create shortcuts in Start Menu folder:
+Sage Evolution 9.00
+v/ Create shortcuts on Desktop
+Only for me (Juan.Wilke)
+* 
+computer (all users):
+< Back 
+Next > 
+Cancel
+Sage Evolution Version: 9.00.00.235
+41 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Specify the type of installation required. You will be able to select between the following options:
+• 
+Complete
+• 
+Typical
+• 
+Custom
+If you have installed and / or upgraded Sage Evolution and only want to install the Freedom Service, select the Custom
+install type and press Next.
+Choose Setup Type
+Choose the setup type that best suits your needs
+All program features will be installed.
+These indude Freedom Service, Glovebox and Mobile Service.
+Complete
+Installs the most common program features.
+Recommended for most users.
+Typical
+Choose which program features will be installed.
+Recommended for advanced users,
+Custom
+< Back 
+il
+Next > 
+I j
+Cancel
+Sage Evolution Version: 9.00.00.235
+Select the recommended Yes option when asked for Windows Firewall settings and press Yes.
+sage
+Selected Components
+|jj 
+Microsoft SQL Server appears to be installed on this machine, and is currently running.
+Would you like Sage Evolution to set your Windows Firewall to allow you to install and run Sage Evolution?
+Q No, I will configure it manually
+• 
+Yes (Recommended)
+More Information
+< Back 
+Ij 
+Next > 
+il 
+Cancel
+Sage Evolution Version: 9.00.00.235
+42 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+Under selected components, select the Freedom Service tick box and press Next.
+sage
+Selected Components
+Component
+617.95 MB
+Database Synchronisation Monitor
+30.95 MB
+2.26 MB
+6.35 MB
+Glove Box
+5.05 MB
+Advanced Procurement
+64.36 MB
+Alert Management
+58.28 MB
+Bank Manager
+32.57 MB
+Debtors Manager
+158.33 MB
+Delivery Management
+38.47 MB
+80.87 MB
+Global Tax
+37.04 MB
+Inventory Issue
+37. 14 MB
+Mobile Sales
+37.34 MB
+I 
+Select All 
+II Select None I
+__ Show Comments
+< Back
+1: 
+Next >
+Cancel
+Sage Evolution Version: 9.00.00.235
+Click on the Install button to start the installation process.
+Ready to install
+Sage Evolution Setup has enough information to install the components you have selected.
+< Back 
+I 
+Install 
+I 
+Cancel
+Sage Evolution Version: 9.00.00.235
+The Freedom Service requires .NET version 4.5 as a prerequisite. The system will detect if this specific version of .NET
+framework is not installed and install it automatically.
+43 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+   
+ 
+ 
+ 
+ 
+ 
+ 
+sage
+The Freedom Service has been successfully installed.
+Overview
+Sage Evolution setup completed successfully.
+I 
+xitj
+Q View installation log
+< Back 
+Finish 
+Cancel
+Sage Evolution Version: 9.00.00.235
+Step 2 - Configuration
+After successful installation of the Freedom Service it is required to configure both the Freedom as well as the failover
+service. From within your Sage Evolution company navigate to the System Wizard, by selecting the option from the
+Administrator menu option. Locate and select the Services Tab. The screen displays as follows:
+E-mail
+Versions
+Repository
+Freedom Service
+Access Control
+Security Settings
+Database Settings
+Logging
+WARNING : Users need write |
+logs. This folder will be createc
+44 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+sage
+Enter the Freedom Service default information into the Freedom Service field. For the failover service indicate whether
+to use a local service or whether it will point to a different server.
+Step 3 - Validating
+To validate whether the Freedom Service is running successfully, open the Windows Services Management Console by
+executing the following command from the windows run command: services.msc
+Internet
+The following screen will appear. Search for the Evolution Freedom Service and validate whether the service is running.
+Services
+File 
+Action 
+View 
+Help
+□
+X
+4- I E]| HI @ B 1 H H I ► ■ II !►
+Services (Local)
+Services (Local)
+Evolution Freedom Service
+Name
+Description
+Status
+Startup Type
+Log On As
+Device Association Service
+Enables pairing between the system and wired o...
+Running
+Manual (Trig...
+Local System
+■ 
+Device Install Service
+Enables a computer to recognize and adapt to h...
+Manual (Trig...
+Local System
+Device Management Enrollment Service
+Performs Device Enrollment Activities for Device...
+Manual
+Local System
+• 
+Device Setup Manager
+Enables the detection, download and installation...
+Manual (Trig...
+Local System
+■S DevQuery Background Discovery Broker
+Enables apps to discover devices with a backgro...
+Manual (Trig...
+Local System
+SjltDHCP Client
+Registers and updates IP addresses and DNS rec...
+Running
+Automatic
+Local Service
+Diagnostic Policy Service
+The Diagnostic Policy Service enables problem d...
+Running
+Automatic
+Local Service
+■ 
+Diagnostic Service Host
+The Diagnostic Service Host is used by the Diagn...
+Running
+Manual
+Local Service
+■ {Diagnostic System Host
+The Diagnostic System Host is used by the Diag...
+Running
+Manual
+Local System
+Distributed Link Tracking Client
+Maintains links between NTFS files within a com...
+Running
+Automatic
+Local System
+Distributed Transaction Coordinator
+Coordinates transactions that span multiple reso...
+Manual
+Network Service
+{ dmwappushsvc
+WAP Push Message Routing Service
+Automatic (D...
+Local System
+DNS Client
+The DNS Client service (dnscache) caches Dorna...
+Running
+Automatic (T...
+Network Service
+• {Downloaded Maps Manager
+Windows service for application access to downl...
+Automatic (D...
+Network Service
+• {Embedded Mode
+The Embedded Mode service enables scenarios r...
+Manual (Trig...
+Local System
+{Encrypting File System (EFS)
+Provides the core file encryption technology use...
+Manual (Trig...
+Local System
+■ 
+Enterprise App Management Service
+Enables enterprise application management.
+Manual
+Local System
+Evolution Freedom Service
+Evolution Freedom Service
+Running
+Automatic
+Local System 
+H
+-£ { Extensible Authentication Protocol
+The Extensible Authentication Protocol (EAP) ser...
+Manual
+Local System
+Enables you to send and receive faxes, utilizing f...
+Manual
+Network Service
+■ {File History Service
+Protects user files from accidental loss by copyin...
+Manual (Trig...
+Local System
+{Flexera Software Corporate Software Inspector A... Performs routine software inspections of the sys...
+Running
+Automatic (D...
+Local System
+{Function Discovery Provider Host
+The FDPHOST service hosts the Function Discov...
+Manual
+Local Service
+{Function Discovery Resource Publication
+Publishes this computer and resources attached ...
+Manual
+Local Service
+GeoIocation Service
+This service monitors the current location of the ...
+Running
+Manual (Trig...
+Local System
+Google Update Service (gupdate)
+Keeps your Google software up to date. If this se...
+Automatic (D...
+Local System
+{Google Update Service (gupdatem)
+Keeps your Google software up to date. If this se...
+Manual
+Local System
+£ { Group Policy Client
+The service is responsible for applying settings c...
+Automatic (T...
+Local System
+Hive Streaming Service
+This is the Hive Streaming service for video strea...
+Running
+Automatic
+NT ServiceXHive...
+sS HomeGroup Listener
+Makes local computer changes associated with ...
+Manual
+Local System
+- {HomeGroup Provider
+Performs networking tasks associated with confi...
+Manual (Trig...
+Local Service
+■ 
+Human Interface Device Service
+Activates and maintains the use of hot buttons o...
+Running
+Manual (Trig...
+Local System
+HV Host Service
+Provides an interface for the Hyper-V hypervisor ...
+Manual (Trig...
+Local System
+Stop the service
+Restart the service
+Description:
+Evolution Freedom Service
+\ Extended 
+Standard /
+From any web browser, enter the variable URL that has been specified earlier within the System Configuration Wizard.
+Example: http://sagjhbnbfnstpl2:5Q00/freedom.core/registration/rest/help
+If the Freedom Service host is running and registered correctly, the following response will be returned via the browser.
+45 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+sage
+File 
+Edit 
+View 
+History 
+Bookmarks 
+Tools 
+Help
+□
+X
+C* 
+{J} 
+© 
+sagjhbnbfnstpl 2:50 00/freedom.core/registration/rest/help
+- 
+© 
+☆
+Search
+lll\ GO
+=
+© 
+You must log in to this network before you can access the Internet.
+Open Network Login Page
+X
+I 
+K3
+Operations at http://sagjhbnbfnstpl2:5000/freedom.core/Registration/Rest
+This page describes the service operations at this endpoint.
+{FRIENDLYNAME}
+<{FRIENDLYNAME}
+;{ FRIENDLYNAME}
+:{AZURERELAYNAME}&
+{REGISTER}
+;{FRIENDLYNAME}&
+{LICENSEKEY}
+:{FRIENDLYNAME}&
+on={DBVERSION}
+<{FRIENDLYNAME}&
+dbVersion={DBVERSION}
+Step 4 - Available REST Services
+The installation of a third-party REST client can assist in identifying all the various REST service calls which can be made
+via the Freedom API extension service. Postman is a free to use add-on which is compatible with most web browser
+available in the market today.
+Below is an example on how to return all the available REST service calls exposed via the Freedom extension service by
+making use of the Postman add-on within Google Chrome.
+http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/help
+46 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+       
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+sage
+No Environment
+http7/127.0.0.1:5000/
+Collections
+History
+http://127.0.0.1:5000/freedom.core/Freedom%20Database/SDK/Rest/help
+Send
+GET
+Save
+All Me Team 
+E 
+J,-
+Authorization 
+Headers (1)
+Pre-request Script 
+Tests
+Postman Echo
+NEW
+(□
+Runner
+Import □+
+Builder 
+Team Library
+X
+Juan Wilke V
+o
+O 
+Chrome apps are being deprecated. Download our free native apps for continued support and better performance. Learn more
+Type
+No Auth 
+V
+Body
+Cookies
+Headers (4)
+Test Results
+Status: 200 OK
+Time: 716 ms
+37 requests
+□
+Pretty
+Preview
+Operations at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest
+This page describes the service operations at this endpoint.
+Method
+GET 
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/AgingTermFind?module={MODULE}&code={CODE}
+Description
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/AgingTermList?module={MODULE}&orderby=
+{ORDERBY}&pageNumber={PAGENUMBER}&pageSize={PAGESIZE}
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/AreaFind?code={CODE}
+jrvice at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/AreaList?orderby={ORDERBY}&pageNumber=
+>AGENUMBER}&pageSize= {PAGESIZE}
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/CustomerExists?code={CODE}
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/CustomerFind?code={CODE}
+Uri
+/AgingTermFind
+/AgingTermList
+/AreaFind
+/CustomerExists
+/CustomerFind
+/CustomerGroupExists
+/CustomerGroupFind
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/CustomerGroupFind?code={CODE}
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/CustomerGroupList?orderby={ORDERBY}&pageNumber=
+{PAGENUMBER}&pageSize={PAGESIZE}
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/CustomerList?orderby={ORDERBY}8ipageNumber=
+{PAGENUMBER}&pageSize={PAGESIZE}
+/CustomerTransactionListByAccountCode GET 
+RDERBY 
+ageNumbe/ 
+OOO/ 
+edo 
+e/Fr 
+dom Data
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/CustomerTransactionListByAccountID?accountID=
+{ACCOUNTID}8<orderby={ORDERBY}&pageNumber={PAGENUMBER}&pageSize={PAGESIZE}
+/CustomerTransactionListByAccountID
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/InventoryItemFind?code={CODE}
+vice at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/TnventoryItemList?orderby={ORDERBY}&.pageNumber=
+kGENUMBER}&pageSize={PAGESIZE}
+Service at http://127.0.0.1:5000/freedom.core/Freedom Database/SDK/Rest/InventoryTransactionListByItemCode?code={CODE}&.orderby=
+/InventoryTransactionListByltemCode
+/CustomerGroupList
+/CustomerList
+/InventoryitemFind
+/InventoryitemList
+Important Information
+A basic authentication type needs to be specified before making any calls to the Freedom extension service. The
+username & password which need to be specified is the actual Sage Evolution agent name and agent password stored
+within the Sage Evolution company database.
+No Environment
+http://127.0.0.1:5000/ •
+Send 
+v
+http://1 27.0.0.1:5000/freedom.core/Freedom%20Database/SDK/Rest/help
+GET
+Authorization • 
+Headers (1)
+Pre-request Script 
+Tests
+Code
+Update Request
+Type
+Basic Auth
+Admin
+The authorization header will be generated and
+added as a custom header
+Save helper data to request
+Username
+Password
+Show Password
+47 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+        
+ 
+       
+           
+            
+ 
+           
+                
+ 
+                
+ 
+                
+ 
+                
+ 
+                
+ 
+               
+ 
+                
+            
+        
+ 
+sage
+Initialization & Code Samples
+Step 1 - Adding a Service Reference
+When using a .NET IDE, to reference the service merely involves opening your project and adding a service reference to
+the RESTful service itself.
+Search Solution txplorer lLtrl+;J
+SI Solution 'SampleFreedomApplication' (1 project)
+J
+*c]*| SampleFreedomApplication
+> 
+Properties
+|http://127.0.0.1:5000/freedom.core/Freedom V9 Databa5e/SDK|
+SDK
+SDK
+AreaFind
+Areainsert
+Areallpdate
+FreedomSDK
+OK
+J 
+Cd References
+Jr Analyzers
+Microsoft,CSharp
+System
+System.Core
+System.Data
+System.Data.DataSetExtensions
+System.Net.Http
+System.Runtime.Serialization
+System.ServiceModel
+System.Xml
+System.Xml.Linq
+*4 
+Service References
+FreedomSDK
+yd App. config
+> 
+C* Program.es
+Step 2 - Create a Simple RESTful Client
+Below is a code sample on how to create a simple RESTful client to call the Freedom extension service from a .NET IDE.
+public static void RESTCIientExample(string userName, string password)
+{
+SDKClient cl = new SDKCIient("BasicHttpBinding_SDK");
+using (OperationContextScope scope = new OperationContextScope(cl.lnnerChannel))
+{
+MessageHeader userNameHeader = MessageHeader.CreateHeader("UserName", 
+userName);
+MessageHeader passwordNameHeader = MessageHeader.CreateHeader("Password", 
+password);
+OperationContext.Current.OutgoingMessageHeaders.Add(userNameHeader);
+OperationContext.Current.OutgoingMessageHeaders.Add( passwordNameHeader);
+cl.Open();
+//sample code....
+cl.Close();
+}
+}
+Reminder
+Add additional references to your project to be able to access the necessary .NET framework classes.
+• 
+FreedomSDK
+• 
+System.ServiceModel
+• 
+System.ServiceModel.Channels
+48 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+I. 
+ 
+............... 
+                
+ 
+                
+ 
+                
+ 
+                { 
+                   
+ 
+                    
+ 
+                   
+ 
+                   
+ 
+                    
+                }; 
+               
+ 
+               
+ 
+                
+ 
+II. 
+ 
+.......... 
+                         
+ 
+                       
+ 
+                        
+ 
+                         
+ 
+                         
+                        { 
+                             
+ 
+                             
+ 
+                             
+ 
+                             
+ 
+                             
+ 
+                         } 
+                         
+ 
+ 
+        .......... 
+       
+ 
+       
+ 
+       
+ 
+       
+ 
+       
+         
+ 
+         
+       
+ 
+ 
+ 
+  
+ 
+ 
+sage
+1. Code Sample: Master Records
+Below are code examples on how to create, edit and view existing master records via an API service call. Within this
+document we'll make use of the customer object to demonstrate how to access any of the master record types.
+Add a new customer record
+cl.Openf);
+//Initiate new customer object.
+CustomerDto customer = new CustomerDto()
+Code = "JWL001",
+Description = "Johannesburg Water & Lights",
+Active = true,
+ChargeTax = true,
+PhysicalAddress = new AddressDto() { Linel = "101 Rocky Street", Line2 = "Hillbrow", PostalCode = "2038"}
+//Append the customer object record.
+ValidationResult result = cl.Customerlnsert(customer);
+cl.Close();
+Edit an existing customer record
+customer = cl.CustomerFind("JWL001");
+customer.Description = "City Power";
+customer.PhysicalAddress.Linel = "77 Rocky Street";
+//Update the customer object record.
+ValidationResult result = cl.CustomerUpdate(customer);
+cl.Open();
+//Validate whether the customer exists.
+bool exists = cl.CustomerExists("JWL001");
+CustomerDto customer = null;
+if (exists)
+cl.Close();
+III. 
+Return a list of customer records
+cl.Open();
+//List all various customer records.
+var IstCustomers = cl.CustomerList("Account", 1, 10);
+foreach (var customer in IstCustomers)
+{
+Console.WriteLine($"Account: {customer.Code}\t Description: {customer.Description}");
+}
+cl.Closet);
+2. Code Sample: Sales Order Documents
+Below are code examples on how to create, edit and process sales order source documents via an API service call.
+49 | P a g e
+Freedom API Guidelines VI.04
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+I. 
+.......... 
+ 
+ 
+ 
+ 
+  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+           .......... 
+          
+ 
+           
+ 
+            
+ 
+            
+ 
+           
+ 
+            
+ 
+           
+ 
+           
+ 
+            
+            
+ 
+            
+                   
+                    
+                    
+ 
+                    
+ 
+                    
+ 
+               
+             
+             
+ 
+             
+ 
+    
+    
+ 
+     
+ 
+    
+ 
+    
+ 
+      
+     
+          
+ 
+            
+ 
+           
+                 
+                   
+ 
+             
+           
+ 
+           
+          
+ 
+sage
+Place a new sales order
+cl.OpenQ;
+//Initiate order inventory lines as a list collection.
+List<DocumentLineDto> lines = new List<DocumentLineDto>();
+lines.Add(new DocumentLineDto() { StockCode = "Item", TaxCode = "1", Quantity = 3, UnitPrice = 10.50 });
+lines.Add(new DocumentLineDto() { StockCode = "WH Item", WarehouseCode = "JHB", TaxCode = "1", Quantity = 1,
+UnitPrice = 15.50 });
+lines.Add(new DocumentLineDto() { StockCode = "SN Item", SerialNumbers = "ABC443,XYR917", TaxCode = "1", Quantity = 2,
+UnitPrice = 20.30 });
+//Initiate order ledger lines as a list collection.
+List<DocumentFinancialLineDto> financialLines = new List<DocumentFinancialLineDto>();
+financialLines.Add(new DocumentFinancialLineDto()
+{ AccountCode = "Rent", TaxCode = "1", Quantity = 1, UnitPrice = 45.00 });
+//Initiate the sales order document header.
+SalesOrderDto order = new SalesOrderDtoQ
+{
+CustomerAccountCode = "CASH",
+OrderDate = new DateTime(2017, 11, 29),
+InvoiceDate = new DateTime(2017, 11, 30),
+Lines = lines.ToArray(),
+FinancialLines = financialLines.ToArray()
+);
+//Append the sales order document
+ValidationResult result = cl.SalesOrderPlaceOrder(order);
+cl.Close()
+II. 
+Process a new sales order invoice
+cl.Open();
+//Initiate order inventory lines as a list collection.
+List<DocumentLineDto> lines = new List<DocumentLineDto>();
+lines.Add(new DocumentLineDto() { StockCode = "Standard", TaxCode = "1", Quantity = 4, ToProcess = 4, UnitPrice = 10.50 });
+//Initiate order ledger lines as a list collection.
+List<DocumentFinancialLineDto> financialLines = new List<DocumentFinancialLineDto>();
+financialLines.Add(new DocumentFinancialLineDto()
+{ AccountCode = "Rent", TaxCode = "1", Quantity = 1, ToProcess = 1, UnitPrice = 45.00 });
+//Initiate the sales order document header.
+SalesOrderDto order = new SalesOrderDto))
+{
+CustomerAccountCode = "CASH",
+OrderDate = new DateTime(2017, 11, 29),
+InvoiceDate = new DateTime(2017, 11, 30),
+Lines = lines.ToArray(),
+FinancialLines = financialLines.ToArray()
+);
+//Append the sales order document
+ValidationResult result = cl.SalesOrderPlaceOrder(order);
+cl.Close();
+III. 
+Edit an existing sales order
+cl.OpenQ;
+//Validate whether the sales order document exists
+bool exists = cl.SalesQrderExists("S00129");
+ValidationResult result = null;
+//Load the sales order.
+if (exists)
+{
+SalesOrderDto SalesOrderDto = cl.SalesOrderLoadByOrderNo("SO0129");
+if (SalesOrderDto != null)
+{
+foreach (var line in SalesOrderDto.Lines)
+line.ToProcess = line.Quantity;
+}
+result = cl.SalesOrderExistingProcesslnvoice(salesOrderDto);
+}
+cl.CloseQ;
+50 | P a g e
+Freedom API Guidelines VI.04

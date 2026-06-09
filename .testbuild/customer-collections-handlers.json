@@ -1,0 +1,50 @@
+[
+  {
+    "id": "coll-01-q2-summary",
+    "query": "what was the collection from customers in Q2 2025",
+    "operation": "customer.collections.summary",
+    "mustNotRoute": ["customer.list"]
+  },
+  {
+    "id": "coll-02-q2-short",
+    "query": "customer collections Q2 2025",
+    "operation": "customer.collections.summary",
+    "mustNotRoute": ["customer.list"]
+  },
+  {
+    "id": "coll-03-amount-q2",
+    "query": "amount collected from customers in Q2",
+    "operation": "customer.collections.summary",
+    "mustNotRoute": ["customer.list"]
+  },
+  {
+    "id": "coll-04-receipts-range",
+    "query": "receipts from customers April to June 2025",
+    "operation": "customer.collections.summary",
+    "mustNotRoute": ["customer.list"]
+  },
+  {
+    "id": "coll-05-payments-received",
+    "query": "customer payments received in Q2 2025",
+    "operation": "customer.collections.summary",
+    "mustNotRoute": ["customer.list", "customer.payment.prompt.top"]
+  },
+  {
+    "id": "coll-06-by-month",
+    "query": "collections by month Q2 2025",
+    "operation": "customer.collections.by.month",
+    "mustNotRoute": ["customer.list"]
+  },
+  {
+    "id": "coll-07-by-customer",
+    "query": "collections by customer Q2 2025",
+    "operation": "customer.collections.by.customer",
+    "mustNotRoute": ["customer.list"]
+  },
+  {
+    "id": "coll-08-q2-q4-segments",
+    "query": "what was the total collection from customers in Q2 and Q4 of 2025",
+    "operation": "customer.collections.summary",
+    "mustNotRoute": ["customer.list"]
+  }
+]

@@ -1,0 +1,36 @@
+[
+  { "id": "pay-01-user", "query": "which customer has been paying promptly i.e. clearing all outstanding balances within the respective terms", "operation": "customer.payment.prompt.top" },
+  { "id": "pay-02-prompt", "query": "which customers pay promptly", "operation": "customer.payment.prompt.top" },
+  { "id": "pay-03-within-terms", "query": "customers clearing within credit terms", "operation": "customer.payment.prompt.top" },
+  { "id": "pay-04-good-payer", "query": "best paying customers this year", "operation": "customer.payment.prompt.top" },
+  { "id": "pay-05-on-time", "query": "customers who pay on time", "operation": "customer.payment.prompt.top" },
+  { "id": "pay-06-discipline", "query": "customer payment discipline ranking", "operation": "customer.payment.prompt.top" },
+  { "id": "pay-07-fastest", "query": "who pays us the fastest", "operation": "customer.payment.prompt.top" },
+  { "id": "pay-08-early", "query": "customers who pay early", "operation": "customer.payment.prompt.top" },
+
+  { "id": "pay-09-late", "query": "which customers pay late", "operation": "customer.payment.late.top" },
+  { "id": "pay-10-slow", "query": "slow paying customers", "operation": "customer.payment.late.top" },
+  { "id": "pay-11-chronic", "query": "chronic overdue late payers", "operation": "customer.payment.late.top" },
+  { "id": "pay-12-slowest", "query": "slowest paying customers", "operation": "customer.payment.late.top" },
+  { "id": "pay-13-late-payer", "query": "late payer customers AR", "operation": "customer.payment.late.top" },
+  { "id": "pay-14-pay-late", "query": "customers who pay late on invoices", "operation": "customer.payment.late.top" },
+
+  { "id": "pay-15-summary", "query": "show customer payment behaviour summary", "operation": "customer.payment.behavior.summary" },
+  { "id": "pay-16-analyze", "query": "analyze customer payment discipline 2026", "operation": "customer.payment.behavior.summary" },
+  { "id": "pay-17-behavior", "query": "customer payment behavior overview", "operation": "customer.payment.behavior.summary" },
+  { "id": "pay-18-summary2", "query": "payment behaviour summary for customers", "operation": "customer.payment.behavior.summary" },
+  { "id": "pay-19-summary3", "query": "AR customer payment behavior summary", "operation": "customer.payment.behavior.summary" },
+
+  { "id": "pay-20-detail", "query": "show payment behaviour for customer U009", "operation": "customer.payment.detail" },
+  { "id": "pay-21-detail2", "query": "why is customer J010 a slow payer", "operation": "customer.payment.late.top" },
+  { "id": "pay-22-detail3", "query": "payment behavior for customer ABC", "operation": "customer.payment.detail" },
+  { "id": "pay-23-detail4", "query": "payment behaviour for customer T006", "operation": "customer.payment.detail" },
+  { "id": "pay-24-detail5", "query": "why is customer M043 a good payer", "operation": "customer.payment.prompt.top" },
+
+  { "id": "guard-01", "query": "which customers pay promptly", "mustNotRoute": ["customer.outstanding.debit.top", "customer.unpaid.summary"], "preferredOperation": "customer.payment.prompt.top" },
+  { "id": "guard-02", "query": "clearing within credit terms", "preferredOperation": "customer.payment.prompt.top", "mustNotRoute": ["customer.unpaid.summary"] },
+  { "id": "guard-03", "query": "who owes us the most", "preferredOperation": "customer.outstanding.debit.top", "mustNotRoute": ["customer.payment.prompt.top"] },
+  { "id": "guard-04", "query": "who pays us the fastest", "preferredOperation": "customer.payment.prompt.top", "mustNotRoute": ["customer.aged.top"] },
+  { "id": "guard-05", "query": "slow paying customers", "preferredOperation": "customer.payment.late.top", "mustNotRoute": ["customer.unpaid.summary"] },
+  { "id": "guard-06", "query": "highest unpaid customer balances", "preferredOperation": "customer.unpaid.summary", "mustNotRoute": ["customer.payment.prompt.top"] }
+]

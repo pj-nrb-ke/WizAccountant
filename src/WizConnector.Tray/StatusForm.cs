@@ -42,12 +42,15 @@ internal sealed class StatusForm : Form
         btnPair.Click += (_, _) => _app.ShowPairing();
         var btnSetup = new Button { Text = "Open Sage Setup", Width = 140 };
         btnSetup.Click += (_, _) => _app.OpenSageSetup();
+        var btnSaveUrl = new Button { Text = "Save URL", Width = 90 };
+        btnSaveUrl.Click += (_, _) => SaveApiUrl(showSaved: true);
         var btnRefresh = new Button { Text = "Refresh", Width = 90 };
         btnRefresh.Click += async (_, _) => await RefreshStatusAsync();
 
         var buttons = new FlowLayoutPanel { Dock = DockStyle.Bottom, Padding = new Padding(12), AutoSize = true };
         buttons.Controls.Add(btnPair);
         buttons.Controls.Add(btnSetup);
+        buttons.Controls.Add(btnSaveUrl);
         buttons.Controls.Add(btnRefresh);
 
         var hint = new Label
@@ -82,12 +85,27 @@ internal sealed class StatusForm : Form
         panel.Controls.Add(control, 1, row);
     }
 
+    private void SaveApiUrl(bool showSaved = false)
+    {
+        var url = _apiUrl.Text.Trim();
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            MessageBox.Show("Enter the cloud API URL (e.g. https://app.ascendbooks.biz).", Text,
+                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        var settings = TraySettings.Load();
+        settings.ApiBaseUrl = url;
+        settings.Save();
+        _app.UpdateApiUrl(url);
+        if (showSaved)
+            _online.Text = "API URL saved.";
+    }
+
     public async Task RefreshStatusAsync()
     {
-        var settings = TraySettings.Load();
-        settings.ApiBaseUrl = _apiUrl.Text.Trim();
-        settings.Save();
-        _app.UpdateApiUrl(settings.ApiBaseUrl);
+        SaveApiUrl();
 
         var state = ConnectorStateStore.Load();
         if (state is null)

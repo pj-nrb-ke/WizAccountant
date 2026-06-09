@@ -1,0 +1,67 @@
+Using launch settings from C:\Users\pj\WizAccountant\src\WizAccountant.Api\Properties\launchSettings.json...
+Building...
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (12ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."SiteId", "s"."DeviceId", "s"."IsOnline", "s"."LastSeenUtc", "s"."SiteName", "s"."TenantId"
+      FROM "Sites" AS "s"
+      WHERE "s"."IsOnline"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS JobAudits (
+          AuditId TEXT NOT NULL PRIMARY KEY,
+          JobId TEXT NOT NULL,
+          SiteId TEXT NOT NULL,
+          Operation TEXT NOT NULL,
+          EventType TEXT NOT NULL,
+          RequestedBy TEXT NULL,
+          Success INTEGER NULL,
+          Detail TEXT NULL,
+          TimestampUtc TEXT NOT NULL
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE IF NOT EXISTS Tenants (
+          TenantId TEXT NOT NULL PRIMARY KEY,
+          Name TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS Users (
+          UserId TEXT NOT NULL PRIMARY KEY,
+          TenantId TEXT NOT NULL,
+          Email TEXT NOT NULL,
+          Password TEXT NOT NULL,
+          DisplayName TEXT NOT NULL,
+          Role TEXT NOT NULL DEFAULT 'Preparer'
+      );
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE Users ADD COLUMN Role TEXT NOT NULL DEFAULT 'Preparer';
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      ALTER TABLE Users ADD COLUMN Role TEXT NOT NULL DEFAULT 'Preparer';
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5278
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\pj\WizAccountant\src\WizAccountant.Api
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."SiteId", "s"."DeviceId", "s"."IsOnline", "s"."LastSeenUtc", "s"."SiteName", "s"."TenantId"
+      FROM "Sites" AS "s"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "j"."AuditId", "j"."Detail", "j"."EventType", "j"."JobId", "j"."Operation", "j"."RequestedBy", "j"."SiteId", "j"."Success", "j"."TimestampUtc"
+      FROM "JobAudits" AS "j"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."SiteId", "s"."DeviceId", "s"."IsOnline", "s"."LastSeenUtc", "s"."SiteName", "s"."TenantId"
+      FROM "Sites" AS "s"
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT "s"."SiteId", "s"."DeviceId", "s"."IsOnline", "s"."LastSeenUtc", "s"."SiteName", "s"."TenantId"
+      FROM "Sites" AS "s"

@@ -4,6 +4,7 @@ When working on **Insight AI chat**, **WizConnector** read handlers, or Sage SQL
 
 | Start here | Path |
 |------------|------|
+| **Remote Sage + Brevo + deploy (manufacturing handover)** | `DOCS/MANUFACTURING-AGENT-HANDOVER.md` |
 | Training index | `DOCS/SAGE-AI-AGENT-TRAINING-INDEX.md` |
 | Master Cursor prompt | `DOCS/Sage_AI_Training/Sage_AI_Agent_Master_Cursor_Prompt.md` |
 | Framework (01–10) | `DOCS/Sage_AI_Training/` |

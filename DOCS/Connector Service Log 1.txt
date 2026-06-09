@@ -1,0 +1,9 @@
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\pj\WizAccountant\src\WizConnector.Service\bin\Release\net8.0
+info: WizConnector.Service.Worker[0]
+      Connected to hub for SiteId=9d0ca3a1-f235-4ba4-a869-990c42406b4b
+

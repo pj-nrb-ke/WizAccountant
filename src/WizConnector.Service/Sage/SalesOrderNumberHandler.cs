@@ -11,6 +11,44 @@ internal static class SalesOrderNumberHandler
     /// <summary>Sales orders use iModule = 0 in ORDERSDF.</summary>
     public const int DefaultSalesOrderModule = 0;
 
+    private static readonly string[] SelectSqlCandidates =
+    [
+        """
+        SELECT OrderPrefix, NextCustNo
+        FROM ORDERSDF WITH (UPDLOCK, HOLDLOCK)
+        WHERE iModule = @module
+        """,
+        """
+        SELECT cOrderPrefix AS OrderPrefix, NextCustNo
+        FROM ORDERSDF WITH (UPDLOCK, HOLDLOCK)
+        WHERE iModule = @module
+        """,
+        """
+        SELECT OrderPrefix, NextCustNo
+        FROM ORDERSDF WITH (UPDLOCK, HOLDLOCK)
+        WHERE iModuleID = @module
+        """,
+        """
+        SELECT TOP 1 OrderPrefix, NextCustNo
+        FROM ORDERSDF WITH (UPDLOCK, HOLDLOCK)
+        ORDER BY iModule
+        """
+    ];
+
+    private static readonly string[] UpdateSqlCandidates =
+    [
+        """
+        UPDATE ORDERSDF
+        SET NextCustNo = NextCustNo + 1
+        WHERE iModule = @module
+        """,
+        """
+        UPDATE ORDERSDF
+        SET NextCustNo = NextCustNo + 1
+        WHERE iModuleID = @module
+        """
+    ];
+
     public static string AllocateNext(string companyConnectionString, Dictionary<string, string> parameters)
     {
         if (string.IsNullOrWhiteSpace(companyConnectionString))
@@ -23,6 +61,31 @@ internal static class SalesOrderNumberHandler
             module = parsedModule;
         }
 
+        Exception? last = null;
+        foreach (var selectSql in SelectSqlCandidates)
+        {
+            foreach (var updateSql in UpdateSqlCandidates)
+            {
+                try
+                {
+                    return AllocateWithSql(companyConnectionString, module, selectSql, updateSql);
+                }
+                catch (Exception ex)
+                {
+                    last = ex;
+                }
+            }
+        }
+
+        throw last ?? new InvalidOperationException("Could not allocate sales order number from ORDERSDF.");
+    }
+
+    private static string AllocateWithSql(
+        string companyConnectionString,
+        int module,
+        string selectSql,
+        string updateSql)
+    {
         using var conn = new SqlConnection(companyConnectionString);
         conn.Open();
         using var tran = conn.BeginTransaction(IsolationLevel.Serializable);
@@ -30,34 +93,22 @@ internal static class SalesOrderNumberHandler
         {
             string? prefix;
             long nextNumber;
-            using (var selectCmd = new SqlCommand(
-                       """
-                       SELECT OrderPrefix, NextCustNo
-                       FROM ORDERSDF WITH (UPDLOCK, HOLDLOCK)
-                       WHERE iModule = @module
-                       """,
-                       conn,
-                       tran)
-                   { CommandTimeout = 60 })
+            using (var selectCmd = new SqlCommand(selectSql, conn, tran) { CommandTimeout = 60 })
             {
-                selectCmd.Parameters.AddWithValue("@module", module);
+                if (selectSql.Contains("@module", StringComparison.Ordinal))
+                    selectCmd.Parameters.AddWithValue("@module", module);
+
                 using var reader = selectCmd.ExecuteReader();
                 if (!reader.Read())
                     throw new InvalidOperationException($"ORDERSDF row not found for iModule = {module}.");
 
-                prefix = ReadString(reader, "OrderPrefix") ?? "";
-                nextNumber = ReadInt64(reader, "NextCustNo");
+                prefix = ReadString(reader, "OrderPrefix", "cOrderPrefix", "Prefix") ?? "";
+                nextNumber = ReadInt64(reader, "NextCustNo", "iNextCustNo", "NextNumber");
+                if (nextNumber <= 0)
+                    throw new InvalidOperationException("ORDERSDF NextCustNo is not configured.");
             }
 
-            using (var updateCmd = new SqlCommand(
-                       """
-                       UPDATE ORDERSDF
-                       SET NextCustNo = NextCustNo + 1
-                       WHERE iModule = @module
-                       """,
-                       conn,
-                       tran)
-                   { CommandTimeout = 60 })
+            using (var updateCmd = new SqlCommand(updateSql, conn, tran) { CommandTimeout = 60 })
             {
                 updateCmd.Parameters.AddWithValue("@module", module);
                 if (updateCmd.ExecuteNonQuery() != 1)

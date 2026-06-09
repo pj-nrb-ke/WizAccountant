@@ -1,0 +1,90 @@
+[
+  {
+    "id": "ar-01-discount-count",
+    "query": "How many sales invoices in 2026 have discounts?",
+    "operation": "salesinvoice.discount.count",
+    "intent": "Aggregation",
+    "countOnly": true,
+    "forbiddenOperations": ["customer.openitems"]
+  },
+  {
+    "id": "ar-01b-credit-note-count",
+    "query": "total credit notes issues in Q1 2025",
+    "operation": "salescreditnote.count",
+    "intent": "Aggregation",
+    "countOnly": true,
+    "mustNotRoute": ["customer.aged.credit.top", "customer.list"]
+  },
+  {
+    "id": "ar-02-discount-top",
+    "query": "Top 5 invoices with highest discount value in 2025",
+    "operation": "salesinvoice.discount.top",
+    "intent": "Ranking",
+    "maxRows": 5
+  },
+  {
+    "id": "ar-03-aged-debit",
+    "query": "Top 5 customers with oldest aged debit balances",
+    "operation": "customer.aged.top",
+    "intent": "Ranking",
+    "maxRows": 5
+  },
+  {
+    "id": "ar-04-aged-credit",
+    "query": "Top 3 customers with oldest credit balance on AR",
+    "operation": "customer.aged.credit.top",
+    "intent": "Ranking",
+    "maxRows": 3
+  },
+  {
+    "id": "ar-05-overdue-buckets",
+    "query": "How many overdue customer invoices by aging bucket?",
+    "operation": "ar.invoice.overdue.buckets",
+    "intent": "Aggregation",
+    "countOnly": true
+  },
+  {
+    "id": "ar-06-credit-limit",
+    "query": "Which customers exceeded their credit limit?",
+    "operation": "customer.over.creditlimit",
+    "intent": "Ranking"
+  },
+  {
+    "id": "ar-07-partial-paid",
+    "query": "List partially paid sales invoices",
+    "operation": "salesinvoice.partially.paid",
+    "intent": "Listing"
+  },
+  {
+    "id": "ar-08-unpaid-90",
+    "query": "Unpaid invoices older than 90 days",
+    "operation": "customer.invoice.unpaid.olderthan"
+  },
+  {
+    "id": "ar-09-outstanding-top",
+    "query": "Top 10 customers by outstanding debit balance",
+    "operation": "customer.outstanding.debit.top",
+    "intent": "Ranking",
+    "maxRows": 10
+  },
+  {
+    "id": "ar-10-sales-top",
+    "query": "Top 5 customers by sales value in 2026",
+    "operation": "customer.sales.top",
+    "intent": "Ranking",
+    "maxRows": 5
+  },
+  {
+    "id": "ar-confuse-count-vs-list",
+    "query": "How many unpaid sales invoices in 2026?",
+    "intent": "Aggregation",
+    "mustNotRoute": ["customer.openitems"],
+    "countOnly": true
+  },
+  {
+    "id": "ar-confuse-top-vs-list",
+    "query": "Top 5 customers with highest outstanding",
+    "mustNotRoute": ["customer.list"],
+    "intent": "Ranking"
+  }
+]
