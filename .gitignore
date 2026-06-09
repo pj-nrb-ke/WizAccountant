@@ -50,3 +50,5 @@ docs/QA/results/
 qa/node_modules/
 qa/e2e-report/
 tools/k6/
+TestResults/
+TestResults2/
