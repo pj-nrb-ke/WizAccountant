@@ -121,7 +121,6 @@ public sealed class JobService(
         {
             var job = await db.Jobs
                 .Where(j => j.SiteId == siteId && j.Status == JobStatus.Pending)
-                .OrderBy(j => j.CreatedAtUtc)
                 .FirstOrDefaultAsync(ct);
 
             if (job is not null)
