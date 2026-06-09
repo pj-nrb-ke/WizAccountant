@@ -50,7 +50,7 @@ public class InvNumDocumentFilterTests
     [Fact]
     public void Clarification_response_v2_is_in_docs()
     {
-        var path = FindRepoFile("DOCS", "SAGE_DOCS_001_Clarification_Response_V2.md");
+        var path = FindRepoFile("DOCS", "Sage_AI_Training", "SAGE_DOCS_001_Clarification_Response_V2.md");
         var text = File.ReadAllText(path);
         Assert.Contains("Do not assume customer debit notes are `DocType = 2`", text);
         Assert.Contains("Remove DocType 1", text);

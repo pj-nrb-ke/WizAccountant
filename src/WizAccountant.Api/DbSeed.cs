@@ -1,5 +1,6 @@
 using System.Data;
 using Microsoft.EntityFrameworkCore;
+using BC = BCrypt.Net.BCrypt;
 
 namespace WizAccountant.Api;
 
@@ -66,6 +67,23 @@ public static class DbSeed
             """);
     }
 
+    /// <summary>
+    /// Hashes any remaining plain-text passwords (passwords not starting with $2).
+    /// Runs at startup to handle databases created before the BCrypt upgrade.
+    /// </summary>
+    public static async Task MigratePasswordHashesAsync(AppDbContext db)
+    {
+        var plainTextUsers = await db.Users
+            .Where(u => !u.Password.StartsWith("$2"))
+            .ToListAsync();
+
+        foreach (var user in plainTextUsers)
+            user.Password = BC.HashPassword(user.Password, workFactor: 12);
+
+        if (plainTextUsers.Count > 0)
+            await db.SaveChangesAsync();
+    }
+
     public static async Task EnsurePhase1SeedAsync(AppDbContext db)
     {
         await EnsureJobAuditsTableAsync(db);
@@ -103,7 +121,7 @@ public static class DbSeed
                 UserId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                 TenantId = "pilot-tenant",
                 Email = "admin@pilot.local",
-                Password = "pilot",
+                Password = BC.HashPassword("pilot", workFactor: 12),
                 DisplayName = "Pilot Admin",
                 Role = "Admin"
             });
@@ -206,7 +224,7 @@ public static class DbSeed
                 UserId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                 TenantId = "pilot-tenant",
                 Email = "approver@pilot.local",
-                Password = "pilot",
+                Password = BC.HashPassword("pilot", workFactor: 12),
                 DisplayName = "Pilot Approver",
                 Role = "Approver"
             });
@@ -220,7 +238,7 @@ public static class DbSeed
                 UserId = Guid.Parse("33333333-3333-3333-3333-333333333333"),
                 TenantId = "pilot-tenant",
                 Email = "preparer@pilot.local",
-                Password = "pilot",
+                Password = BC.HashPassword("pilot", workFactor: 12),
                 DisplayName = "Pilot Preparer",
                 Role = "Preparer"
             });

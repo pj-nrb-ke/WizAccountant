@@ -1,27 +1,45 @@
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using WizAccountant.Contracts;
 
 namespace WizAccountant.Api;
 
-public sealed class AuthService(AppDbContext db)
+public sealed class AuthService(AppDbContext db, WizTokenService tokens)
 {
     public async Task<LoginResponse?> LoginAsync(LoginRequest request, CancellationToken ct)
     {
         var email = request.Email.Trim().ToLowerInvariant();
         var user = await db.Users.AsNoTracking()
             .FirstOrDefaultAsync(u => u.Email.ToLower() == email, ct);
-        if (user is null || user.Password != request.Password)
-            return null;
+
+        if (user is null) return null;
+
+        // Support both hashed (BCrypt $2) and legacy plain-text passwords during migration window.
+        var passwordValid = user.Password.StartsWith("$2", StringComparison.Ordinal)
+            ? BCrypt.Net.BCrypt.Verify(request.Password, user.Password)
+            : user.Password == request.Password;
+
+        if (!passwordValid) return null;
+
+        // Opportunistically upgrade plain-text password to hash on successful login.
+        if (!user.Password.StartsWith("$2", StringComparison.Ordinal))
+            await UpgradePasswordHashAsync(user.UserId, request.Password, ct);
 
         return new LoginResponse
         {
-            Token = EncodeToken(user.TenantId, user.UserId),
+            Token = tokens.GenerateToken(user.UserId, user.TenantId, user.Email, user.Role),
             TenantId = user.TenantId,
             UserId = user.UserId,
             DisplayName = user.DisplayName,
             Role = user.Role
         };
+    }
+
+    private async Task UpgradePasswordHashAsync(Guid userId, string plainPassword, CancellationToken ct)
+    {
+        var mutable = await db.Users.FindAsync([userId], ct);
+        if (mutable is null) return;
+        mutable.Password = BCrypt.Net.BCrypt.HashPassword(plainPassword, workFactor: 12);
+        await db.SaveChangesAsync(ct);
     }
 
     public async Task<List<TenantDto>> ListTenantsAsync(CancellationToken ct) =>
@@ -45,25 +63,5 @@ public sealed class AuthService(AppDbContext db)
                 Role = u.Role
             })
             .ToListAsync(ct);
-    }
-
-    public static string EncodeToken(string tenantId, Guid userId) =>
-        Convert.ToBase64String(Encoding.UTF8.GetBytes($"wiz:{tenantId}:{userId}"));
-
-    public static bool TryDecodeToken(string token, out string tenantId, out Guid userId)
-    {
-        tenantId = string.Empty;
-        userId = Guid.Empty;
-        try
-        {
-            var parts = Encoding.UTF8.GetString(Convert.FromBase64String(token)).Split(':');
-            if (parts.Length != 3 || parts[0] != "wiz") return false;
-            tenantId = parts[1];
-            return Guid.TryParse(parts[2], out userId);
-        }
-        catch
-        {
-            return false;
-        }
     }
 }

@@ -1,6 +1,9 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using WizAccountant.Api;
 using WizAccountant.Api.Act;
 using WizAccountant.Api.Insight;
@@ -12,6 +15,30 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
+
+// Auth — JWT Bearer (validates tokens issued by WizTokenService)
+builder.Services.AddSingleton<WizTokenService>();
+var jwtSecret = builder.Configuration["Jwt:Secret"];
+if (!string.IsNullOrWhiteSpace(jwtSecret))
+{
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(opt =>
+        {
+            opt.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+                ValidateIssuer = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "WizAccountant",
+                ValidateAudience = true,
+                ValidAudience = builder.Configuration["Jwt:Issuer"] ?? "WizAccountant",
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(2)
+            };
+        });
+    builder.Services.AddAuthorization();
+}
+
 builder.Services.AddSingleton<IConnectorRegistry, ConnectorRegistry>();
 builder.Services.AddScoped<JobService>();
 builder.Services.AddScoped<AuthService>();
@@ -51,6 +78,7 @@ using (var scope = app.Services.CreateScope())
         site.IsOnline = false;
     await db.SaveChangesAsync();
     await DbSeed.EnsurePhase1SeedAsync(db);
+    await DbSeed.MigratePasswordHashesAsync(db);   // hash any plain-text passwords from pre-upgrade DBs
 }
 
 if (app.Environment.IsDevelopment())
@@ -59,6 +87,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
     app.UseCors("MobileDev");
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
