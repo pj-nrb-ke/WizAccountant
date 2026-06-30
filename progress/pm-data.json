@@ -1,0 +1,45 @@
+{
+  "last_updated": "2026-06-30T22:00:00+03:00",
+  "summary": {
+    "total_tasks": 23,
+    "completed": 0,
+    "in_progress": 1,
+    "blocked": 1,
+    "pending_qa": 0,
+    "not_started": 21,
+    "total_estimated_hours": 34.5,
+    "hours_consumed": 3.0,
+    "hours_remaining": 31.5
+  },
+  "burndown": [
+    {"date": "2026-06-30", "hours_remaining": 31.5, "target_remaining": 34.5}
+  ],
+  "tasks": [
+    {"id": 8,  "name": "Schema probe queries + connector metadata", "block": "BLOCK 1", "est_hours": 0.5,  "hours_used": 3.0, "status": "In Progress",  "delay_status": "Overdue",   "clock_started": "2026-06-30", "billing_status": "Pending PJ Approval"},
+    {"id": 11, "name": "RBAC v2 — fine-grained role model + middleware", "block": "BLOCK 1", "est_hours": 1.0,  "hours_used": 0.0, "status": "Blocked",     "delay_status": "Overdue",   "clock_started": "2026-06-30", "billing_status": "Within Estimate"},
+    {"id": 12, "name": "Practice mode — FirmRecord + multi-site", "block": "BLOCK 2", "est_hours": 1.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 13, "name": "Monitoring — site SLA + failed-job alerts", "block": "BLOCK 2", "est_hours": 1.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 14, "name": "Mobile Phase 4 — practice + inventory + tablet", "block": "BLOCK 2", "est_hours": 1.5,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 15, "name": "Multi-company connector support", "block": "BLOCK 3", "est_hours": 1.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 16, "name": "Inventory write — warehouse transfer, credit note, RTS", "block": "BLOCK 3", "est_hours": 1.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 17, "name": "Order processing — SO/PO lifecycle", "block": "BLOCK 3", "est_hours": 1.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 18, "name": "SSO — Azure AD / Google OIDC", "block": "BLOCK 4", "est_hours": 1.5,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 19, "name": "Billing hooks + compliance + app store pipeline", "block": "BLOCK 4", "est_hours": 1.5,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 20, "name": "Stock Take — list sessions, post adjustments", "block": "BLOCK 3", "est_hours": 0.5,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 21, "name": "Fixed Assets (minimal) — list, get, depreciation", "block": "BLOCK 4", "est_hours": 1.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 22, "name": "Bank Reconciliation — statements, reconcile", "block": "BLOCK 4", "est_hours": 1.5,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 23, "name": "Reports — Customer (aged debtors, statement, ledger)", "block": "BLOCK 4", "est_hours": 1.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 24, "name": "Reports — Vendor (aged creditors, statement, ledger)", "block": "BLOCK 4", "est_hours": 1.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 25, "name": "Reports — Inventory (levels, movement, valuation)", "block": "BLOCK 4", "est_hours": 1.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 26, "name": "Reports — Stock Take variance", "block": "BLOCK 4", "est_hours": 0.5,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 27, "name": "Reports — Financial (TB, Balance Sheet, P&L)", "block": "BLOCK 4", "est_hours": 2.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 28, "name": "SaaS module — plans, onboarding, billing", "block": "BLOCK 5", "est_hours": 3.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 29, "name": "Multi-tenancy (full) — isolation, admin portal", "block": "BLOCK 5", "est_hours": 2.5,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 30, "name": "User Rights — role UI + permission matrix", "block": "BLOCK 5", "est_hours": 1.5,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 31, "name": "E-commerce — Shopify / WooCommerce", "block": "BLOCK 6", "est_hours": 4.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"},
+    {"id": 32, "name": "Import — QuickBooks Online + Tally", "block": "BLOCK 6", "est_hours": 4.0,  "hours_used": 0.0, "status": "Not Started", "delay_status": "On Track",  "clock_started": null, "billing_status": "Not Started"}
+  ],
+  "billing_log": [
+    {"date": "2026-06-30", "task_id": 8, "hours_logged": 3.0, "est_hours": 0.5, "overrun_pct": 500, "approval_status": "Pending PJ Approval"}
+  ]
+}

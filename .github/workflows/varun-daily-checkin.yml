@@ -1,18 +1,20 @@
-﻿name: Varun Daily Check-in Emails
+name: Varun Daily Check-in
 
 # 11AM EAT = 08:00 UTC | 5PM EAT = 14:00 UTC  (Kenya, UTC+3, no DST)
 on:
   schedule:
-    - cron: '0 8 * * 1-5'    # 11:00 AM EAT â€” morning session start
-    - cron: '0 14 * * 1-5'   # 05:00 PM EAT â€” evening wrap-up
-  workflow_dispatch:           # manual trigger for testing
+    - cron: '0 8 * * 1-6'    # 11:00 AM EAT — morning (Mon–Sat)
+    - cron: '0 14 * * 1-6'   # 05:00 PM EAT — evening wrap-up (Mon–Sat)
+  workflow_dispatch:
 
 env:
-  VARUN_EMAIL: varun@wizag.biz
   SENDER_EMAIL: info@emailnotifications.co.ke
+  VARUN_EMAIL:  varun@wizag.biz
+  PJ_EMAIL:     pj@wizag.biz
+  REPO:         pj-nrb-ke/WizAccountant
 
 jobs:
-  send-checkin-email:
+  daily-checkin:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,14 +31,49 @@ jobs:
             echo "type=PM" >> $GITHUB_OUTPUT
           fi
 
-      - name: Read session prompt
-        id: prompt
+      # ── Morning: create daily progress issue + send session-start email ─────
+      - name: Create daily progress issue (AM only)
+        if: steps.session.outputs.type == 'AM'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          {
-            echo 'content<<PROMPTEOF'
-            cat progress/VARUN-SESSION-PROMPT.md
-            echo 'PROMPTEOF'
-          } >> $GITHUB_OUTPUT
+          TODAY=$(date +"%d %b %Y")
+          DSTAMP=$(date +"%Y-%m-%d")
+
+          STATUS=$(awk '/## Progress Summary/{found=1} found{print} /^---/{if(found>0){found++} if(found>2){exit}}' progress/TRACKING.md)
+
+          BODY="## Daily Progress Report — ${TODAY}
+
+> **Varun:** Add a comment below with your progress. No git commands needed — just type and submit.
+
+### Current Task Board
+\`\`\`
+${STATUS}
+\`\`\`
+Full board: https://github.com/${REPO}/blob/main/progress/TRACKING.md
+
+---
+
+### Comment Format
+\`\`\`
+TASKS WORKED ON: #8, #11
+COMPLETED: #8 — schema probe queries done
+IN PROGRESS: #11 — RBAC middleware, got stuck on X
+HOURS USED: 2.0 hrs
+BLOCKERS: None
+NEXT SESSION: Continue #11, start #12
+\`\`\`
+
+**Billing note:** The PM clock starts the moment you first mention a task number in a comment. Hours are tracked against the estimate for billing purposes.
+
+---
+*Created automatically by WizAccountant PM System · ${DSTAMP}*"
+
+          gh issue create \
+            --repo "$REPO" \
+            --title "[Daily Report] ${TODAY}" \
+            --label "progress-report" \
+            --body "$BODY"
 
       - name: Read tracking summary
         id: tracking
@@ -47,142 +84,167 @@ jobs:
             echo 'TRACKEOF'
           } >> $GITHUB_OUTPUT
 
-      - name: Send morning email via Brevo API
+      - name: Read session prompt
+        id: prompt
+        run: |
+          {
+            echo 'content<<PROMPTEOF'
+            cat progress/VARUN-SESSION-PROMPT.md
+            echo 'PROMPTEOF'
+          } >> $GITHUB_OUTPUT
+
+      # ── Morning email ─────────────────────────────────────────────────────
+      - name: Send morning email
         if: steps.session.outputs.type == 'AM'
         run: |
           TODAY=$(date +"%A, %d %B %Y")
           DSTAMP=$(date +"%Y-%m-%d")
+          ISSUE_URL="https://github.com/${REPO}/issues"
           python3 - <<PYEOF
-          import json, os, sys, urllib.request, urllib.error
+import json, os, sys, urllib.request, urllib.error
 
-          api_key = os.environ["BREVO_API_KEY"]
-          today   = os.environ["TODAY"]
-          dstamp  = os.environ["DSTAMP"]
-          prompt  = os.environ["SESSION_PROMPT"]
-          status  = os.environ["TRACKING_SUMMARY"]
+api_key   = os.environ["BREVO_API_KEY"]
+today     = os.environ["TODAY"]
+dstamp    = os.environ["DSTAMP"]
+prompt    = os.environ["SESSION_PROMPT"]
+status    = os.environ["TRACKING_SUMMARY"]
+issue_url = os.environ["ISSUE_URL"]
 
-          body = f"""Hi Varun,
+body = f"""Hi Varun,
 
-Good morning! It is 11AM EAT â€” time to start your development session for {today}.
+Good morning — it is 11AM EAT on {today}. Time to start your session.
+
+YOUR GITHUB ISSUE FOR TODAY:
+{issue_url}
+
+Add your progress comment there at the end of your session (and mid-session if you hit blockers).
+No git commands needed — just type and submit on GitHub.
 
 CURRENT PROJECT STATUS
 ======================
 {status}
 
-YOUR SESSION INSTRUCTIONS
-=========================
-Open Claude Code and paste the full contents of this file into a new session:
+SESSION INSTRUCTIONS
+====================
+Open Claude Code and paste the prompt from:
   progress/VARUN-SESSION-PROMPT.md
-
-Or copy it directly from GitHub:
+or copy from GitHub:
   https://github.com/pj-nrb-ke/WizAccountant/blob/main/progress/VARUN-SESSION-PROMPT.md
 
---- SESSION PROMPT BELOW ---
+--- SESSION PROMPT ---
 {prompt}
---- END OF SESSION PROMPT ---
+--- END ---
 
-IMPORTANT â€” END OF SESSION:
-Run these commands in Claude before closing:
-  git add progress/sessions/{dstamp}-AM.md
-  git commit -m "progress: session report {dstamp} AM"
-  git push origin main
-
-No email needed. The PM system picks up your commit automatically.
+BILLING REMINDER
+================
+Your billing clock starts the moment you first mention a task number in your
+GitHub comment. Hours are tracked per task against the approved AI session estimate.
+Tasks with >120% hours logged require PJ approval for the overrun portion.
 
 Regards,
 WizAccountant PM System (automated)
 Reply-To: pj@wizag.biz
 """
 
-          payload = json.dumps({{
-              "sender": {{"name": "WizAccountant PM", "email": "info@emailnotifications.co.ke"}},
-              "to": [{{"email": "varun@wizag.biz", "name": "Varun"}}],
-              "replyTo": {{"email": "pj@wizag.biz", "name": "PJ"}},
-              "subject": f"[WizAccountant] Good Morning Varun â€” Session Start {today}",
-              "textContent": body
-          }}).encode()
+payload = json.dumps({{
+    "sender":     {{"name": "WizAccountant PM", "email": "info@emailnotifications.co.ke"}},
+    "to":         [{{"email": "varun@wizag.biz", "name": "Varun"}}],
+    "replyTo":    {{"email": "pj@wizag.biz", "name": "PJ"}},
+    "subject":    f"[WizAccountant] Good Morning Varun — Session Start {today}",
+    "textContent": body
+}}).encode()
 
-          req = urllib.request.Request(
-              "https://api.brevo.com/v3/smtp/email",
-              data=payload,
-              headers={{"api-key": api_key, "Content-Type": "application/json"}},
-              method="POST"
-          )
-          try:
-              with urllib.request.urlopen(req) as r:
-                  print(f"Morning email sent â€” HTTP {{r.status}}")
-          except urllib.error.HTTPError as e:
-              print(f"Failed â€” HTTP {{e.code}}: {{e.read().decode()}}", file=sys.stderr)
-              sys.exit(1)
-          PYEOF
+req = urllib.request.Request(
+    "https://api.brevo.com/v3/smtp/email",
+    data=payload,
+    headers={{"api-key": api_key, "Content-Type": "application/json"}},
+    method="POST"
+)
+try:
+    with urllib.request.urlopen(req) as r:
+        print(f"Morning email sent — HTTP {r.status}")
+except urllib.error.HTTPError as e:
+    print(f"Failed — HTTP {e.code}: {e.read().decode()}", file=sys.stderr)
+    sys.exit(1)
+PYEOF
         env:
-          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
-          TODAY: ${{ env.TODAY }}
-          DSTAMP: ${{ env.DSTAMP }}
-          SESSION_PROMPT: ${{ steps.prompt.outputs.content }}
+          BREVO_API_KEY:    ${{ secrets.BREVO_API_KEY }}
+          TODAY:            ${{ env.TODAY }}
+          DSTAMP:           ${{ env.DSTAMP }}
+          ISSUE_URL:        ${{ env.ISSUE_URL }}
+          SESSION_PROMPT:   ${{ steps.prompt.outputs.content }}
           TRACKING_SUMMARY: ${{ steps.tracking.outputs.summary }}
 
-      - name: Send evening email via Brevo API
+      # ── Evening email ─────────────────────────────────────────────────────
+      - name: Send evening email
         if: steps.session.outputs.type == 'PM'
         run: |
           TODAY=$(date +"%A, %d %B %Y")
           DSTAMP=$(date +"%Y-%m-%d")
+          ISSUE_URL="https://github.com/${REPO}/issues"
           python3 - <<PYEOF
-          import json, os, sys, urllib.request, urllib.error
+import json, os, sys, urllib.request, urllib.error
 
-          api_key = os.environ["BREVO_API_KEY"]
-          today   = os.environ["TODAY"]
-          dstamp  = os.environ["DSTAMP"]
-          status  = os.environ["TRACKING_SUMMARY"]
+api_key   = os.environ["BREVO_API_KEY"]
+today     = os.environ["TODAY"]
+dstamp    = os.environ["DSTAMP"]
+status    = os.environ["TRACKING_SUMMARY"]
+issue_url = os.environ["ISSUE_URL"]
 
-          body = f"""Hi Varun,
+body = f"""Hi Varun,
 
-It is 5PM EAT â€” please wrap up your Claude session for {today}.
+It is 5PM EAT — time to wrap up your session for {today}.
+
+BEFORE YOU CLOSE CLAUDE
+========================
+1. Ask Claude to summarise what you accomplished
+2. Go to today's GitHub issue and add your progress comment:
+   {issue_url}
+
+3. Use this format:
+   TASKS WORKED ON: #X, #Y
+   COMPLETED: #X — description (or "None")
+   IN PROGRESS: #Y — what you did, what remains
+   HOURS USED: X hrs
+   BLOCKERS: description (or "None")
+   NEXT SESSION: your plan
+
+The PM system checks at 8PM EAT. No comment = chase emails every 10 minutes.
 
 CURRENT PROJECT STATUS
 ======================
 {status}
 
-END-OF-SESSION STEPS:
-Before closing Claude, ask it to generate your session report, then run:
-  git add progress/sessions/{dstamp}-PM.md
-  git commit -m "progress: session report {dstamp} PM"
-  git push origin main
+Have a good evening.
 
-No email needed. The PM system will pick up your commit within the hour and update
-the tracking board automatically.
-
-Have a good evening!
-
-Regards,
 WizAccountant PM System (automated)
 Reply-To: pj@wizag.biz
 """
 
-          payload = json.dumps({{
-              "sender": {{"name": "WizAccountant PM", "email": "info@emailnotifications.co.ke"}},
-              "to": [{{"email": "varun@wizag.biz", "name": "Varun"}}],
-              "replyTo": {{"email": "pj@wizag.biz", "name": "PJ"}},
-              "subject": f"[WizAccountant] Wrap Up Varun â€” End of Day Report Due {today}",
-              "textContent": body
-          }}).encode()
+payload = json.dumps({{
+    "sender":     {{"name": "WizAccountant PM", "email": "info@emailnotifications.co.ke"}},
+    "to":         [{{"email": "varun@wizag.biz", "name": "Varun"}}],
+    "replyTo":    {{"email": "pj@wizag.biz", "name": "PJ"}},
+    "subject":    f"[WizAccountant] Wrap Up — Post Your Progress Comment Now {today}",
+    "textContent": body
+}}).encode()
 
-          req = urllib.request.Request(
-              "https://api.brevo.com/v3/smtp/email",
-              data=payload,
-              headers={{"api-key": api_key, "Content-Type": "application/json"}},
-              method="POST"
-          )
-          try:
-              with urllib.request.urlopen(req) as r:
-                  print(f"Evening email sent â€” HTTP {{r.status}}")
-          except urllib.error.HTTPError as e:
-              print(f"Failed â€” HTTP {{e.code}}: {{e.read().decode()}}", file=sys.stderr)
-              sys.exit(1)
-          PYEOF
+req = urllib.request.Request(
+    "https://api.brevo.com/v3/smtp/email",
+    data=payload,
+    headers={{"api-key": api_key, "Content-Type": "application/json"}},
+    method="POST"
+)
+try:
+    with urllib.request.urlopen(req) as r:
+        print(f"Evening email sent — HTTP {r.status}")
+except urllib.error.HTTPError as e:
+    print(f"Failed — HTTP {e.code}: {e.read().decode()}", file=sys.stderr)
+    sys.exit(1)
+PYEOF
         env:
-          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
-          TODAY: ${{ env.TODAY }}
-          DSTAMP: ${{ env.DSTAMP }}
+          BREVO_API_KEY:    ${{ secrets.BREVO_API_KEY }}
+          TODAY:            ${{ env.TODAY }}
+          DSTAMP:           ${{ env.DSTAMP }}
+          ISSUE_URL:        ${{ env.ISSUE_URL }}
           TRACKING_SUMMARY: ${{ steps.tracking.outputs.summary }}
-
