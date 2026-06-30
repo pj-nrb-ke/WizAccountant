@@ -1,15 +1,15 @@
-name: Varun Daily Check-in Emails
+﻿name: Varun Daily Check-in Emails
 
 # 11AM EAT = 08:00 UTC | 5PM EAT = 14:00 UTC  (Kenya, UTC+3, no DST)
 on:
   schedule:
-    - cron: '0 8 * * 1-5'    # 11:00 AM EAT — morning session start
-    - cron: '0 14 * * 1-5'   # 05:00 PM EAT — evening wrap-up
+    - cron: '0 8 * * 1-5'    # 11:00 AM EAT â€” morning session start
+    - cron: '0 14 * * 1-5'   # 05:00 PM EAT â€” evening wrap-up
   workflow_dispatch:           # manual trigger for testing
 
 env:
   VARUN_EMAIL: varun@wizag.biz
-  SENDER_EMAIL: noreply@ascendbooks.biz
+  SENDER_EMAIL: info@emailnotifications.co.ke
 
 jobs:
   send-checkin-email:
@@ -63,7 +63,7 @@ jobs:
 
           body = f"""Hi Varun,
 
-Good morning! It is 11AM EAT — time to start your development session for {today}.
+Good morning! It is 11AM EAT â€” time to start your development session for {today}.
 
 CURRENT PROJECT STATUS
 ======================
@@ -81,7 +81,7 @@ Or copy it directly from GitHub:
 {prompt}
 --- END OF SESSION PROMPT ---
 
-IMPORTANT — END OF SESSION:
+IMPORTANT â€” END OF SESSION:
 Run these commands in Claude before closing:
   git add progress/sessions/{dstamp}-AM.md
   git commit -m "progress: session report {dstamp} AM"
@@ -95,10 +95,10 @@ Reply-To: pj@wizag.biz
 """
 
           payload = json.dumps({{
-              "sender": {{"name": "WizAccountant PM", "email": "noreply@ascendbooks.biz"}},
+              "sender": {{"name": "WizAccountant PM", "email": "info@emailnotifications.co.ke"}},
               "to": [{{"email": "varun@wizag.biz", "name": "Varun"}}],
               "replyTo": {{"email": "pj@wizag.biz", "name": "PJ"}},
-              "subject": f"[WizAccountant] Good Morning Varun — Session Start {today}",
+              "subject": f"[WizAccountant] Good Morning Varun â€” Session Start {today}",
               "textContent": body
           }}).encode()
 
@@ -110,9 +110,9 @@ Reply-To: pj@wizag.biz
           )
           try:
               with urllib.request.urlopen(req) as r:
-                  print(f"Morning email sent — HTTP {{r.status}}")
+                  print(f"Morning email sent â€” HTTP {{r.status}}")
           except urllib.error.HTTPError as e:
-              print(f"Failed — HTTP {{e.code}}: {{e.read().decode()}}", file=sys.stderr)
+              print(f"Failed â€” HTTP {{e.code}}: {{e.read().decode()}}", file=sys.stderr)
               sys.exit(1)
           PYEOF
         env:
@@ -137,7 +137,7 @@ Reply-To: pj@wizag.biz
 
           body = f"""Hi Varun,
 
-It is 5PM EAT — please wrap up your Claude session for {today}.
+It is 5PM EAT â€” please wrap up your Claude session for {today}.
 
 CURRENT PROJECT STATUS
 ======================
@@ -160,10 +160,10 @@ Reply-To: pj@wizag.biz
 """
 
           payload = json.dumps({{
-              "sender": {{"name": "WizAccountant PM", "email": "noreply@ascendbooks.biz"}},
+              "sender": {{"name": "WizAccountant PM", "email": "info@emailnotifications.co.ke"}},
               "to": [{{"email": "varun@wizag.biz", "name": "Varun"}}],
               "replyTo": {{"email": "pj@wizag.biz", "name": "PJ"}},
-              "subject": f"[WizAccountant] Wrap Up Varun — End of Day Report Due {today}",
+              "subject": f"[WizAccountant] Wrap Up Varun â€” End of Day Report Due {today}",
               "textContent": body
           }}).encode()
 
@@ -175,9 +175,9 @@ Reply-To: pj@wizag.biz
           )
           try:
               with urllib.request.urlopen(req) as r:
-                  print(f"Evening email sent — HTTP {{r.status}}")
+                  print(f"Evening email sent â€” HTTP {{r.status}}")
           except urllib.error.HTTPError as e:
-              print(f"Failed — HTTP {{e.code}}: {{e.read().decode()}}", file=sys.stderr)
+              print(f"Failed â€” HTTP {{e.code}}: {{e.read().decode()}}", file=sys.stderr)
               sys.exit(1)
           PYEOF
         env:
@@ -185,3 +185,4 @@ Reply-To: pj@wizag.biz
           TODAY: ${{ env.TODAY }}
           DSTAMP: ${{ env.DSTAMP }}
           TRACKING_SUMMARY: ${{ steps.tracking.outputs.summary }}
+
