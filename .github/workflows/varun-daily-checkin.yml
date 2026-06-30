@@ -1,0 +1,119 @@
+name: Varun Daily Check-in Emails
+
+# Fires at 11AM EAT (08:00 UTC) and 5PM EAT (14:00 UTC), Mon–Fri
+on:
+  schedule:
+    - cron: '0 8 * * 1-5'    # 11:00 AM EAT — morning session start
+    - cron: '0 14 * * 1-5'   # 05:00 PM EAT — evening wrap-up
+  workflow_dispatch:           # allow manual trigger for testing
+
+jobs:
+  send-checkin-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Determine session type (AM or PM)
+        id: session
+        run: |
+          HOUR=$(date -u +"%H")
+          if [ "$HOUR" -lt "12" ]; then
+            echo "type=AM" >> $GITHUB_OUTPUT
+            echo "label=Morning" >> $GITHUB_OUTPUT
+          else
+            echo "type=PM" >> $GITHUB_OUTPUT
+            echo "label=Evening" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Read session prompt
+        id: prompt
+        run: |
+          CONTENT=$(cat progress/VARUN-SESSION-PROMPT.md)
+          echo "content<<PROMPTEOF" >> $GITHUB_OUTPUT
+          echo "$CONTENT" >> $GITHUB_OUTPUT
+          echo "PROMPTEOF" >> $GITHUB_OUTPUT
+
+      - name: Read latest tracking summary
+        id: tracking
+        run: |
+          # Extract the Progress Summary table from TRACKING.md
+          SUMMARY=$(awk '/## Progress Summary/,/^---/' progress/TRACKING.md | head -20)
+          echo "summary<<TRACKEOF" >> $GITHUB_OUTPUT
+          echo "$SUMMARY" >> $GITHUB_OUTPUT
+          echo "TRACKEOF" >> $GITHUB_OUTPUT
+
+      - name: Send Morning Email (11AM EAT)
+        if: steps.session.outputs.type == 'AM'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          secure: true
+          username: ${{ secrets.SMTP_USER }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "[WizAccountant] Good Morning Varun — Session Start ${{ github.run_id }}"
+          to: ${{ secrets.VARUN_EMAIL }}
+          from: "PJ via WizAccountant PM <${{ secrets.SMTP_FROM }}>"
+          body: |
+            Hi Varun,
+
+            It's 11AM — time to start your morning session.
+
+            Please open Claude Code and paste the contents of the file below into a new session:
+
+              progress/VARUN-SESSION-PROMPT.md
+
+            (It is in the WizAccountant GitHub repo — you can also copy it from:
+             https://github.com/pj-nrb-ke/WizAccountant/blob/main/progress/VARUN-SESSION-PROMPT.md)
+
+            --- CURRENT PROJECT STATUS ---
+
+            ${{ steps.tracking.outputs.summary }}
+
+            --- YOUR SESSION PROMPT (paste into Claude) ---
+
+            ${{ steps.prompt.outputs.content }}
+
+            ---
+            This is an automated message from the WizAccountant PM system.
+            You do not need to reply to this email.
+            Commit your session report to GitHub at the end of your session — that's all.
+
+      - name: Send Evening Email (5PM EAT)
+        if: steps.session.outputs.type == 'PM'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_HOST }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          secure: true
+          username: ${{ secrets.SMTP_USER }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "[WizAccountant] Wrap Up Varun — End of Day Report Due"
+          to: ${{ secrets.VARUN_EMAIL }}
+          from: "PJ via WizAccountant PM <${{ secrets.SMTP_FROM }}>"
+          body: |
+            Hi Varun,
+
+            It's 5PM — please wrap up your Claude session for the day.
+
+            Before you close Claude, run the end-of-session steps in your session prompt:
+
+            1. Ask Claude to generate your session report as:
+                 progress/sessions/$(date +%Y-%m-%d)-PM.md
+
+            2. Then commit and push:
+                 git add progress/sessions/$(date +%Y-%m-%d)-PM.md
+                 git commit -m "progress: session report $(date +%Y-%m-%d) PM"
+                 git push origin main
+
+            That's it — the PM system will automatically pick up your report and update the tracking board.
+
+            --- CURRENT PROJECT STATUS ---
+
+            ${{ steps.tracking.outputs.summary }}
+
+            ---
+            This is an automated message from the WizAccountant PM system.
+            You do not need to reply to this email.
